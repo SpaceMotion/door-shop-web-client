@@ -510,6 +510,19 @@ input, textarea, select {
     7. Checkbox
     ----------------------------------
 */
+
+.checkbox-color.checkbox-color::before {
+    display: none;
+}
+
+.checkbox-color.checkbox-color {
+    padding-left: 0;
+}
+
+.filter-content_type_color .checkbox {
+    padding: 8px 0;
+}
+
 .checkbox {
     margin: 0;
     padding: 5px 0;
@@ -533,10 +546,10 @@ input, textarea, select {
     display: none;
 }
 
-.checkbox input[type="checkbox"] + label:before,
-.checkbox input[type="radio"] + label:before {
+.checkbox label:before {
     font-family: 'LinearIcons';
-    content: "";
+    content: "\e870";
+    text-align: center;
     line-height: 22px;
     font-size: 16px;
     position: absolute;
@@ -560,8 +573,7 @@ input, textarea, select {
     transition: all 0.2s;
 }
 
-.checkbox input[type="checkbox"]:checked + label:before,
-.checkbox input[type="radio"]:checked + label:before {
+.checkbox label.checked:before {
     background: #ffbb00;
     color: white;
     border-color: #ffbb00;
@@ -573,11 +585,11 @@ input, textarea, select {
     transform: scale(0.8);
 }
 
-.checkbox input[type="checkbox"]:checked + label:before {
+.checkbox label.checkbox.checked:before {
     content: "\e870";
 }
 
-.checkbox input[type="radio"]:checked + label:before {
+.checkbox label.radio.checked:before {
     content: "\e814";
 }
 

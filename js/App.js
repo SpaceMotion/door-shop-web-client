@@ -1,225 +1,89 @@
+import Header from "./Header";
+import Filters from "./Filters";
+
 class App extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			filters: {
+				isReady: false				
+			}
+		};
+		this.updateFiltersData = this.updateFiltersData.bind(this);
+		this.setUpFilters = this.setUpFilters.bind(this);
+
+		this.setUpFilters();
+	}
+
+	updateFiltersData(changes) {
+		this.setState((state, props) => {
+			state.filters[changes.filterType][changes.idx].checked = changes.checked;
+			return state;
+		});
+	}
+
+	setUpFilters() {
+		// Manufacturers
+		let manufacturersDataGet = new Promise((resolve, reject) => {
+			fetch(`http://${this.props.api}/manufacturers`, {
+				headers: new Headers({
+					'Content-Type': 'application/json'
+				})
+			}).then((response) => {
+				return response.json();
+			}).then((data) => {
+				this.setState((state) => {
+					state.filters.manufacturers = data.results;
+					return state;
+				});
+				resolve();
+			});
+		});
+
+		//Colors
+		let colorsDataGet = new Promise((resolve, reject) => {
+			fetch(`http://${this.props.api}/products`, {
+				headers: new Headers({
+					'Content-Type': 'application/json'
+				})
+			}).then((response) => {
+				return response.json();
+			}).then((data) => {
+				let colors = [];
+				data.results.forEach((product) => {
+					if (product.color && !colors.find((color) => {
+						return product.color.id === color.id;	
+					})) {
+						colors.push({
+							id: product.color.id,
+							value: product.color.value
+						});
+					}
+				});
+
+				this.setState((state) => {
+					state.filters.colors = colors;
+					return state;
+				});
+				resolve();
+			});				
+		});
+
+		Promise.all([manufacturersDataGet, colorsDataGet]).then(() => {
+			this.setState((state) => {
+				state.filters.isReady = true;
+				return state;
+			});
+		});
+	}
+
 	render() {
 		return (
 			<div>
 			    <div className="page-loader"></div>
 
 			    <div className="wrapper">
-			        <nav className="navbar-fixed">
-			            <div className="container">
-			                <div className="navigation navigation-top clearfix">
-			                    <ul>
-			                        <li><a href="javascript:void(0);" className="open-search"><i className="icon icon-magnifier"></i></a></li>
-			                        <li><a href="javascript:void(0);" className="open-cart"><i className="icon icon-cart"></i> <span>3</span></a></li>
-			                    </ul>
-			                </div>
-			                <div className="navigation navigation-main">
-			                    <a href="#" className="open-menu"><i className="icon icon-menu"></i></a>
-			                    <div className="floating-menu">
-			                        <div className="close-menu-wrapper">
-			                            <span className="close-menu"><i className="icon icon-cross"></i></span>
-			                        </div>
-
-			                        <ul>
-			                            <li><a href="index.html">Домой</a></li>
-			                            <li>
-			                                <a href="#">Каталог товаров <span className="open-dropdown"><i className="fa fa-angle-down"></i></span></a>
-			                                <div className="navbar-dropdown navbar-dropdown-single">
-			                                    <div className="navbar-box">
-			                                        <div className="box-2">
-			                                            <div className="box clearfix">
-			                                                <ul>
-			                                                    <li><a href="#">Двери</a></li>
-			                                                    <li><a href="#">Ламинат</a></li>
-			                                                </ul>
-			                                            </div>
-			                                        </div>
-			                                    </div>
-			                                </div>
-			                            </li>
-			                            <li>
-			                                <a href="#">Оплата и доставка</a>
-			                            </li>
-			                            <li>
-			                                <a href="#">Контакты</a>
-			                            </li>
-			                        </ul>
-			                    </div>
-			                </div>
-			                <div className="search-wrapper">
-			                    <input className="form-control" placeholder="Search..." />
-			                    <button className="btn btn-main btn-search">Go!</button>
-
-			                    <div className="search-results">
-			                        <div className="search-result-items">
-			                            <div className="title h4">Products <a href="#" className="btn btn-clean-dark btn-xs">View all</a></div>
-			                            <ul>
-			                                <li><a href="#"><span className="id">42563</span> <span className="name">Green corner</span> <span className="category">Sofa</span></a></li>
-			                                <li><a href="#"><span className="id">42563</span> <span className="name">Laura</span> <span className="category">Armchairs</span></a></li>
-			                                <li><a href="#"><span className="id">42563</span> <span className="name">Nude</span> <span className="category">Dining tables</span></a></li>
-			                                <li><a href="#"><span className="id">42563</span> <span className="name">Aurora</span> <span className="category">Nightstands</span></a></li>
-			                                <li><a href="#"><span className="id">42563</span> <span className="name">Dining set</span> <span className="category">Kitchen</span></a></li>
-			                                <li><a href="#"><span className="id">42563</span> <span className="name">Seat chair</span> <span className="category">Bar sets</span></a></li>
-			                            </ul>
-			                        </div>
-			                    </div>
-			                </div>
-
-			                <div className="login-wrapper">
-			                    <form>
-			                        <div className="h4">Sign in</div>
-			                        <div className="form-group">
-			                            <input type="email" className="form-control" id="exampleInputEmail1" placeholder="Email"></input>
-			                        </div>
-			                        <div className="form-group">
-			                            <input type="password" className="form-control" id="exampleInputPassword1" placeholder="Password"></input>
-			                        </div>
-			                        <div className="form-group">
-			                            <a href="#forgotpassword" className="open-popup">Forgot password?</a>
-			                            <a href="#createaccount" className="open-popup">Don't have an account?</a>
-			                        </div>
-			                        <button type="submit" className="btn btn-block btn-main">Submit</button>
-			                    </form>
-			                </div>
-
-			                <div className="cart-wrapper">
-			                    <div className="checkout">
-			                        <div className="clearfix">
-			                            <div className="row">
-			                                <div className="cart-block cart-block-item clearfix">
-			                                    <div className="image">
-			                                        <a href="product.html"><img src="assets/images/product-1.png" alt="" /></a>
-			                                    </div>
-			                                    <div className="title">
-			                                        <div><a href="product.html">Green corner</a></div>
-			                                        <small>Green corner</small>
-			                                    </div>
-			                                    <div className="quantity">
-			                                        <input type="number" className="form-control form-quantity" />
-			                                    </div>
-			                                    <div className="price">
-			                                        <span className="final">$ 1.998</span>
-			                                        <span className="discount">$ 2.666</span>
-			                                    </div>
-			                                    <span className="icon icon-cross icon-delete"></span>
-			                                </div>
-
-			                                <div className="cart-block cart-block-item clearfix">
-			                                    <div className="image">
-			                                        <a href="product.html"><img src="assets/images/product-2.png" alt="" /></a>
-			                                    </div>
-			                                    <div className="title">
-			                                        <div><a href="product.html">Green corner</a></div>
-			                                        <small>Green corner</small>
-			                                    </div>
-			                                    <div className="quantity">
-			                                        <input type="number" className="form-control form-quantity" />
-			                                    </div>
-			                                    <div className="price">
-			                                        <span className="final">$ 1.998</span>
-			                                        <span className="discount">$ 2.666</span>
-			                                    </div>
-			                                    <span className="icon icon-cross icon-delete"></span>
-			                                </div>
-
-			                                <div className="cart-block cart-block-item clearfix">
-			                                    <div className="image">
-			                                        <a href="product.html"><img src="assets/images/product-3.png" alt="" /></a>
-			                                    </div>
-			                                    <div className="title">
-			                                        <div><a href="product.html">Green corner</a></div>
-			                                        <small>Green corner</small>
-			                                    </div>
-			                                    <div className="quantity">
-			                                        <input type="number" className="form-control form-quantity" />
-			                                    </div>
-			                                    <div className="price">
-			                                        <span className="final">$ 1.998</span>
-			                                        <span className="discount">$ 2.666</span>
-			                                    </div>
-			                                    <span className="icon icon-cross icon-delete"></span>
-			                                </div>
-
-			                                <div className="cart-block cart-block-item clearfix">
-			                                    <div className="image">
-			                                        <a href="product.html"><img src="assets/images/product-4.png" alt="" /></a>
-			                                    </div>
-			                                    <div className="title">
-			                                        <div><a href="product.html">Green corner</a></div>
-			                                        <small>Green corner</small>
-			                                    </div>
-			                                    <div className="quantity">
-			                                        <input type="number" className="form-control form-quantity" />
-			                                    </div>
-			                                    <div className="price">
-			                                        <span className="final">$ 1.998</span>
-			                                        <span className="discount">$ 2.666</span>
-			                                    </div>
-			                                    <span className="icon icon-cross icon-delete"></span>
-			                                </div>
-			                            </div>
-
-			                            <hr />
-
-			                            <div className="clearfix">
-			                                <div className="cart-block cart-block-footer clearfix">
-			                                    <div>
-			                                        <strong>Discount 15%</strong>
-			                                    </div>
-			                                    <div>
-			                                        <span>$ 159,00</span>
-			                                    </div>
-			                                </div>
-
-			                                <div className="cart-block cart-block-footer clearfix">
-			                                    <div>
-			                                        <strong>Shipping</strong>
-			                                    </div>
-			                                    <div>
-			                                        <span>$ 30,00</span>
-			                                    </div>
-			                                </div>
-
-			                                <div className="cart-block cart-block-footer clearfix">
-			                                    <div>
-			                                        <strong>VAT</strong>
-			                                    </div>
-			                                    <div>
-			                                        <span>$ 59,00</span>
-			                                    </div>
-			                                </div>
-			                            </div>
-
-			                            <hr />
-
-			                            <div className="clearfix">
-			                                <div className="cart-block cart-block-footer clearfix">
-			                                    <div>
-			                                        <strong>Total</strong>
-			                                    </div>
-			                                    <div>
-			                                        <div className="h4 title">$ 1259,00</div>
-			                                    </div>
-			                                </div>
-			                            </div>
-
-			                            <div className="cart-block-buttons clearfix">
-			                                <div className="row">
-			                                    <div className="col-xs-6">
-			                                        <a href="#" className="btn btn-clean-dark">Continue shopping</a>
-			                                    </div>
-			                                    <div className="col-xs-6 text-right">
-			                                        <a href="#" className="btn btn-main"><span className="icon icon-cart"></span> Checkout</a>
-			                                    </div>
-			                                </div>
-			                            </div>
-
-			                        </div>
-			                    </div>
-			                </div>
-			            </div>
-			        </nav>
-
+					<Header/>
 			        <section className="header-content">
 			            <div className="owl-slider">
 			                <div className="item" style={{backgroundImage: "url(assets/images/gallery-1.jpg)"}}>
@@ -293,6 +157,308 @@ class App extends React.Component {
 			                            <figcaption>ЛАМИНАТ</figcaption>
 			                        </figure>
 			                    </a>
+			                </div>
+			            </div>
+			        </section>
+
+			        <section className="products">
+			            <div className="container">
+
+			                <header className="hidden">
+			                    <h3 className="h3 title">Product category grid</h3>
+			                </header>
+
+			                <div className="row">
+
+			                    <div className="col-md-3 col-xs-12">
+									{this.state.filters.isReady ? <Filters filters={this.state.filters} updateState={this.updateFiltersData}/> : null}
+			                    </div>
+
+			                    <div className="col-md-9 col-xs-12">
+
+			                        <div className="sort-bar clearfix">
+			                            <div className="sort-results pull-left">
+			                                <select>
+			                                    <option value="1">10</option>
+			                                    <option value="2">50</option>
+			                                    <option value="3">100</option>
+			                                    <option value="4">All</option>
+			                                </select>
+			                                <span>Showing all <strong>50</strong> of <strong>3,250</strong> items</span>
+			                            </div>
+			                            <div className="sort-options pull-right">
+			                                <span className="hidden-xs">Sort by</span>
+			                                <select id="sort-price">
+			                                    <option data-option-value="asc">Price: lowest</option>
+			                                    <option data-option-value="desc">Price: highest</option>
+			                                </select>
+			                                <span className="grid-list">
+			                                    <a href="products-grid.html"><i className="fa fa-th-large"></i></a>
+			                                    <a href="products-list.html"><i className="fa fa-align-justify"></i></a>
+			                                    <a href="javascript:void(0);" className="toggle-filters-mobile"><i className="fa fa-search"></i></a>
+			                                </span>
+			                            </div>
+			                        </div>
+
+			                        <div id="products" className="row">
+
+			                            <div className="col-md-6 col-xs-6 item price-discount category-sofa material-leather">
+			                                <article>
+			                                    <div className="info">
+			                                        <span className="add-favorite">
+			                                            <a href="javascript:void(0);" data-title="Add to favorites" data-title-added="Added to favorites list"><i className="icon icon-heart"></i></a>
+			                                        </span>
+			                                        <span>
+			                                            <a href="#productid1" className="mfp-open" data-title="Quick wiew"><i className="icon icon-eye"></i></a>
+			                                        </span>
+			                                    </div>
+			                                    <div className="btn btn-add">
+			                                        <i className="icon icon-cart"></i>
+			                                    </div>
+			                                    <div className="figure-grid">
+			                                        <span className="label">-50%</span>
+			                                        <div className="image">
+			                                            <a href="#productid1" className="mfp-open">
+			                                                <img src="assets/images/product-1.png" alt="" width="360" />
+			                                            </a>
+			                                        </div>
+			                                        <div className="text">
+			                                            <h2 className="title h4"><a href="product.html">Green corner <small>Sofa</small></a></h2>
+			                                            <sub>$ 1499,-</sub>
+			                                            <sup>$ <span className="price">1099</span>,-</sup>
+			                                            <span className="description clearfix">Gubergren amet dolor ea diam takimata consetetur facilisis blandit et aliquyam lorem ea duo labore diam sit et consetetur nulla</span>
+			                                        </div>
+			                                    </div>
+			                                </article>
+			                            </div>
+
+			                            <div className="col-md-6 col-xs-6 item price-discount category-armchair material-wood">
+			                                <article>
+			                                    <div className="info">
+			                                        <span className="add-favorite">
+			                                            <a href="javascript:void(0);" data-title="Add to favorites" data-title-added="Added to favorites list"><i className="icon icon-heart"></i></a>
+			                                        </span>
+			                                        <span>
+			                                            <a href="#productid1" className="mfp-open" data-title="Quick wiew"><i className="icon icon-eye"></i></a>
+			                                        </span>
+			                                    </div>
+			                                    <div className="btn btn-add">
+			                                        <i className="icon icon-cart"></i>
+			                                    </div>
+			                                    <div className="figure-grid">
+			                                        <div className="image">
+			                                            <a href="#productid1" className="mfp-open">
+			                                                <img src="assets/images/product-2.png" alt="" width="360" />
+			                                            </a>
+			                                        </div>
+			                                        <div className="text">
+			                                            <h2 className="title h4"><a href="product.html">Laura <small>Armchair</small></a></h2>
+			                                            <sub>$ 3999,-</sub>
+			                                            <sup>$ <span className="price">3499</span>,-</sup>
+			                                            <span className="description clearfix">Gubergren amet dolor ea diam takimata consetetur facilisis blandit et aliquyam lorem ea duo labore diam sit et consetetur nulla</span>
+			                                        </div>
+			                                    </div>
+			                                </article>
+			                            </div>
+
+			                            <div className="col-md-6 col-xs-6 item price-regular category-armchair material-leather">
+			                                <article>
+			                                    <div className="info">
+			                                        <span className="add-favorite">
+			                                            <a href="javascript:void(0);" data-title="Add to favorites" data-title-added="Added to favorites list"><i className="icon icon-heart"></i></a>
+			                                        </span>
+			                                        <span>
+			                                            <a href="#productid1" className="mfp-open" data-title="Quick wiew"><i className="icon icon-eye"></i></a>
+			                                        </span>
+			                                    </div>
+			                                    <div className="btn btn-add">
+			                                        <i className="icon icon-cart"></i>
+			                                    </div>
+			                                    <div className="figure-grid">
+			                                        <div className="image">
+			                                            <a href="#productid1" className="mfp-open">
+			                                                <img src="assets/images/product-3.png" alt="" width="360" />
+			                                            </a>
+			                                        </div>
+			                                        <div className="text">
+			                                            <h2 className="title h4"><a href="product.html">Nude <small>Armchair</small></a></h2>
+			                                            <sup>$ <span className="price">2999</span>,-</sup>
+			                                            <span className="description clearfix">Gubergren amet dolor ea diam takimata consetetur facilisis blandit et aliquyam lorem ea duo labore diam sit et consetetur nulla</span>
+			                                        </div>
+			                                    </div>
+			                                </article>
+			                            </div>
+
+			                            <div className="col-md-6 col-xs-6 item price-regular category-armchair material-wood">
+			                                <article>
+			                                    <div className="info">
+			                                        <span className="add-favorite">
+			                                            <a href="javascript:void(0);" data-title="Add to favorites" data-title-added="Added to favorites list"><i className="icon icon-heart"></i></a>
+			                                        </span>
+			                                        <span>
+			                                            <a href="#productid1" className="mfp-open" data-title="Quick wiew"><i className="icon icon-eye"></i></a>
+			                                        </span>
+			                                    </div>
+			                                    <div className="btn btn-add">
+			                                        <i className="icon icon-cart"></i>
+			                                    </div>
+			                                    <div className="figure-grid">
+			                                        <span className="label label-warning">New</span>
+			                                        <div className="image">
+			                                            <a href="#productid1" className="mfp-open">
+			                                                <img src="assets/images/product-4.png" alt="" width="360" />
+			                                            </a>
+			                                        </div>
+			                                        <div className="text">
+			                                            <h2 className="title h4"><a href="product.html">Aurora <small>Armchair</small></a></h2>
+			                                            <sup>$ <span className="price">299</span>,-</sup>
+			                                            <span className="description clearfix">Gubergren amet dolor ea diam takimata consetetur facilisis blandit et aliquyam lorem ea duo labore diam sit et consetetur nulla</span>
+			                                        </div>
+			                                    </div>
+			                                </article>
+			                            </div>
+
+			                            <div className="col-md-6 col-xs-6 item price-discount category-armchair material-metal">
+			                                <article>
+			                                    <div className="info">
+			                                        <span className="add-favorite">
+			                                            <a href="javascript:void(0);" data-title="Add to favorites" data-title-added="Added to favorites list"><i className="icon icon-heart"></i></a>
+			                                        </span>
+			                                        <span>
+			                                            <a href="#productid1" className="mfp-open" data-title="Quick wiew"><i className="icon icon-eye"></i></a>
+			                                        </span>
+			                                    </div>
+			                                    <div className="btn btn-add">
+			                                        <i className="icon icon-cart"></i>
+			                                    </div>
+			                                    <div className="figure-grid">
+			                                        <span className="label label-warning">New</span>
+			                                        <div className="image">
+			                                            <a href="#productid1" className="mfp-open">
+			                                                <img src="assets/images/product-5.png" alt="" width="360" />
+			                                            </a>
+			                                        </div>
+			                                        <div className="text">
+			                                            <h2 className="title h4"><a href="product.html">Dining set <small>Armchair</small></a></h2>
+			                                            <sub>$ 1999,-</sub>
+			                                            <sup>$ <span className="price">1499</span>,-</sup>
+			                                            <span className="description clearfix">Gubergren amet dolor ea diam takimata consetetur facilisis blandit et aliquyam lorem ea duo labore diam sit et consetetur nulla</span>
+			                                        </div>
+			                                    </div>
+			                                </article>
+			                            </div>
+
+			                            <div className="col-md-6 col-xs-6 item price-regular category-sofa material-wood">
+			                                <article>
+			                                    <div className="info">
+			                                        <span className="add-favorite">
+			                                            <a href="javascript:void(0);" data-title="Add to favorites" data-title-added="Added to favorites list"><i className="icon icon-heart"></i></a>
+			                                        </span>
+			                                        <span>
+			                                            <a href="#productid1" className="mfp-open" data-title="Quick wiew"><i className="icon icon-eye"></i></a>
+			                                        </span>
+			                                    </div>
+			                                    <div className="btn btn-add">
+			                                        <i className="icon icon-cart"></i>
+			                                    </div>
+			                                    <div className="figure-grid">
+			                                        <div className="image">
+			                                            <a href="#productid1" className="mfp-open">
+			                                                <img src="assets/images/product-6.png" alt="" width="360" />
+			                                            </a>
+			                                        </div>
+			                                        <div className="text">
+			                                            <h2 className="title h4"><a href="product.html">Seat chair <small>Sofa</small></a></h2>
+			                                            <sup>$ <span className="price">896</span>,-</sup>
+			                                            <span className="description clearfix">Gubergren amet dolor ea diam takimata consetetur facilisis blandit et aliquyam lorem ea duo labore diam sit et consetetur nulla</span>
+			                                        </div>
+			                                    </div>
+			                                </article>
+			                            </div>
+
+
+
+			                        </div>
+
+			                    </div>
+
+			                </div>
+
+			                <div className="popup-main mfp-hide" id="productid1">
+
+			                    <div className="product">
+
+			                        <div className="popup-title">
+			                            <div className="h1 title">Laura <small>product category</small></div>
+			                        </div>
+
+			                        <div className="owl-product-gallery">
+			                            <img src="assets/images/product-1.png" alt="" width="640" />
+			                            <img src="assets/images/product-2.png" alt="" width="640" />
+			                            <img src="assets/images/product-3.png" alt="" width="640" />
+			                            <img src="assets/images/product-4.png" alt="" width="640" />
+			                        </div>
+
+			                        <div className="popup-content">
+			                            <div className="product-info-wrapper">
+			                                <div className="row">
+
+			                                    <div className="col-sm-6">
+			                                        <div className="info-box">
+			                                            <strong>Maifacturer</strong>
+			                                            <span>Brand name</span>
+			                                        </div>
+			                                        <div className="info-box">
+			                                            <strong>Materials</strong>
+			                                            <span>Wood, Leather, Acrylic</span>
+			                                        </div>
+			                                        <div className="info-box">
+			                                            <strong>Availability</strong>
+			                                            <span><i className="fa fa-check-square-o"></i> in stock</span>
+			                                        </div>
+			                                    </div>
+
+			                                    <div className="col-sm-6">
+			                                        <div className="info-box">
+			                                            <strong>Available Colors</strong>
+			                                            <div className="product-colors clearfix">
+			                                                <span className="color-btn color-btn-red"></span>
+			                                                <span className="color-btn color-btn-blue checked"></span>
+			                                                <span className="color-btn color-btn-green"></span>
+			                                                <span className="color-btn color-btn-gray"></span>
+			                                                <span className="color-btn color-btn-biege"></span>
+			                                            </div>
+			                                        </div>
+			                                        <div className="info-box">
+			                                            <strong>Choose size</strong>
+			                                            <div className="product-colors clearfix">
+			                                                <span className="color-btn color-btn-biege">S</span>
+			                                                <span className="color-btn color-btn-biege checked">M</span>
+			                                                <span className="color-btn color-btn-biege">XL</span>
+			                                                <span className="color-btn color-btn-biege">XXL</span>
+			                                            </div>
+			                                        </div>
+			                                    </div>
+
+			                                </div>
+			                            </div>
+			                        </div>
+
+			                        <div className="popup-table">
+			                            <div className="popup-cell">
+			                                <div className="price">
+			                                    <span className="h3">$ 1999,00 <small>$ 2999,00</small></span>
+			                                </div>
+			                            </div>
+			                            <div className="popup-cell">
+			                                <div className="popup-buttons">
+			                                    <a href="product.html"><span className="icon icon-eye"></span> <span className="hidden-xs">View more</span></a>
+			                                    <a href="javascript:void(0);"><span className="icon icon-cart"></span> <span className="hidden-xs">Buy</span></a>
+			                                </div>
+			                            </div>
+			                        </div>
+
+			                    </div> 
 			                </div>
 			            </div>
 			        </section>
@@ -374,4 +540,6 @@ class App extends React.Component {
 	}
 }
 
-ReactDOM.render(<App/>, document.getElementById('app'));
+ReactDOM.render(React.createElement(App, {
+	api: 'door-shop.pavelgoltsev.com:8000/api/v1'
+}), document.getElementById('app'));

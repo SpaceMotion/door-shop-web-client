@@ -25,8 +25,9 @@ export default class Header extends React.Component {
 	                                        <div className="box-2">
 	                                            <div className="box clearfix">
 	                                                <ul>
-	                                                    <li><a href="#">Двери</a></li>
-	                                                    <li><a href="#">Ламинат</a></li>
+	                                                	{this.props.categories.map((category, idx) => {
+	                                                		return <li key={idx}><a href="#">{category.name}</a></li>;
+	                                                	})}
 	                                                </ul>
 	                                            </div>
 	                                        </div>

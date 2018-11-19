@@ -1,7 +1,7 @@
 export default class Header extends React.Component {
 	render() {
 		return (
-	        <nav className="navbar-fixed">
+	        <nav className="navbar-fixed header-nav">
 	            <div className="container">
 	                <div className="navigation navigation-top clearfix">
 	                    <ul>

@@ -14,16 +14,44 @@ export default class Filters extends React.Component {
         }
 	}
 
+    componentDidMount() {
+        const Filters = this;
+        $("#range-price-slider").ionRangeSlider({
+            type: "double",
+            min: 0,
+            max: 4000,
+            from: 0,
+            to: 4000,
+            prefix: String.fromCharCode(8381),
+            onChange: function (data) {
+                Filters.props.updateState({
+                    filterType: 'price',
+                    from: data.from,
+                    to: data.to
+                });
+            }
+        });        
+    }
+
 	render() {
 		return (
             <div id="filters" className="filters">
+                <div className="filter-box">
+                    <div className="title" onClick={this.onFilterTitleClick}>Цена</div>
+                    <div className="filter-content">
+                        <div className="price-filter">
+                            <input type="text" id="range-price-slider" name="range" />
+                        </div>
+                    </div>
+                </div>
+
                 <div className="filter-box">
                     <div className="title" onClick={this.onFilterTitleClick}>
                         Производитель
                     </div>
                     <div className="filter-content">
                     	{this.props.filters.manufacturers.map((manufacturer, idx) => {
-	                        return <FormInput key={idx} label={manufacturer.name} type="checkbox" updateState={(state) => {
+	                        return <FormInput key={idx} label={manufacturer.name} type="checkbox" any={manufacturer.any} updateState={(state) => {
                                 state.filterType = "manufacturers";
 								state.idx = idx;
 								this.props.updateState(state);
@@ -38,7 +66,7 @@ export default class Filters extends React.Component {
                     </div>
                     <div className="filter-content filter-content_type_color">
                     	{this.props.filters.colors.map((color, idx) => {
-	                        return <FormInput key={idx} value={color.value} type="color" updateState={(state) => {
+	                        return <FormInput key={idx} value={color.value} label={color.name} type="checkbox" any={color.any} updateState={(state) => {
                                 state.filterType = "colors";
 								state.idx = idx;
 								this.props.updateState(state);

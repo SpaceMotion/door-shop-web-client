@@ -1,5 +1,7 @@
 import Header from "./Header";
 import Filters from "./Filters";
+import SortBar from "./SortBar";
+import CONFIG from "./config";
 
 class App extends React.Component {
 	constructor(props) {
@@ -7,10 +9,16 @@ class App extends React.Component {
 		this.state = {
 			filters: {
 				isReady: false				
+			},
+			sorting: {
+				itemsPerPage: 10,
+				price: 'asc',
+				name: 'A-z'
 			}
 		};
 		this.updateFiltersData = this.updateFiltersData.bind(this);
 		this.setUpFilters = this.setUpFilters.bind(this);
+		this.updateSortingData = this.updateSortingData.bind(this);
 
 		this.setUpFilters();
 	}
@@ -26,26 +34,14 @@ class App extends React.Component {
 		    // Global menu variables
 
 		    var objSearch = $('.search-wrapper'),
-		        objLogin = $('.login-wrapper'),
 		        objCart = $('.cart-wrapper'),
 		        objMenu = $('.floating-menu'),
 		        objMenuLink = $('.floating-menu a'),
 		        $search = $('.open-search'),
-		        $login = $('.open-login'),
 		        $cart = $('.open-cart'),
 		        $menu = $('.open-menu'),
 		        $openDropdown = $('.open-dropdown'),
-		        $settingsItem = $('.nav-settings .nav-settings-list li'),
 		        $close = $('.close-menu');
-
-		    // Open/close login
-
-		    $login.on('click', function () {
-		        toggleOpen($(this));
-		        objLogin.toggleClass('open');
-		        closeSearch();
-		        closeCart();
-		    });
 
 		    // Open/close search bar
 
@@ -53,7 +49,6 @@ class App extends React.Component {
 		        toggleOpen($(this));
 		        objSearch.toggleClass('open');
 		        objSearch.find('input').focus();
-		        closeLogin();
 		        closeCart();
 		    });
 
@@ -62,7 +57,6 @@ class App extends React.Component {
 		    $cart.on('click', function () {
 		        toggleOpen($(this));
 		        objCart.toggleClass('open');
-		        closeLogin();
 		        closeSearch();
 		    });
 
@@ -71,23 +65,8 @@ class App extends React.Component {
 		    $menu.on('click', function () {
 		        objMenu.addClass('expanded');
 		        closeSearch();
-		        closeLogin();
 		        closeCart();
 		    });
-
-		    // Settings language & currency dropdown
-
-		    $settingsItem.on('click', function () {
-		        var $value = $(this).closest('.nav-settings').find('.nav-settings-value');
-		        $value.text($(this).text());
-		    });
-
-		    // Floating menu hyperlink
-		    if ($('nav').hasClass('navbar-single-page')) {
-		        objMenuLink.on('click', function () {
-		            objMenu.removeClass('expanded');
-		        });
-		    }
 
 		    // Open dropdown/megamenu
 
@@ -125,10 +104,6 @@ class App extends React.Component {
 		        objSearch.removeClass('open');
 		        $search.removeClass('open');
 		    }
-		    function closeLogin() {
-		        objLogin.removeClass('open');
-		        $login.removeClass('open');
-		    }
 		    function closeCart() {
 		        objCart.removeClass('open');
 		        $cart.removeClass('open');
@@ -140,7 +115,7 @@ class App extends React.Component {
 		    var navbarFixed = $('nav.navbar-fixed');
 
 		    // When reload page - check if page has offset
-		    if ($(document).scrollTop() > 94) {
+		    if ($(document).scrollTop() > $('.header-nav').height()) {
 		        navbarFixed.addClass('navbar-sticked');
 		    }
 		    // Add sticky menu on scroll
@@ -152,59 +127,6 @@ class App extends React.Component {
 		            navbarFixed.removeClass('navbar-sticked');
 		        }
 		    });
-
-		    // Tooltip
-		    // ----------------------------------------------------------------
-
-		    $('[data-toggle="tooltip"]').tooltip()
-
-		    // Main popup
-		    // ----------------------------------------------------------------
-
-		    $('.mfp-open').magnificPopup({
-		        type: 'inline',
-		        fixedContentPos: false,
-		        fixedBgPos: true,
-		        overflowY: 'auto',
-		        closeBtnInside: true,
-		        preloader: false,
-		        midClick: true,
-		        removalDelay: 300,
-		        mainClass: 'my-mfp-zoom-in',
-		        callbacks: {
-		            open: function () {
-		                // wait on popup initalization
-		                // then load owl-carousel
-		                $('.popup-main .owl-carousel').hide();
-		                setTimeout(function () {
-		                    $('.popup-main .owl-carousel').slideDown();
-		                }, 500);
-		            }
-		        }
-		    });
-
-		    // Main popup gallery
-		    // ----------------------------------------------------------------
-
-		    $('.open-popup-gallery').magnificPopup({
-		        delegate: 'a',
-		        type: 'image',
-		        tLoading: 'Loading image #%curr%...',
-		        gallery: {
-		            enabled: true,
-		            navigateByImgClick: true,
-		            preload: [0, 1] // Will preload 0 - before current, and 1 after the current image
-		        },
-		        fixedContentPos: false,
-		        fixedBgPos: true,
-		        overflowY: 'auto',
-		        closeBtnInside: true,
-		        preloader: false,
-		        midClick: true,
-		        removalDelay: 300,
-		        mainClass: 'my-mfp-zoom-in'
-		    });
-
 
 		    // Frontpage slider
 		    // ----------------------------------------------------------------
@@ -251,64 +173,6 @@ class App extends React.Component {
 		        }
 		    });
 
-		    // Quote carousel
-		    // ----------------------------------------------------------------
-
-		    $.each($(".quote-carousel"), function (i, n) {
-		        $(n).owlCarousel({
-		            navigation: true, // Show next and prev buttons
-		            slideSpeed: 300,
-		            items: 3,
-		            paginationSpeed: 400,
-		            singleItem: false,
-		            navigationText: arrowIcons,
-		            itemsDesktop: [1199, 3],
-		            itemsDesktopSmall: [979, 3],
-		            itemsTablet: [768, 1],
-		            itemsTabletSmall: false,
-		            itemsMobile: [479, 1],
-		            autoPlay: 3000,
-		            stopOnHover: true
-		        });
-		    });
-
-		    // Icon slider
-		    // ----------------------------------------------------------------
-
-
-		    /*$.each($(".owl-icons"), function (i, n) {
-		        $(n).owlCarousel({
-		            autoHeight: false,
-		            pagination: false,
-		            navigation: true,
-		            navigationText: arrowIcons,
-		            items: 6,
-		            itemsDesktop: [1199, 5],
-		            itemsDesktopSmall: [979, 5],
-		            itemsTablet: [768, 4],
-		            itemsTabletSmall: false,
-		            itemsMobile: [479, 3],
-		            addClassActive: true,
-		            autoPlay: 5500,
-		            stopOnHover: true
-		        });
-		    });*/
-
-		    //Product slider
-		    $.each($(".owl-product-gallery"), function (i, n) {
-		        $(n).owlCarousel({
-		            //transitionStyle: "fadeUp",
-		            autoHeight: true,
-		            slideSpeed: 800,
-		            navigation: true,
-		            navigationText: arrowIcons,
-		            pagination: true,
-		            items: 1,
-		            singleItem: true
-		        });
-		    });
-
-
 		    // Scroll to top
 		    // ----------------------------------------------------------------
 
@@ -341,99 +205,8 @@ class App extends React.Component {
 		        return false;
 		    });
 
-		    // Product color var
-		    // ----------------------------------------------------------------
-
-		    $.each($('.product-colors'), function (i, n) {
-		        var $btn = $('.color-btn');
-		        $btn.on('click', function () {
-		            $(this).parent().find($btn).removeClass('checked');
-		            $(this).addClass('checked');
-		        });
-		    });
-
-		    // Tabsy images
-		    // ----------------------------------------------------------------
-
-		    var tabsyImg = $('.tabsy .tabsy-images > div'),
-		        tabsyLink = $('.tabsy .tabsy-links figure');
-
-		    // apply images to parent background
-		    tabsyImg.each(function (i, n) {
-		        $(n).css('background-image', 'url(' + $(n).find('img').attr('src') + ')');
-		    });
-
-		    tabsyLink.bind('mouseenter mouseleave', function () {
-		        var self = $(this),
-		            tabID = self.attr('data-image');
-		        tabsyLink.removeClass('current');
-		        tabsyImg.removeClass('current');
-		        self.addClass('current');
-		        self.closest('.tabsy').find("#" + tabID).addClass('current');
-		    });
-
-
-		    // Add to favorites list / product list
-		    // ----------------------------------------------------------------
-
-		    $('.add-favorite').on('click', function () {
-		        $(this).toggleClass("added");
-		    });
-
-		    $('.info-box-addto').on('click', function () {
-		        $(this).toggleClass('added');
-		    });
-
 		    // Filters toggle functions
 		    // ----------------------------------------------------------------
-
-		    // Check if some filter boxes has class active
-		    // then show hidden filters
-		    $('.filters .filter-box').each(function () {
-		        if ($(this).hasClass('active')) {
-		            $(this).find('.filter-content').show();
-		        }
-		    });
-
-		    var $filtersTitle = $('.filters .title');
-
-		    // Add emtpy span on title
-		    $filtersTitle.append('<span>' + '</span>');
-
-		    // Toggle filter function
-		    $filtersTitle.on('click', function (e) {
-		        var $this = $(this),
-		            $parent = $this.parent();
-		        $parent.toggleClass('active');
-
-		        if ($parent.hasClass('active')) {
-		            $parent.find('.filter-content').slideDown(300);
-		        }
-		        else {
-		            $parent.find('.filter-content').slideUp(200);
-		        }
-		    });
-
-		    // Update filter results - close dropdown filters
-		    // ----------------------------------------------------------------
-
-		    $('.filters .filter-update').on('click', function (e) {
-		        $(this).closest('.filter-box')
-		            .removeClass('active')
-		            .find('.filter-content').slideUp(200);
-		    });
-
-		    // Only for filters topbar
-		    // ----------------------------------------------------------------
-
-		    $('.filters input').on('change', function () {
-		        if ($(this).is(':checked')) {
-		            var $labelText = $(this).parent().find('label').text(),
-		                $title = $(this).closest('.filter-box').find('.title');
-		            
-		            $title.find('span').text($labelText);
-		        }
-		    });
 
 		    // Show hide filters (only for mobile)
 		    // ----------------------------------------------------------------
@@ -449,263 +222,6 @@ class App extends React.Component {
 		        return false;
 		    });
 
-
-		    // Strecher accordion
-		    // ----------------------------------------------------------------
-
-		    var $strecherItem = $('.stretcher-item');
-		    $strecherItem.bind({
-		        mouseenter: function (e) {
-		            $(this).addClass('active');
-		            $(this).siblings().addClass('inactive');
-		        },
-		        mouseleave: function (e) {
-		            $(this).removeClass('active');
-		            $(this).siblings().removeClass('inactive');
-		        }
-		    });
-
-		    // Blog image caption
-		    // ----------------------------------------------------------------
-
-		    var $blogImage = $('.blog-post-text img');
-		    $blogImage.each(function () {
-		        var $this = $(this);
-		        $this.wrap('<span class="blog-image"></span>');
-		        if ($this.attr("alt")) {
-		            var caption = this.alt;
-		            var link = $this.attr('data');
-		            $this.after('<span class="caption">' + caption + '</span>');
-		        }
-		    });
-
-		    // Coupon code 
-		    // ----------------------------------------------------------------
-
-		    $(".form-coupon").hide();
-		    $("#couponCodeID").on('click', function () {
-		        if ($(this).is(":checked")) {
-		            $(".form-coupon").fadeIn();
-		        } else {
-		            $(".form-coupon").fadeOut();
-		        }
-		    });
-
-		    // Checkout login / register
-		    // ----------------------------------------------------------------
-
-		    var loginWrapper = $('.login-wrapper'),
-		        loginBtn = loginWrapper.find('.btn-login'),
-		        regBtn = loginWrapper.find('.btn-register'),
-		        signUp = loginWrapper.find('.login-block-signup'),
-		        signIn = loginWrapper.find('.login-block-signin');
-
-		    loginBtn.on('click', function () {
-		        signIn.slideDown();
-		        signUp.slideUp();
-		    });
-
-		    regBtn.on('click', function () {
-		        signIn.slideUp();
-		        signUp.slideDown();
-		    });
-
-		    // Isotope filter
-		    // ----------------------------------------------------------------
-
-		    $(function () {
-		        var price = 0;
-		        var $products = $("#products");
-		        var $checkboxes = $("#filters input");
-		        var $sortPrice = $("#sort-price");
-		        var filters = [];
-
-		        $(".item").addClass("show-me");
-		        filters.push(".show-me");
-
-		        // Sort products
-		        // --------------------------------------
-
-		        $products.isotope({
-		            itemSelector: '.item',
-		            getSortData: {
-		                number: '.price parseInt'
-		            },
-		            sortBy: 'number'
-		        });
-
-		        // Checkboxes & radiobuttons
-		        // --------------------------------------
-
-		        $sortPrice.on('change', function () {
-		            var order = $('option:selected', this).attr('data-option-value');
-		            var valAscending = (order == "asc");
-
-		            $products.isotope({
-		                itemSelector: '.item',
-		                getSortData: {
-		                    number: '.price parseInt'
-		                },
-		                sortBy: 'number',
-		                sortAscending: valAscending,
-		                filter: filters
-		            });
-
-		        });
-
-		        // Checkboxes & radiobuttons
-		        // --------------------------------------
-
-		        $checkboxes.on('change', function () {
-		            filters = [];
-		            filters.push(".show-me");
-		            $checkboxes.filter(':checked').each(function () {
-		                filters.push(this.value);
-		            });
-
-		            filters = filters.join('');
-		            $products.isotope({
-		                filter: filters
-		            });
-
-		        });
-
-		        // Range slider
-		        // --------------------------------------
-
-		        $("#range-price-slider").ionRangeSlider({
-		            type: "double",
-		            min: 0,
-		            max: 4000,
-		            from: 150,
-		            to: 3800,
-		            prefix: "$",
-		            onChange: function (data) {
-
-		                $(".item").each(function () {
-
-		                    price = parseInt($(this).find(".price").text(), 10);
-
-		                    if (data.from <= price && data.to >= price) {
-		                        $(this).addClass('show-me');
-		                    }
-		                    else {
-		                        $(this).removeClass('show-me');
-		                    }
-		                });
-
-		                $products.isotope({
-		                    itemSelector: '.item',
-		                    filter: filters
-		                });
-		            }
-		        });
-
-		    });
-
-		    // Single page - box filters
-		    // ----------------------------------------------------------------
-		    $(function () {
-
-		        // Filter buttons - toggle click event
-
-		        var $boxFilter = $('.box-filters figure');
-
-		        // init Isotope
-		        var $grid = $('#box-filters-results').isotope({
-		            itemSelector: '.item'
-		        });
-
-		        $boxFilter.on('click', function () {
-		            var $this = $(this);
-		            // Filter buttons - toggle click event
-		            if ($this.hasClass('active')) {
-		                $this.removeClass('active');
-
-		                $grid.isotope({ filter: "" });
-		            }
-		            else {
-		                $boxFilter.removeClass('active');
-		                $this.addClass('active');
-
-		                // Filter results
-		                var filterValue = $this.attr('data-filter');
-		                $grid.isotope({ filter: filterValue });
-		            }
-
-
-
-		        });
-
-
-		    });
-
-
-
-		    // Team members hover effect
-		    // ----------------------------------------------------------------
-
-		    var $member = $('.team article');
-		    $member.bind({
-		        mouseenter: function (e) {
-		            $member.addClass('inactive');
-		            $(this).addClass('active');
-		        },
-		        mouseleave: function (e) {
-		            $member.removeClass('inactive');
-		            $(this).removeClass('active');
-		        }
-		    });
-
-		    // Toggle contact form
-		    // ----------------------------------------------------------------
-
-		    $('.open-form').on('click', function () {
-		        var $this = $(this),
-		            parent = $this.parent();
-		        parent.toggleClass('active');
-		        if (parent.hasClass('active')) {
-		            $this.text($this.data('text-close'));
-		            $('.contact-form').slideDown();
-		        }
-		        else {
-		            $this.text($this.data('text-open'));
-		            $('.contact-form').slideUp();
-		        }
-
-		    });
-
-		    // Single page navigation (scroll to)
-		    // ----------------------------------------------------------------
-
-
-		    if ($('nav').hasClass('navbar-single-page')) {
-
-		        var $singleHyperlink = $('.navigation-main a');
-
-		        $singleHyperlink.on('click', function () {
-
-		            $singleHyperlink.removeClass('current');
-
-		            $(this).addClass('current');
-
-		            $('html, body').animate({
-		                scrollTop: $($(this).attr('href')).offset().top - $('.navigation-main').height()
-		            }, 500);
-		            return false;
-		        });
-
-		        // Magnific popup scroll to content
-		        // ----------------------------------------------------------------
-
-		        $('.mfp-open-scrollto').on('click', function () {
-		            $('html,body').animate({
-		                scrollTop: $('.mfp-content').offset().top - 200
-		            }, 300);
-		            return false;
-		        });
-		    }
-
 		    setTimeout(function () {
 		        $('.page-loader').addClass('loaded');
 		    }, 1000);
@@ -715,7 +231,42 @@ class App extends React.Component {
 
 	updateFiltersData(changes) {
 		this.setState((state, props) => {
-			state.filters[changes.filterType][changes.idx].checked = changes.checked;
+			const filterType = changes.filterType;
+			let filters = state.filters[filterType];
+
+			if (filterType === 'price') {
+				filters = {
+					from: changes.from,
+					to: changes.to
+				};
+			} else {
+				filters[changes.idx].checked = changes.checked;				
+				const anyOption = filters.find((filterOption) => {
+					return filterOption.any;
+				});
+				if (changes.checked) {
+					if (changes.any) {
+						filters.forEach((filterOption) => {
+							if (!filterOption.any) {
+								filterOption.checked = false;								
+							}
+						});
+					} else if (anyOption) {
+						anyOption.checked = false;							
+					}					
+				} else if (filters.every((filterOption) => {
+					return !filterOption.checked;
+				})) {
+					anyOption.checked = true;
+				}
+			}
+			return state;
+		});
+	}
+
+	updateSortingData(changes) {
+		this.setState((state) => {
+			state.sorting[changes.option] = changes.value;
 			return state;
 		});
 	}
@@ -723,7 +274,7 @@ class App extends React.Component {
 	setUpFilters() {
 		// Manufacturers
 		let manufacturersDataGet = new Promise((resolve, reject) => {
-			fetch(`http://${this.props.api}/manufacturers`, {
+			fetch(`${CONFIG.ROOT_API_URL}/manufacturers`, {
 				headers: new Headers({
 					'Content-Type': 'application/json'
 				})
@@ -732,6 +283,12 @@ class App extends React.Component {
 			}).then((data) => {
 				this.setState((state) => {
 					state.filters.manufacturers = data.results;
+					state.filters.manufacturers.unshift({
+						id: 9999,
+						any: true,
+						checked: true,
+						name: "Любой"
+					});
 					return state;
 				});
 				resolve();
@@ -740,7 +297,7 @@ class App extends React.Component {
 
 		//Colors
 		let colorsDataGet = new Promise((resolve, reject) => {
-			fetch(`http://${this.props.api}/products`, {
+			fetch(`${CONFIG.ROOT_API_URL}/products`, {
 				headers: new Headers({
 					'Content-Type': 'application/json'
 				})
@@ -757,6 +314,13 @@ class App extends React.Component {
 							value: product.color.value
 						});
 					}
+				});
+
+				colors.unshift({
+					id: 9999,
+					any: true,
+					checked: true,
+					name: 'Любой'
 				});
 
 				this.setState((state) => {
@@ -871,30 +435,7 @@ class App extends React.Component {
 				                    </div>
 
 				                    <div className="col-md-9 col-xs-12">
-
-				                        <div className="sort-bar clearfix">
-				                            <div className="sort-results pull-left">
-				                                <select>
-				                                    <option value="1">10</option>
-				                                    <option value="2">50</option>
-				                                    <option value="3">100</option>
-				                                    <option value="4">All</option>
-				                                </select>
-				                                <span>Showing all <strong>50</strong> of <strong>3,250</strong> items</span>
-				                            </div>
-				                            <div className="sort-options pull-right">
-				                                <span className="hidden-xs">Sort by</span>
-				                                <select id="sort-price">
-				                                    <option data-option-value="asc">Price: lowest</option>
-				                                    <option data-option-value="desc">Price: highest</option>
-				                                </select>
-				                                <span className="grid-list">
-				                                    <a href="products-grid.html"><i className="fa fa-th-large"></i></a>
-				                                    <a href="products-list.html"><i className="fa fa-align-justify"></i></a>
-				                                    <a href="javascript:void(0);" className="toggle-filters-mobile"><i className="fa fa-search"></i></a>
-				                                </span>
-				                            </div>
-				                        </div>
+										<SortBar updateState={this.updateSortingData} itemsPerPage={this.state.sorting.itemsPerPage} price={this.state.sorting.price} name={this.state.sorting.name}/>
 
 				                        <div id="products" className="row">
 
@@ -1238,10 +779,8 @@ class App extends React.Component {
 	}
 }
 
-let api = 'door-shop.pavelgoltsev.com/api/v1';
-
 // Set up categories
-fetch(`http://${api}/categories?no_parent=true`, {
+fetch(`${CONFIG.ROOT_API_URL}/categories?no_parent=true`, {
 	headers: new Headers({
 		'Content-Type': 'application/json'
 	})
@@ -1249,7 +788,6 @@ fetch(`http://${api}/categories?no_parent=true`, {
 	return response.json();
 }).then((data) => {
 	ReactDOM.render(React.createElement(App, {
-		api,
 		categories: {
 			main: data.results
 		}

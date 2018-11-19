@@ -523,12 +523,12 @@ input, textarea, select {
     padding: 8px 0;
 }
 
-.checkbox {
+.checkbox, .radio {
     margin: 0;
     padding: 5px 0;
 }
 
-.checkbox label {
+.checkbox.checkbox.checkbox label {
     padding-left: 35px;
     line-height: 1.8;
 }
@@ -546,9 +546,12 @@ input, textarea, select {
     display: none;
 }
 
-.checkbox label:before {
+.checkbox label.color {
+    transition: all .3s;
+}
+
+.checkbox label:not(.color):before {
     font-family: 'LinearIcons';
-    content: "\e870";
     text-align: center;
     line-height: 22px;
     font-size: 16px;
@@ -573,7 +576,7 @@ input, textarea, select {
     transition: all 0.2s;
 }
 
-.checkbox label.checked:before {
+.checkbox label:not(.color).checked:before {
     background: #ffbb00;
     color: white;
     border-color: #ffbb00;
@@ -585,11 +588,11 @@ input, textarea, select {
     transform: scale(0.8);
 }
 
-.checkbox label.checkbox.checked:before {
+.checkbox label:not(.color).checkbox:before {
     content: "\e870";
 }
 
-.checkbox label.radio.checked:before {
+.checkbox label:not(.color).radio:before {
     content: "\e814";
 }
 
@@ -1940,6 +1943,11 @@ nav .cart-wrapper.open {
     15. Sort bar
     ----------------------------------
 */
+
+#sort-price, #sort-name {
+    margin-right: 10px;
+}
+
 .sort-bar {
     margin-bottom: 15px;
     font-size: 14px;

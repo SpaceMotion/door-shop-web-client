@@ -1,7 +1,9 @@
+import CONFIG from "./config";
+import CONSTANTS from "./constants";
 import Header from "./Header";
 import Filters from "./Filters";
 import SortBar from "./SortBar";
-import CONFIG from "./config";
+import Pagination from "./Pagination";
 
 class App extends React.Component {
 	constructor(props) {
@@ -14,11 +16,15 @@ class App extends React.Component {
 				itemsPerPage: 10,
 				price: 'asc',
 				name: 'A-z'
+			},
+			pagination: {
+				activePage: 1
 			}
 		};
 		this.updateFiltersData = this.updateFiltersData.bind(this);
 		this.setUpFilters = this.setUpFilters.bind(this);
 		this.updateSortingData = this.updateSortingData.bind(this);
+		this.updatePaginationData = this.updatePaginationData.bind(this);
 
 		this.setUpFilters();
 	}
@@ -115,13 +121,13 @@ class App extends React.Component {
 		    var navbarFixed = $('nav.navbar-fixed');
 
 		    // When reload page - check if page has offset
-		    if ($(document).scrollTop() > $('.header-nav').height()) {
+		    if ($(document).scrollTop() > CONSTANTS.HEADER_NAV_HEIGHT) {
 		        navbarFixed.addClass('navbar-sticked');
 		    }
 		    // Add sticky menu on scroll
 		    $(document).on('bind ready scroll', function () {
 		        var docScroll = $(document).scrollTop();
-		        if (docScroll >= 10) {
+		        if (docScroll >= CONSTANTS.STICKY_MENU_AFTER_SCROLL_POSITION) {
 		            navbarFixed.addClass('navbar-sticked');
 		        } else {
 		            navbarFixed.removeClass('navbar-sticked');
@@ -147,7 +153,7 @@ class App extends React.Component {
 		            addClassActive: true,
 		            transitionStyle: "fadeUp",
 		            afterMove: animatetCaptions,
-		            autoPlay: 8000,
+		            autoPlay: CONSTANTS.FRONTPAGE_SLIDER_ANIMATION_TIMEOUT,
 		            stopOnHover: false
 		        });
 
@@ -156,15 +162,15 @@ class App extends React.Component {
 		        function animatetCaptions(event) {
 		            "use strict";
 		            var activeItem = $(n).find('.owl-item.active'),
-		            timeDelay = 100;
+		            timeDelay = CONSTANTS.FRONTPAGE_SLIDER_DELAY_BEFORE_ANIMATE_CAPTIONS;
 		            $.each(activeItem.find('.animated'), function (j, m) {
 		                var item = $(m);
 		                item.css('animation-delay', timeDelay + 'ms');
-		                timeDelay = timeDelay + 180;
+		                timeDelay = timeDelay + CONSTANTS.FRONTPAGE_SLIDER_DELAY_OFFSET_ANIMATE_CAPTIONS;
 		                item.addClass(item.data('animation'));
 		                setTimeout(function () {
 		                    item.removeClass(item.data('animation'));
-		                }, 2000);
+		                }, CONSTANTS.FRONTPAGE_SLIDER_DELAY_BEFORE_NEXT);
 		            });
 		        }
 
@@ -185,7 +191,7 @@ class App extends React.Component {
 		        var docScrollTop = $(document).scrollTop(),
 		            docScrollBottom = $(window).scrollTop() + $(window).height() == $(document).height();
 
-		        if (docScrollTop >= 150) {
+		        if (docScrollTop >= CONSTANTS.SCROLL_TO_TOP_OFFSET_SHOW) {
 		            $scrollbtn.addClass('visible');
 		        } else {
 		            $scrollbtn.removeClass('visible');
@@ -201,30 +207,13 @@ class App extends React.Component {
 		    $scrollbtn.on('click', function () {
 		        $('html,body').animate({
 		            scrollTop: $('body').offset().top
-		        }, 1000);
-		        return false;
-		    });
-
-		    // Filters toggle functions
-		    // ----------------------------------------------------------------
-
-		    // Show hide filters (only for mobile)
-		    // ----------------------------------------------------------------
-
-		    $('.toggle-filters-mobile').on('click', function () {
-		        $('.filters').addClass('active');
-		    });
-		    $('.toggle-filters-close').on('click', function () {
-		        $('.filters').removeClass('active');
-		        $('html,body').animate({
-		            scrollTop: $('body').offset().top
-		        }, 800);
+		        }, CONSTANTS.SCROLL_TO_TOP_ANIMATION_TIME);
 		        return false;
 		    });
 
 		    setTimeout(function () {
 		        $('.page-loader').addClass('loaded');
-		    }, 1000);
+		    }, CONSTANTS.DELAY_REMOVE_PAGE_LOADER);
 
 		})();		
 	}
@@ -265,8 +254,19 @@ class App extends React.Component {
 	}
 
 	updateSortingData(changes) {
+		const option = changes.option;
 		this.setState((state) => {
-			state.sorting[changes.option] = changes.value;
+			if (option === 'itemsPerPage') {
+				state.pagination.activePage = 1;
+			}
+			state.sorting[option] = changes.value;
+			return state;
+		});
+	}
+
+	updatePaginationData(changes) {
+		this.setState((state) => {
+			state.pagination.activePage = changes.activePage;
 			return state;
 		});
 	}
@@ -420,7 +420,7 @@ class App extends React.Component {
 			            </div>
 			        </section>
 
-			        {true ? null : (
+			        {false ? null : (
 				        <section className="products">
 				            <div className="container">
 
@@ -616,6 +616,7 @@ class App extends React.Component {
 
 
 				                        </div>
+							            <Pagination updateState={this.updatePaginationData} totalItems={170} itemsPerPage={this.state.sorting.itemsPerPage} activePage={this.state.pagination.activePage}/>
 
 				                    </div>
 

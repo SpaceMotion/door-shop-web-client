@@ -19,9 +19,9 @@ export default class Filters extends React.Component {
         $("#range-price-slider").ionRangeSlider({
             type: "double",
             min: 0,
-            max: 4000,
+            max: 100000,
             from: 0,
-            to: 4000,
+            to: 100000,
             prefix: String.fromCharCode(8381),
             onChange: function (data) {
                 Filters.props.updateState({

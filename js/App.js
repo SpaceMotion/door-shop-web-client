@@ -297,25 +297,14 @@ class App extends React.Component {
 
 		//Colors
 		let colorsDataGet = new Promise((resolve, reject) => {
-			fetch(`${CONFIG.ROOT_API_URL}/products`, {
+			fetch(`${CONFIG.ROOT_API_URL}/colors`, {
 				headers: new Headers({
 					'Content-Type': 'application/json'
 				})
 			}).then((response) => {
 				return response.json();
 			}).then((data) => {
-				let colors = [];
-				data.results.forEach((product) => {
-					if (product.color && !colors.find((color) => {
-						return product.color.id === color.id;	
-					})) {
-						colors.push({
-							id: product.color.id,
-							value: product.color.value
-						});
-					}
-				});
-
+				let colors = data.results;
 				colors.unshift({
 					id: 9999,
 					any: true,

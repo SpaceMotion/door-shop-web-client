@@ -22,7 +22,11 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     
-    display: inline-block;
+    display: block;
+}
+
+.f-icon_type_symbol::before {
+    content: attr(data-icon-code);
 }
 
 .f-icon-dining-table:before {

@@ -60,7 +60,7 @@ export default class Filters extends React.Component {
                     </div>
                 </div>
 
-                <div className="filter-box">
+                {false ? (<div className="filter-box">
                     <div className="title" onClick={this.onFilterTitleClick}>
                         Цвет
                     </div>
@@ -73,7 +73,7 @@ export default class Filters extends React.Component {
 	                        }} checked={color.checked}/>;
                     	})}
                     </div>
-                </div>
+                </div>) : null}
             </div>
 		);
 	}

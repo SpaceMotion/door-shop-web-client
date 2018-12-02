@@ -5930,8 +5930,8 @@ footer a:hover {
 footer .footer-showroom {
     padding-top: 30px;
     padding-bottom: 30px;
-    margin-bottom: 15px;
-    border-bottom: 1px solid #222;
+    /*margin-bottom: 15px;*/
+    /*border-bottom: 1px solid #222;*/
 }
 
 footer .footer-showroom.footer-showroom-single {
@@ -5946,7 +5946,7 @@ footer .footer-showroom .call-us {
     footer .footer-showroom {
         padding-top: 40px;
         padding-bottom: 40px;
-        margin-bottom: 40px;
+        /*margin-bottom: 40px;*/
     }
 }
 
@@ -5954,7 +5954,7 @@ footer .footer-showroom .call-us {
     footer .footer-showroom {
         padding-top: 60px;
         padding-bottom: 60px;
-        margin-bottom: 60px;
+        /*margin-bottom: 60px;*/
     }
 }
 
@@ -5962,7 +5962,7 @@ footer .footer-showroom .call-us {
     footer .footer-showroom {
         padding-top: 60px;
         padding-bottom: 60px;
-        margin-bottom: 80px;
+        /*margin-bottom: 80px;*/
     }
 }
 

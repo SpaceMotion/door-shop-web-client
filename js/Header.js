@@ -1,3 +1,5 @@
+import {Link} from "react-router-dom";
+
 export default class Header extends React.Component {
 	render() {
 		return (
@@ -17,16 +19,22 @@ export default class Header extends React.Component {
 	                        </div>
 
 	                        <ul>
-	                            <li><a href="index.html">Домой</a></li>
 	                            <li>
-	                                <a href="#">Каталог товаров <span className="open-dropdown"><i className="fa fa-angle-down"></i></span></a>
+	                            	<Link to="/">Домой</Link>
+	                            </li>
+	                            <li>
+	                                <a href="javascript:void(0);">Каталог товаров <span className="open-dropdown"><i className="fa fa-angle-down"></i></span></a>
 	                                <div className="navbar-dropdown navbar-dropdown-single">
 	                                    <div className="navbar-box">
 	                                        <div className="box-2">
 	                                            <div className="box clearfix">
 	                                                <ul>
 	                                                	{this.props.categories.map((category, idx) => {
-	                                                		return <li key={idx}><a href="#">{category.name}</a></li>;
+	                                                		return (
+																<li key={idx}>
+																	<Link to={`/products?category=${category.id}`}>{category.name}</Link>
+																</li>
+	                                                		);
 	                                                	})}
 	                                                </ul>
 	                                            </div>
@@ -35,10 +43,10 @@ export default class Header extends React.Component {
 	                                </div>
 	                            </li>
 	                            <li>
-	                                <a href="#">Оплата и доставка</a>
+	                            	<Link to="/delivery">Оплата и доставка</Link>
 	                            </li>
 	                            <li>
-	                                <a href="#">Контакты</a>
+	                            	<Link to="/contacts">Контакты</Link>
 	                            </li>
 	                        </ul>
 	                    </div>

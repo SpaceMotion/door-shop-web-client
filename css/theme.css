@@ -859,6 +859,16 @@ nav .navigation-top > ul > li > a:hover {
     color: #ffc933;
 }
 
+.navigation-main {
+    display: flex;
+    justify-content: space-between;
+}
+
+.navigation-main > .logo-phone {
+    display: flex;
+    align-items: center;
+}
+
 @media (min-width: 991px) {
     nav .open-cart.open-cart,
     nav .open-search.open-search {
@@ -1097,6 +1107,11 @@ nav .navigation-main .navbar-dropdown .navbar-box ul > li:last-child > a {
 }
 
 @media (max-width: 991px) {
+    .navigation-main > .logo-phone {
+        margin-left: 10px;
+        font-size: 15px;
+    }
+
     nav.navbar-fixed {
         position: absolute;
         background-color: black;
@@ -1125,7 +1140,7 @@ nav .navigation-main .navbar-dropdown .navbar-box ul > li:last-child > a {
         position: absolute;
         top: 0px;
         right: 0;
-        width: 40px;
+        width: 49px;
         height: 100%;
         color: #fff;
         text-align: center;
@@ -1133,7 +1148,7 @@ nav .navigation-main .navbar-dropdown .navbar-box ul > li:last-child > a {
     }
     nav .navigation-main .open-menu .icon {
         font-size: 26px;
-        line-height: 58px;
+        line-height: 49px;
     }
     nav .navigation-main .floating-menu {
         position: absolute;
@@ -5949,7 +5964,7 @@ footer .footer-showroom.footer-showroom-single {
 }
 
 footer .footer-showroom .call-us {
-    margin-top: 20px;
+    /*margin-top: 20px;*/
 }
 
 @media (min-width: 768px) {

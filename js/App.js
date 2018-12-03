@@ -158,25 +158,50 @@ class App extends React.Component {
 			<div>
 			    <div className="page-loader"></div>
 			    <div className="wrapper">
-					<Header categories={this.props.categories}/>
+					<Header categories={this.props.categories} companyInfo={this.props.companyInfo}/>
 					<Route exact path="/" render={() => <MainPage categories={this.props.categories}/>}/>
 					<Route path="/products" render={() => <ProductsPage categories={this.props.categories}/>}/>
 					<Route path="/delivery" render={() => <DeliveryPage/>}/>
 					<Route path="/contacts" render={() => <ContactsPage/>}/>
-					<Footer/>
+					<Footer companyInfo={this.props.companyInfo}/>
 			    </div>
 			</div>
 		);
 	}
 }
 
+const setUpDataPromises = [];
+const appProps = {};
+
 // Set up categories
-fetch(`${CONFIG.ROOT_API_URL}/categories?no_parent=true`, {
-	headers: new Headers({
-		'Content-Type': 'application/json'
-	})
-}).then((response) => {
-	return response.json();
-}).then((data) => {
-	ReactDOM.render(<HashRouter><App categories={data.results}/></HashRouter>, document.getElementById('app'));
+const categoriesPromise = new Promise((resolve) => {
+	fetch(`${CONFIG.ROOT_API_URL}/categories?no_parent=true`, {
+		headers: new Headers({
+			'Content-Type': 'application/json'
+		})
+	}).then((response) => {
+		return response.json();
+	}).then((data) => {
+		appProps.categories = data.results;
+		resolve();
+	});
+});
+setUpDataPromises.push(categoriesPromise);
+
+const companyInfoPromise = new Promise((resolve) => {
+	fetch(`${CONFIG.ROOT_API_URL}/company`, {
+		headers: new Headers({
+			'Content-Type': 'application/json'
+		})
+	}).then((response) => {
+		return response.json();
+	}).then((data) => {
+		appProps.companyInfo = data;
+		resolve();
+	});		
+});
+setUpDataPromises.push(companyInfoPromise);
+
+Promise.all(setUpDataPromises).then(() => {
+	ReactDOM.render(<HashRouter><App {...appProps}/></HashRouter>, document.getElementById('app'));
 });

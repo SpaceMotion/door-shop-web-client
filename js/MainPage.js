@@ -18,9 +18,9 @@ export default class MainPage extends ReloadPageMixin(React.Component) {
 	        '<span class="icon icon-chevron-right"></span>'
 	    ];
 
-	    $.each($(".owl-slider"), function (i, n) {
+	    $.each($(".owl-slider"), function (sliderIndex, sliderItem) {
 
-	        $(n).owlCarousel({
+	        $(sliderItem).owlCarousel({
 	            autoHeight: false,
 	            navigation: true,
 	            navigationText: arrowIcons,
@@ -37,10 +37,10 @@ export default class MainPage extends ReloadPageMixin(React.Component) {
 
 	        function animatetCaptions(event) {
 	            "use strict";
-	            var activeItem = $(n).find('.owl-item.active'),
+	            var activeItem = $(sliderItem).find('.owl-item.active'),
 	            timeDelay = CONSTANTS.FRONTPAGE_SLIDER_DELAY_BEFORE_ANIMATE_CAPTIONS;
-	            $.each(activeItem.find('.animated'), function (j, m) {
-	                var item = $(m);
+	            $.each(activeItem.find('.animated'), function (sliderItemAnimatedCaptionIndex, sliderItemAnimatedCaptionItem) {
+	                var item = $(sliderItemAnimatedCaptionItem);
 	                item.css('animation-delay', timeDelay + 'ms');
 	                timeDelay = timeDelay + CONSTANTS.FRONTPAGE_SLIDER_DELAY_OFFSET_ANIMATE_CAPTIONS;
 	                item.addClass(item.data('animation'));
@@ -50,7 +50,7 @@ export default class MainPage extends ReloadPageMixin(React.Component) {
 	            });
 	        }
 
-	        if ($(n).hasClass('owl-slider-fullscreen')) {
+	        if ($(sliderItem).hasClass('owl-slider-fullscreen')) {
 	            $('.header-content .item').height($(window).height());
 	        }
 	    });
@@ -115,7 +115,7 @@ export default class MainPage extends ReloadPageMixin(React.Component) {
 
 		        <section className="owl-icons-wrapper owl-icons-frontpage">
 		            <header className="hidden">
-		                <h2>Product categories</h2>
+		                <h2>Категории продуктов</h2>
 		            </header>
 
 		            <div className="container">

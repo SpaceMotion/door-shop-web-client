@@ -1,5 +1,4 @@
 import CONFIG from "./config";
-import CONSTANTS from "./constants";
 import Filters from "./Filters";
 import SortBar from "./SortBar";
 import Pagination from "./Pagination";
@@ -39,7 +38,7 @@ export default withRouter(class ProductsPage extends ReloadPageMixin(React.Compo
 
 	setUpFilters() {
 		// Manufacturers
-		let manufacturersDataGet = new Promise((resolve, reject) => {
+		let manufacturersDataGet = new Promise((resolve) => {
 			fetch(`${CONFIG.ROOT_API_URL}/manufacturers`, {
 				headers: new Headers({
 					'Content-Type': 'application/json'
@@ -50,7 +49,6 @@ export default withRouter(class ProductsPage extends ReloadPageMixin(React.Compo
 				this.setState((state) => {
 					state.filters.manufacturers = data.results;
 					state.filters.manufacturers.unshift({
-						id: 9999,
 						any: true,
 						checked: true,
 						name: "Любой"
@@ -61,31 +59,6 @@ export default withRouter(class ProductsPage extends ReloadPageMixin(React.Compo
 			});
 		});
 
-		//Colors
-		/*let colorsDataGet = new Promise((resolve, reject) => {
-			fetch(`${CONFIG.ROOT_API_URL}/colors`, {
-				headers: new Headers({
-					'Content-Type': 'application/json'
-				})
-			}).then((response) => {
-				return response.json();
-			}).then((data) => {
-				let colors = data.results;
-				colors.unshift({
-					id: 9999,
-					any: true,
-					checked: true,
-					name: 'Любой'
-				});
-
-				this.setState((state) => {
-					state.filters.colors = colors;
-					return state;
-				});
-				resolve();
-			});				
-		});*/
-
 		Promise.all([manufacturersDataGet]).then(() => {
 			this.setState((state) => {
 				state.filters.isReady = true;
@@ -95,16 +68,16 @@ export default withRouter(class ProductsPage extends ReloadPageMixin(React.Compo
 	}
 
 	updateFiltersData(changes) {
-		this.setState((state, props) => {
+		this.setState((state) => {
 			const filterType = changes.filterType;
-			let filters = state.filters[filterType];
 
 			if (filterType === 'price') {
-				filters = {
+				state.filters[filterType] = {
 					from: changes.from,
 					to: changes.to
 				};
 			} else {
+				let filters = state.filters[filterType];
 				filters[changes.idx].checked = changes.checked;				
 				const anyOption = filters.find((filterOption) => {
 					return filterOption.any;

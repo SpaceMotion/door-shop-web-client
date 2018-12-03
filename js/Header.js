@@ -12,7 +12,11 @@ export default class Header extends React.Component {
 	                    </ul>
 	                </div>
 	                <div className="navigation navigation-main">
-	                    <a href="#" className="open-menu"><i className="icon icon-menu"></i></a>
+	                	<div className="logo-phone">
+							<Link to="/"><img src="assets/images/logo.png" alt="Логотип компании" style={{marginRight: '10px', width: '130px'}}/></Link>
+							<a href={`tel:${this.props.companyInfo.phone}`} style={{color: 'white'}}>{this.props.companyInfo.phone}</a>
+	                	</div>
+	                    <a href="javascript:void(0);" className="open-menu"><i className="icon icon-menu"></i></a>
 	                    <div className="floating-menu">
 	                        <div className="close-menu-wrapper">
 	                            <span className="close-menu"><i className="icon icon-cross"></i></span>

@@ -16,12 +16,20 @@ export default class Filters extends React.Component {
 
     componentDidMount() {
         const Filters = this;
+        const minPrice = 0;
+        const maxPrice = 200000;
+
+        Filters.props.updateState({
+            filterType: 'price',
+            from: minPrice,
+            to: maxPrice
+        });
         $("#range-price-slider").ionRangeSlider({
             type: "double",
-            min: 0,
-            max: 100000,
-            from: 0,
-            to: 100000,
+            min: minPrice,
+            max: maxPrice,
+            from: minPrice,
+            to: maxPrice,
             prefix: String.fromCharCode(8381),
             onChange: function (data) {
                 Filters.props.updateState({
@@ -59,21 +67,6 @@ export default class Filters extends React.Component {
                     	})}
                     </div>
                 </div>
-
-                {false ? (<div className="filter-box">
-                    <div className="title" onClick={this.onFilterTitleClick}>
-                        Цвет
-                    </div>
-                    <div className="filter-content filter-content_type_color">
-                    	{this.props.filters.colors.map((color, idx) => {
-	                        return <FormInput key={idx} value={color.value} label={color.name} type="checkbox" any={color.any} updateState={(state) => {
-                                state.filterType = "colors";
-								state.idx = idx;
-								this.props.updateState(state);
-	                        }} checked={color.checked}/>;
-                    	})}
-                    </div>
-                </div>) : null}
             </div>
 		);
 	}

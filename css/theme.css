@@ -842,7 +842,7 @@ nav .navigation-top {
 
 nav .navigation-top > ul {
     text-align: right;
-    height: 28px;
+    height: 41px;
     overflow: hidden;
     -moz-transition: all 0.3s;
     -o-transition: all 0.3s;
@@ -860,6 +860,11 @@ nav .navigation-top > ul > li > a:hover {
 }
 
 @media (min-width: 991px) {
+    nav .open-cart.open-cart,
+    nav .open-search.open-search {
+        font-size: inherit;
+    }
+
     nav .navigation-top > ul {
         height: 35px;
     }
@@ -1127,7 +1132,7 @@ nav .navigation-main .navbar-dropdown .navbar-box ul > li:last-child > a {
         border-left: 1px solid #333;
     }
     nav .navigation-main .open-menu .icon {
-        font-size: 15px;
+        font-size: 26px;
         line-height: 58px;
     }
     nav .navigation-main .floating-menu {
@@ -1402,6 +1407,11 @@ nav .open-cart,
 nav .open-settings,
 nav .open-search {
     border-left: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+nav .open-cart,
+nav .open-search {
+    font-size: 22px;
 }
 
 nav .open-login.open .icon:before,

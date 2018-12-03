@@ -70,23 +70,6 @@ export default class Header extends React.Component {
 	                    </div>
 	                </div>
 
-	                <div className="login-wrapper">
-	                    <form>
-	                        <div className="h4">Sign in</div>
-	                        <div className="form-group">
-	                            <input type="email" className="form-control" id="exampleInputEmail1" placeholder="Email"></input>
-	                        </div>
-	                        <div className="form-group">
-	                            <input type="password" className="form-control" id="exampleInputPassword1" placeholder="Password"></input>
-	                        </div>
-	                        <div className="form-group">
-	                            <a href="#forgotpassword" className="open-popup">Forgot password?</a>
-	                            <a href="#createaccount" className="open-popup">Don't have an account?</a>
-	                        </div>
-	                        <button type="submit" className="btn btn-block btn-main">Submit</button>
-	                    </form>
-	                </div>
-
 	                <div className="cart-wrapper">
 	                    <div className="checkout">
 	                        <div className="clearfix">

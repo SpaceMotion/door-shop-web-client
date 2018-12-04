@@ -1,3 +1,5 @@
+import {Link} from "react-router-dom";
+
 export default class Header extends React.Component {
 	render() {
 		return (
@@ -10,23 +12,33 @@ export default class Header extends React.Component {
 	                    </ul>
 	                </div>
 	                <div className="navigation navigation-main">
-	                    <a href="#" className="open-menu"><i className="icon icon-menu"></i></a>
+	                	<div className="logo-phone">
+							<Link to="/"><img src="assets/images/logo.png" alt="Логотип компании" style={{marginRight: '10px', width: '130px'}}/></Link>
+							<a href={`tel:${this.props.companyInfo.phone}`} style={{color: 'white'}}>{this.props.companyInfo.phone}</a>
+	                	</div>
+	                    <a href="javascript:void(0);" className="open-menu"><i className="icon icon-menu"></i></a>
 	                    <div className="floating-menu">
 	                        <div className="close-menu-wrapper">
 	                            <span className="close-menu"><i className="icon icon-cross"></i></span>
 	                        </div>
 
 	                        <ul>
-	                            <li><a href="index.html">Домой</a></li>
 	                            <li>
-	                                <a href="#">Каталог товаров <span className="open-dropdown"><i className="fa fa-angle-down"></i></span></a>
+	                            	<Link to="/">Домой</Link>
+	                            </li>
+	                            <li>
+	                                <a href="javascript:void(0);">Каталог товаров <span className="open-dropdown"><i className="fa fa-angle-down"></i></span></a>
 	                                <div className="navbar-dropdown navbar-dropdown-single">
 	                                    <div className="navbar-box">
 	                                        <div className="box-2">
 	                                            <div className="box clearfix">
 	                                                <ul>
 	                                                	{this.props.categories.map((category, idx) => {
-	                                                		return <li key={idx}><a href="#">{category.name}</a></li>;
+	                                                		return (
+																<li key={idx}>
+																	<Link to={`/products?category=${category.id}`}>{category.name}</Link>
+																</li>
+	                                                		);
 	                                                	})}
 	                                                </ul>
 	                                            </div>
@@ -35,10 +47,10 @@ export default class Header extends React.Component {
 	                                </div>
 	                            </li>
 	                            <li>
-	                                <a href="#">Оплата и доставка</a>
+	                            	<Link to="/delivery">Оплата и доставка</Link>
 	                            </li>
 	                            <li>
-	                                <a href="#">Контакты</a>
+	                            	<Link to="/contacts">Контакты</Link>
 	                            </li>
 	                        </ul>
 	                    </div>
@@ -60,23 +72,6 @@ export default class Header extends React.Component {
 	                            </ul>
 	                        </div>
 	                    </div>
-	                </div>
-
-	                <div className="login-wrapper">
-	                    <form>
-	                        <div className="h4">Sign in</div>
-	                        <div className="form-group">
-	                            <input type="email" className="form-control" id="exampleInputEmail1" placeholder="Email"></input>
-	                        </div>
-	                        <div className="form-group">
-	                            <input type="password" className="form-control" id="exampleInputPassword1" placeholder="Password"></input>
-	                        </div>
-	                        <div className="form-group">
-	                            <a href="#forgotpassword" className="open-popup">Forgot password?</a>
-	                            <a href="#createaccount" className="open-popup">Don't have an account?</a>
-	                        </div>
-	                        <button type="submit" className="btn btn-block btn-main">Submit</button>
-	                    </form>
 	                </div>
 
 	                <div className="cart-wrapper">

@@ -27,7 +27,7 @@ export default class Header extends React.Component {
 	                            	<Link to="/">Домой</Link>
 	                            </li>
 	                            <li>
-	                                <a href="javascript:void(0);">Каталог товаров <span className="open-dropdown"><i className="fa fa-angle-down"></i></span></a>
+	                                <Link to="/categories">Каталог товаров <span className="open-dropdown"><i className="fa fa-angle-down"></i></span></Link>
 	                                <div className="navbar-dropdown navbar-dropdown-single">
 	                                    <div className="navbar-box">
 	                                        <div className="box-2">

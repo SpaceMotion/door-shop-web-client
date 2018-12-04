@@ -2362,6 +2362,16 @@ nav .cart-wrapper.open {
     line-height: 27px;
 }
 
+.products_type_category article .image a {
+    font-size: 155px;
+}
+
+@media (min-width: 568px) {
+    .products_type_category article .image a {
+        font-size: 200px;
+    }
+}
+
 @media (min-width: 992px) {
     .products .box-filters figure {
         width: 100px;
@@ -2370,6 +2380,10 @@ nav .cart-wrapper.open {
     .products .box-filters figure .f-icon {
         font-size: 68px;
         line-height: 50px;
+    }
+
+    .products_type_category article .image a {
+        font-size: 269px;
     }
 }
 
@@ -2439,6 +2453,10 @@ nav .cart-wrapper.open {
 
 .products article .image a {
     display: block;
+}
+
+.products_type_category article {
+    text-align: center;
 }
 
 .products article .image img {

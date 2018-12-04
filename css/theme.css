@@ -5827,10 +5827,11 @@ nav .cart-wrapper.open {
 }
 
 .owl-icons-wrapper .owl-icons figure .f-icon {
-    width: 70px;
-    height: 70px;
+    margin: auto;
+    width: 105px;
+    height: 105px;
     background: center center / contain no-repeat;
-    font-size: 70px;
+    font-size: 105px;
     -moz-transition: all 0.5s;
     -o-transition: all 0.5s;
     -webkit-transition: all 0.5s;
@@ -5875,8 +5876,16 @@ nav .cart-wrapper.open {
 }
 
 .owl-icons-wrapper.owl-icons-frontpage {
-    margin-top: -125px;
+    margin-top: -161px;
     background: transparent;
+}
+
+.owl-icons-wrapper.owl-icons-frontpage a {
+    margin-right: 5px;
+}
+
+.owl-icons-wrapper.owl-icons-frontpage a:last-child {
+    margin-right: 0;
 }
 
 .owl-icons-wrapper.owl-icons-frontpage a, .owl-icons-wrapper.owl-icons-frontpage a:focus, .owl-icons-wrapper.owl-icons-frontpage a:active, .owl-icons-wrapper.owl-icons-frontpage a:hover {
@@ -5890,16 +5899,16 @@ nav .cart-wrapper.open {
 
 @media (min-width: 992px) {
     .owl-icons-wrapper.owl-icons-frontpage {
-        margin-top: -160px;
+        margin-top: -209px;
         background: transparent;
     }
     .owl-icons-wrapper .owl-icons figcaption {
         font-size: 14px;
     }
     .owl-icons-wrapper .owl-icons figure .f-icon {
-        width: 100px;
-        height: 100px;
-        font-size: 100px;
+        width: 150px;
+        height: 150px;
+        font-size: 150px;
     }
 }
 

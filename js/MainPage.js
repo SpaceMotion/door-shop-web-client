@@ -60,11 +60,12 @@ export default class MainPage extends ReloadPageMixin(React.Component) {
     	let itemsDesktopSmall = 4;
     	let itemsTablet = 3;
     	let itemsMobile = 2;
+    	const minimalCount = 2;
 	    if (categoriesCount < itemsDesktop) { // В случае если количество категории меньше чем количество одновременно показываемых категории в слайдере, минимально будем показывать 2 категории
 	    	itemsDesktop = categoriesCount;
-	    	itemsDesktopSmall = Math.min(Math.max(categoriesCount - 1, 2), itemsDesktop);
-	    	itemsTablet = Math.min(Math.max(categoriesCount - 2, 2), itemsDesktop);
-	    	itemsMobile = Math.min(Math.max(categoriesCount - 3, 2), itemsDesktop);
+	    	itemsDesktopSmall = Math.min(Math.max(categoriesCount - 1, minimalCount), itemsDesktop);
+	    	itemsTablet = Math.min(Math.max(categoriesCount - 2, minimalCount), itemsDesktop);
+	    	itemsMobile = Math.min(Math.max(categoriesCount - 3, minimalCount), itemsDesktop);
 	    }
 
 	    $.each($(".owl-icons"), function (i, n) {

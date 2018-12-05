@@ -10,7 +10,31 @@ import CategoriesPage from "./CategoriesPage";
 import {HashRouter, Route} from "react-router-dom";
 
 class App extends React.Component {
+	closeMenuMobile() {
+		const expandedMenu = $('nav').find('.expanded');
+		if (expandedMenu.length) {
+        	$('nav').find('.navbar-dropdown').slideUp();			
+		}
+        expandedMenu.removeClass('expanded');
+	}
+
+    closeSearch() {
+        $('.search-wrapper').removeClass('open');
+        $('.open-search').removeClass('open');
+    }
+
+    closeCart() {
+        $('.cart-wrapper').removeClass('open');
+        $('.open-cart').removeClass('open');
+    }
+
+
 	componentDidMount() {
+		//Обработчики глобальных событий
+		window.addEventListener('closeMenuMobile', this.closeMenuMobile.bind(this));
+		window.addEventListener('closeSearch', this.closeSearch.bind(this));
+		window.addEventListener('closeCart', this.closeCart.bind(this));
+
 		(function () {
 
 		    "use strict";
@@ -33,67 +57,60 @@ class App extends React.Component {
 		    // Open/close search bar
 
 		    $search.on('click', function () {
+		        window.dispatchEvent(new CustomEvent('closeCart'));
+		    	window.dispatchEvent(new CustomEvent('closeMenuMobile'));
 		        toggleOpen($(this));
 		        objSearch.toggleClass('open');
 		        objSearch.find('input').focus();
-		        closeCart();
 		    });
 
 		    // Open/close cart
 
 		    $cart.on('click', function () {
+		        window.dispatchEvent(new CustomEvent('closeSearch'));
+		    	window.dispatchEvent(new CustomEvent('closeMenuMobile'));
 		        toggleOpen($(this));
 		        objCart.toggleClass('open');
-		        closeSearch();
 		    });
 
 		    // Mobile menu open/close
 
 		    $menu.on('click', function () {
+		        window.dispatchEvent(new CustomEvent('closeSearch'));
+		        window.dispatchEvent(new CustomEvent('closeCart'));
 		        objMenu.addClass('expanded');
-		        closeSearch();
-		        closeCart();
 		    });
 
 		    // Open dropdown/megamenu
 
 		    $openDropdown.on('click', function (e) {
-
 		        e.preventDefault();
 
-		        var liParent = $(this).parent().parent(),
-		            liDropdown = liParent.find('.navbar-dropdown');
+		        if (window.innerWidth < CONSTANTS.DESKTOP_MORE_THAN) {
+			        const liParent = $(this).parent().parent(),
+			            liDropdown = liParent.find('.navbar-dropdown');
 
-		        liParent.toggleClass('expanded');
+			        liParent.toggleClass('expanded');
 
-		        if (liParent.hasClass('expanded')) {
-		            liDropdown.slideDown();
-		        }
-		        else {
-		            liDropdown.slideUp();
+			        if (liParent.hasClass('expanded')) {
+			            liDropdown.slideDown();
+			        }
+			        else {
+			            liDropdown.slideUp();
+			        }
 		        }
 		    });
 
 		    // Close menu (mobile)
 
 		    $close.on('click', function () {
-		        $('nav').find('.expanded').removeClass('expanded');
-		        $('nav').find('.navbar-dropdown').slideUp();
+		    	window.dispatchEvent(new CustomEvent('closeMenuMobile'));
 		    });
 
 		    // Global functions
 
 		    function toggleOpen(el) {
 		        $(el).toggleClass('open');
-		    }
-
-		    function closeSearch() {
-		        objSearch.removeClass('open');
-		        $search.removeClass('open');
-		    }
-		    function closeCart() {
-		        objCart.removeClass('open');
-		        $cart.removeClass('open');
 		    }
 
 		    // Sticky header

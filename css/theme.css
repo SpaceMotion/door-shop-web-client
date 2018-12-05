@@ -83,6 +83,9 @@ body .wrapper {
     position: relative;
     overflow: hidden;
     width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 b,
@@ -5943,6 +5946,7 @@ footer {
     position: relative;
     color: #666666;
     background-color: black;
+    flex: 1;
 }
 
 @media (max-width: 767px) {

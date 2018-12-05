@@ -55,6 +55,36 @@ export default class MainPage extends ReloadPageMixin(React.Component) {
 	        }
 	    });
 
+	    const categoriesCount = this.props.categories.length;
+    	let itemsDesktop = 4;
+    	let itemsDesktopSmall = 4;
+    	let itemsTablet = 3;
+    	let itemsMobile = 2;
+	    if (categoriesCount < itemsDesktop) { // В случае если количество категории меньше чем количество одновременно показываемых категории в слайдере, минимально будем показывать 2 категории
+	    	itemsDesktop = categoriesCount;
+	    	itemsDesktopSmall = Math.max(categoriesCount - 1, 2);
+	    	itemsTablet = Math.max(categoriesCount - 2, 2);
+	    	itemsMobile = Math.max(categoriesCount - 3, 2);
+	    }
+
+	    $.each($(".owl-icons"), function (i, n) {
+	        $(n).owlCarousel({
+	            autoHeight: false,
+	            pagination: false,
+	            navigation: true,
+	            navigationText: arrowIcons,
+	            items: itemsDesktop,
+	            itemsDesktop: [1199, itemsDesktop],
+	            itemsDesktopSmall: [979, itemsDesktopSmall],
+	            itemsTablet: [768, itemsTablet],
+	            itemsTabletSmall: false,
+	            itemsMobile: [479, itemsMobile],
+	            addClassActive: true,
+	            autoPlay: 5500,
+	            stopOnHover: true
+	        });
+	    });
+
 		this.hidePreLoader();
 	}
 

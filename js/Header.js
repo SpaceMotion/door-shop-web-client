@@ -25,7 +25,7 @@ export default class Header extends ReloadPageMixin(React.Component) {
 
 	                        <ul>
 	                            <li>
-	                            	<Link to="/">Домой</Link>
+	                            	<Link to="/">Главная</Link>
 	                            </li>
 	                            <li>
 	                                <Link to="/categories">Каталог товаров <span className="open-dropdown"><i className="fa fa-angle-down"></i></span></Link>

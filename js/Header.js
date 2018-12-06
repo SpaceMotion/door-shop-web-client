@@ -1,6 +1,7 @@
 import {Link} from "react-router-dom";
+import ReloadPageMixin from "./ReloadPageMixin";
 
-export default class Header extends React.Component {
+export default class Header extends ReloadPageMixin(React.Component) {
 	render() {
 		return (
 	        <nav className="navbar-fixed header-nav">
@@ -36,7 +37,7 @@ export default class Header extends React.Component {
 	                                                	{this.props.categories.map((category, idx) => {
 	                                                		return (
 																<li key={idx}>
-																	<Link to={`/products?category=${category.id}`}>{category.name}</Link>
+																	<Link onClick={this.closePopUps} to={`/products?category=${category.id}`}>{category.name}</Link>
 																</li>
 	                                                		);
 	                                                	})}

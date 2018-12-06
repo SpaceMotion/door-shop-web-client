@@ -1,9 +1,16 @@
 import CONSTANTS from "./constants";
 
 export default (superclass) => class ReloadPageMixin extends React.Component {
+    closePopUps() {
+        window.dispatchEvent(new CustomEvent('closeCart'));
+        window.dispatchEvent(new CustomEvent('closeSearch'));
+        window.dispatchEvent(new CustomEvent('closeMenuMobile'));        
+    }
+
 	showPreLoader() {
 		$('.page-loader').removeClass('loaded');
 		$('html').css('overflow', 'hidden');
+        this.closePopUps();
 	}
 
 	hidePreLoader() {

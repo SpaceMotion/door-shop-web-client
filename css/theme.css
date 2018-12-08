@@ -86,6 +86,7 @@ body .wrapper {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    background: url(../assets/images/gallery-1.jpg) center center / cover no-repeat;
 }
 
 b,
@@ -1819,15 +1820,20 @@ nav .cart-wrapper.open {
 .header-content {
     padding: 0;
     position: relative;
-    overflow: hidden;
+    z-index: 1;
+    /*overflow: hidden;*/
+    padding-top: 100px;
 }
 
 .header-content .item {
-    height: 100vh;
+    width: auto !important;
+    height: auto !important;
     position: relative;
     overflow: hidden;
-    background-position: center;
-    background-size: cover;
+    display: block;
+    margin: auto;
+    max-width: 100%;
+    max-height: 100%;
 }
 
 .header-content .item .box {
@@ -1853,31 +1859,21 @@ nav .cart-wrapper.open {
     margin-top: 40px;
 }
 
-@media (min-width: 768px) {
-    .header-content .item {
-        height: 100vh;
-    }
-    .header-content .item .title {
-        font-size: 300%;
-    }
-}
-
-@media (min-width: 1200px) {
-    .header-content .item {
-        height: 700px;
-    }
-    .header-content .item .title {
-        font-size: 300%;
-    }
-}
 
 .header-content .owl-theme .owl-controls .owl-pagination {
     text-align: end;
     padding-right: 20px;
+    bottom: -25px;
 }
 
 .header-content .owl-theme .owl-controls .owl-buttons div span {
     color: white;
+}
+
+.header-content .owl-theme .owl-controls .owl-buttons div {
+    background-color: #232529;
+    opacity: .4;
+    border-radius: 50%;
 }
 
 .header-content .owl-theme .owl-controls .owl-page span {
@@ -5898,7 +5894,7 @@ nav .cart-wrapper.open {
 }
 
 .owl-icons-wrapper.owl-icons-frontpage {
-    margin-top: -161px;
+    /*margin-top: -161px;*/
     background: transparent;
 }
 
@@ -5921,7 +5917,7 @@ nav .cart-wrapper.open {
 
 @media (min-width: 992px) {
     .owl-icons-wrapper.owl-icons-frontpage {
-        margin-top: -209px;
+        /*margin-top: -209px;*/
         background: transparent;
     }
     .owl-icons-wrapper .owl-icons figcaption {

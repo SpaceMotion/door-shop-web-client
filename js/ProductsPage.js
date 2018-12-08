@@ -11,6 +11,7 @@ export default withRouter(class ProductsPage extends ReloadPageMixin(React.Compo
 
 		this.showPreLoader();
 		this.state = {
+			products: [],
 			filters: {
 				isReady: false				
 			},

@@ -44,7 +44,7 @@ export default class Filters extends React.Component {
 	render() {
 		return (
             <div id="filters" className="filters">
-                <div className="filter-box">
+                <div className="filter-box active">
                     <div className="title" onClick={this.onFilterTitleClick}>Цена</div>
                     <div className="filter-content">
                         <div className="price-filter">
@@ -53,7 +53,7 @@ export default class Filters extends React.Component {
                     </div>
                 </div>
 
-                <div className="filter-box">
+                <div className="filter-box active">
                     <div className="title" onClick={this.onFilterTitleClick}>
                         Производитель
                     </div>

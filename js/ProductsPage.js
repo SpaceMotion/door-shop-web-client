@@ -11,6 +11,7 @@ export default withRouter(class ProductsPage extends ReloadPageMixin(React.Compo
 
 		this.showPreLoader();
 		this.state = {
+			products: [],
 			filters: {
 				isReady: false				
 			},
@@ -30,11 +31,26 @@ export default withRouter(class ProductsPage extends ReloadPageMixin(React.Compo
 		this.getBreadCrumbs = this.getBreadCrumbs.bind(this);
 
 		this.setUpFilters();
+        this.setUpProducts();
 	}
 
 	componentDidMount() {
 		this.hidePreLoader();		
 	}
+
+    setUpProducts() {
+        fetch(`${CONFIG.ROOT_API_URL}/products`, {
+            headers: new Headers({
+                'Content-Type': 'application/json'
+            })
+        }).then((response) => {
+            return response.json();
+        }).then((data) => {
+            this.setState({
+                products: data.results
+            });
+        });        
+    }
 
 	setUpFilters() {
 		// Manufacturers

@@ -93,8 +93,6 @@ export default class MainPage extends ReloadPageMixin(React.Component) {
 		return (
 			<div>
 		        <section className="header-content">
-                    <div className="owl-slider__control-background owl-slider__control-background_control-type_prev"/>
-                    <div className="owl-slider__control-background owl-slider__control-background_control-type_next"/>
 		            <div className="owl-slider">
                         <img className="item" src="assets/images/7cc22dd2de2adf9fb842bfb4b9f0350e_slide01.jpg"/>
                         <img className="item" src="assets/images/b09ecf5fb28e67be38ea8bdaca24f2f6_slide02.jpg"/>

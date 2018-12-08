@@ -1822,7 +1822,13 @@ nav .cart-wrapper.open {
     position: relative;
     z-index: 1;
     /*overflow: hidden;*/
-    padding-top: 100px;
+    padding-top: 93px;
+}
+
+@media (min-width: 992px) {
+    .header-content {
+        padding-top: 100px;
+    }
 }
 
 .header-content .item {

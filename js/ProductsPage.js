@@ -174,25 +174,13 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
                 this.timer = null;
             }
             if (!this.timer) {
-                this.sendRequestForProducts(this.lastSearchParams, state);
+                this.sendRequestForProducts(this.lastSearchParams);
                 this.timer = setInterval(() => {
                     this.controlsDisabled = false;
                     this.disablePriceSliderFilter(false);
-                    this.sendRequestForProducts(this.lastSearchParams, state);
+                    this.sendRequestForProducts(this.lastSearchParams);
                 }, 10000);
             }
-
-            fetch(`${CONFIG.ROOT_API_URL}/products/?${searchParamsToSubmit.toString()}`, {
-                headers: new Headers({
-                    'Content-Type': 'application/json'
-                })
-            }).then((response) => {
-                return response.json();
-            }).then((data) => {
-                this.setState({
-                    products: data.results || []
-                });
-            });
 
             return state;
         });
@@ -205,7 +193,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
         }        
     }
 
-    sendRequestForProducts(searchParamsToUpdateStr, state) {
+    sendRequestForProducts(searchParamsToUpdateStr) {
         this.lastRequestId++;
         const requestId = this.lastRequestId;
         fetch(`${CONFIG.ROOT_API_URL}/products/?${searchParamsToUpdateStr}`, {
@@ -217,13 +205,50 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
         }).then((data) => {
             if (this.lastRequestId === requestId) {
                 setTimeout(() => {
-                    state.products = data.results || [];
-                    this.controlsDisabled = false;
-                    this.disablePriceSliderFilter(false);
-                    clearInterval(this.timer);
-                    this.timer = null;
-                    this.lastRequestId = 0;                    
-                    $('.products-loader').addClass('loaded');
+                    this.setState(state => {
+                        state.products = data.results || [];
+                        const products = state.products;
+                        const categoriesIcons = {};
+                        const categories = this.props.categories;
+                        const manufacturers = state.filters.manufacturers;
+                        const collections = state.filters.collections;
+                        const manufacturersNames = {};
+                        const collectionsNames = {};
+                        for (let i = 0, len = categories.length; i < len; i++) {
+                            const icon = categories[i].icon;
+                            categoriesIcons[categories[i].id] = {
+                                type: icon ? 'img' : 'char',
+                                value: icon || categories[i].icon_code
+                            };
+                        }
+                        for (let i = 0, len = manufacturers.length; i < len; i++) {
+                            manufacturersNames[manufacturers[i].id] = manufacturers[i].name;
+                        }
+                        for (let i = 0, len = collections.length; i < len; i++) {
+                            collectionsNames[collections[i].id] = collections[i].name;
+                        }
+                        for (let i = 0, len = products.length; i < len; i++) {
+                            products[i].manufacturerName = manufacturersNames[products[i].manufacturer];
+                            products[i].collectionName = collectionsNames[products[i].collection];
+                            if (products[i].images.length) {
+                                const productImage = products[i].images[0];
+                                products[i].preview_img = {
+                                    type: 'img',
+                                    value: productImage.preview || productImage.full
+                                };
+                            } else {
+                                products[i].preview_img = categoriesIcons[products[i].categories[0]];                            
+                            }
+                        }
+                        this.controlsDisabled = false;
+                        this.disablePriceSliderFilter(false);
+                        clearInterval(this.timer);
+                        this.timer = null;
+                        this.lastRequestId = 0;                    
+                        $('.products-loader').addClass('loaded');
+
+                        return state;
+                    });
                 }, 500);
             }
         });        

@@ -14,13 +14,13 @@ export default class Prouct extends React.Component {
                     <div className="figure-grid">
                         {this.props.data.is_new ? <span className="label label-warning">Новый</span> : null}                        
                         <div className="image">
-                            <a href="#productid1" className="mfp-open">
-                                <img src="assets/images/product-1.png" alt="" width="360" />
+                            <a href="#" className="mfp-open f-icon">
+                                {this.props.data.preview_img.type === 'img' ? <img src={this.props.data.preview_img.value} alt=""/> : <span>{String.fromCharCode(this.props.data.preview_img.value)}</span>}
                             </a>
                         </div>
                         <div className="text">
-                            <h2 className="title h4"><a href="product.html">{this.props.data.name} <small>{this.props.data.collection || this.props.data.manufacturer}</small></a></h2>
-                            <sub>{`${String.fromCharCode(8381)} ${(+this.props.data.price).toFixed(2)}`}</sub>
+                            <h2 className="title h4"><a href="product.html">{this.props.data.name}<br/><small>{this.props.data.collectionName || this.props.data.manufacturerName}</small></a></h2>
+                            {+this.props.data.discount > 0 ? <sub>{`${String.fromCharCode(8381)} ${(+this.props.data.price).toFixed(2)}`}</sub> : null}
                             <sup>{String.fromCharCode(8381)} <span className="price">{(this.props.data.price - this.props.data.discount).toFixed(2)}</span></sup>
                         </div>
                     </div>

@@ -2,7 +2,7 @@ import FormInput from "./FormInput";
 
 export default class Filters extends React.Component {
     componentDidMount() {
-        const Filters = this;
+        const filters = this;
         
         $('.toggle-filters-close').on('click', function () {
             $('.filters').removeClass('active');
@@ -17,7 +17,7 @@ export default class Filters extends React.Component {
             max: this.props.maxPrice,
             prefix: String.fromCharCode(8381),
             onFinish: function (data) {
-                Filters.props.updateState([{
+                filters.props.updateState([{
                     key: 'min_price',
                     value: data.from,
                     operationType: 'update'

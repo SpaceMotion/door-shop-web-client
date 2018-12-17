@@ -1,24 +1,27 @@
 export default class Pagination extends React.Component {
 	onControlItemClick(event, controlName) {
 		event.preventDefault();
-		const activePage = this.props.activePage;
-		const state = {
-			activePage
-		};
+		let activePage = this.props.activePage;
 		if (controlName === 'previous') {
 			if (activePage > 1) {
-				state.activePage = activePage - 1;
+				activePage--;
 			}
 		} else if (controlName === 'next') {
 			if (parseInt(this.props.totalItems / this.props.itemsPerPage) > activePage) {
-				state.activePage = activePage + 1;	
+				activePage++;	
 			}
 		}
-		this.props.updateState(state);
+        if (activePage !== this.props.activePage) {
+            this.props.updateState([{
+                key: 'page',
+                value: activePage,
+                operationType: 'update'
+            }]);            
+        }
 	}
 
 	render() {
-		const pagesCount = parseInt(this.props.totalItems / this.props.itemsPerPage);
+		const pagesCount = Math.ceil(this.props.totalItems / this.props.itemsPerPage);
 		const pages = [...new Array(pagesCount)];
 		const activePage = this.props.activePage;
 		const previousControlDisabled = activePage === 1;
@@ -37,9 +40,14 @@ export default class Pagination extends React.Component {
                     {pages.map((page, idx) => {
                     	return <li key={idx} className={idx + 1 === activePage ? 'active' : ''}><a href="#" onClick={(event) => {
                     		event.preventDefault();
-                    		this.props.updateState({
-								activePage: idx + 1
-                    		});
+                            const activePage = idx + 1;
+                            if (this.props.activePage !== activePage) {
+                                this.props.updateState([{
+                                    key: 'page',
+                                    value: activePage,
+                                    operationType: 'update'
+                                }]);
+                            }
                     	}}>{idx + 1}</a></li>;
                     })}
                     <li className={nextControlDisabled ? 'disabled' : ''}>

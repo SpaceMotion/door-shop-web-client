@@ -18,10 +18,12 @@
     "babel": "^6.23.0",
     "babel-cli": "^6.26.0",
     "babel-loader": "^8.0.4",
+    "react-history": "^0.18.2",
     "webpack": "^4.21.0",
     "webpack-cli": "^3.1.2"
   },
   "dependencies": {
+    "history": "^4.7.2",
     "react": "^16.6.3",
     "react-router-dom": "^4.3.1"
   }

@@ -1,7 +1,7 @@
 export default class Prouct extends React.Component {
 	render() {
 		return (
-            <div className="col-md-6 col-xs-6 item price-discount category-sofa material-leather">
+            <div className="col-sm-4 col-xs-6 item price-discount category-sofa material-leather">
                 <article>
                     <div className="info">
                         <span>

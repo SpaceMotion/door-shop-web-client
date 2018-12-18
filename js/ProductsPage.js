@@ -158,8 +158,8 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
             // Сбор параметров для отправки запроса /products на сервер
             searchParamsToSubmit.set('ordering', sortBy);
             searchParamsToSubmit.set('categories', searchParams.get('category'));
-            searchParamsToSubmit.set('min_price_with_discount', minPrice);
-            searchParamsToSubmit.set('max_price_with_discount', maxPrice);
+            searchParamsToSubmit.set('price_with_discount_min', minPrice);
+            searchParamsToSubmit.set('price_with_discount_max', maxPrice);
             searchParamsToSubmit.set('page', page);
             searchParamsToSubmit.set('page_size', pageSize);
 

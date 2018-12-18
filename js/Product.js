@@ -20,8 +20,8 @@ export default class Prouct extends React.Component {
                         </div>
                         <div className="text">
                             <h2 className="title h4"><a href="product.html">{this.props.data.name}<br/><small>{this.props.data.collectionName || this.props.data.manufacturerName}</small></a></h2>
-                            {+this.props.data.discount > 0 ? <sub>{`${String.fromCharCode(8381)} ${(+this.props.data.price).toFixed(2)}`}</sub> : null}
-                            <sup>{String.fromCharCode(8381)} <span className="price">{(this.props.data.price - this.props.data.discount).toFixed(2)}</span></sup>
+                            {this.props.data.price_with_discount !== this.props.data.price ? <sub>{`${String.fromCharCode(8381)} ${(+this.props.data.price).toFixed(2)}`}</sub> : null}
+                            <sup>{String.fromCharCode(8381)} <span className="price">{(+this.props.data.price_with_discount).toFixed(2)}</span></sup>
                         </div>
                     </div>
                 </article>

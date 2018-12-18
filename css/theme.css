@@ -2481,6 +2481,7 @@ nav .cart-wrapper.open {
     align-items: center;
     height: 300px;
     width: 100%;
+    padding: 30px;
 }
 
 .products_type_category article {
@@ -2770,6 +2771,7 @@ nav .cart-wrapper.open {
 
     .products article .image a {
         height: 200px;
+        padding: 15px;
     }
 }
 

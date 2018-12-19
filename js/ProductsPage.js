@@ -28,6 +28,12 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
         }, {
             id: '-name',
             label: 'Название: от Я до А'
+        }, {
+            id: 'popularity',
+            label: 'Популярность: по возрастанию'
+        }, {
+            id: '-popularity',
+            label: 'Популярность: по убыванию'
         }];
         this.controlsDisabled = false;
         this.lastSearchParams =  '';

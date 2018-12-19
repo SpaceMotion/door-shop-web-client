@@ -2481,16 +2481,12 @@ nav .cart-wrapper.open {
     align-items: center;
     height: 300px;
     width: 100%;
-    padding: 30px;
+    padding: 15px;
+    color: rgb(58, 61, 69, .3);
 }
 
 .products_type_category article {
     text-align: center;
-}
-
-.products article .image img {
-    max-width: 100%;
-    max-height: 100%;
 }
 
 .products article .btn-add {
@@ -2770,8 +2766,7 @@ nav .cart-wrapper.open {
     }
 
     .products article .image a {
-        height: 200px;
-        padding: 15px;
+        padding: 7px;
     }
 }
 

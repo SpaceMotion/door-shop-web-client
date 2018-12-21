@@ -237,7 +237,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
                 manufacturers.unshift({
                     any: true,
                     checked: true,
-                    name: "Любой"
+                    name: "Все"
                 });
 				resolve();
 			});

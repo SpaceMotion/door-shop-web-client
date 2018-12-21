@@ -256,7 +256,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
                 collections.unshift({
                     any: true,
                     checked: true,
-                    name: "Любая"
+                    name: "Все"
                 });
 				resolve();
 			});

@@ -2,57 +2,228 @@ import CONFIG from "./config";
 import Filters from "./Filters";
 import SortBar from "./SortBar";
 import Pagination from "./Pagination";
-import {Link, withRouter} from "react-router-dom";
+import Product from "./Product";
+import {Link} from "react-router-dom";
 import ReloadPageMixin from "./ReloadPageMixin";
+import {createHashHistory} from "history";
+import Utils from "./Utils";
 
-export default withRouter(class ProductsPage extends ReloadPageMixin(React.Component) {
+export default class ProductsPage extends ReloadPageMixin(React.Component) {
 	constructor(props) {
 		super(props);
 
 		this.showPreLoader();
-		this.state = {
-			products: [],
-			filters: {
-				isReady: false				
-			},
-			sorting: {
-				itemsPerPage: 10,
-				price: 'asc',
-				name: 'A-z'
-			},
-			pagination: {
-				activePage: 1
-			}
-		};
-		this.updateFiltersData = this.updateFiltersData.bind(this);
+        this.history = createHashHistory();
+        this.minPrice = 0;
+        this.maxPrice = 200000;
+        this.itemsPerPageOptions = [10, 50, 100];
+
+        this.sortByOptions = new Map([
+            ['price_with_discount', {label: 'Цена: по возрастанию'}],
+            ['-price_with_discount', {label: 'Цена: по убыванию'}],
+            ['name', {label: 'Название: от А до Я'}],
+            ['-name', {label: 'Название: от Я до А'}],
+            ['popularity', {label: 'Популярность: по возрастанию'}],
+            ['-popularity', {label: 'Популярность: по убыванию'}]
+        ]);
+        this.sortByOptions.defaultId = 'price_with_discount';
+
+        this.controlsDisabled = false;
+        this.lastSearchParams =  '';
+        this.lastRequestId = 0;
+
+        this.state = {
+            products: [],
+            filters: {
+                isReady: false,
+                price: {},
+                manufacturers: [],
+                collections: []             
+            },
+            sorting: {
+                itemsPerPage: this.itemsPerPageOptions[0],
+                value: this.sortByOptions.defaultId
+            },
+            pagination: {
+                activePage: 1
+            }
+        };
+
 		this.setUpFilters = this.setUpFilters.bind(this);
-		this.updateSortingData = this.updateSortingData.bind(this);
-		this.updatePaginationData = this.updatePaginationData.bind(this);
 		this.getBreadCrumbs = this.getBreadCrumbs.bind(this);
+        this.onURLChanged = this.onURLChanged.bind(this);
+        this.updateSearchParams = this.updateSearchParams.bind(this);
+
+		this.removeURLChangeListener = this.history.listen(this.onURLChanged);
 
 		this.setUpFilters();
-        this.setUpProducts();
 	}
 
 	componentDidMount() {
 		this.hidePreLoader();		
 	}
 
-    setUpProducts() {
-        fetch(`${CONFIG.ROOT_API_URL}/products`, {
+    componentWillUnmount() {
+        this.removeURLChangeListener();
+    }
+
+	onURLChanged(location) {
+        const searchParamsToSubmit = new URLSearchParams();
+        this.setState((state) => {
+            // Обработка параметров запроса
+            const searchParams = new URLSearchParams(this.history.location.search);
+
+            const minPrice = Utils.parseValueToInt(searchParams.get('min_price'), this.minPrice);
+            const maxPrice = Utils.parseValueToInt(searchParams.get('max_price'), this.maxPrice);
+            const page = Utils.parseValueToInt(searchParams.get('page'), 1);
+            const pageSize = Utils.parseValueToInt(searchParams.get('page_size'), this.itemsPerPageOptions[0]);
+            const sortById = searchParams.get('sort_by');
+            const sortBy = this.sortByOptions.has(sortById) ? sortById : this.sortByOptions.defaultId;
+
+            const manufacturersIds = searchParams.getAll('manufacturer');
+            const collectionsIds = searchParams.getAll('collection');
+
+            // Установка состояния
+            const filters = state.filters;
+            const priceFilter = filters.price;
+            priceFilter.from = minPrice;
+            priceFilter.to = maxPrice;
+            state.sorting.itemsPerPage = pageSize;
+            state.sorting.value = sortBy;
+            state.pagination.activePage = page;
+            const manufacturers = filters.manufacturers;
+            const manufacturersAnyOption = this.manufacturersAnyOption;
+            let manufacturersAnyFlag = true;
+            for (let i = 0, len = manufacturers.length; i < len; i++) {
+                if (manufacturersAnyOption !== manufacturers[i]) {
+                    const manufacturerId = manufacturers[i].id.toString();
+                    const checked = manufacturersIds.includes(manufacturerId);
+                    manufacturers[i].checked = checked;
+                    if (checked) {
+                        manufacturersAnyFlag = false;
+                        searchParamsToSubmit.append('manufacturer', manufacturerId);
+                    }                    
+                }                
+            }
+            manufacturersAnyOption.checked = manufacturersAnyFlag;
+            const collections = filters.collections;
+            const collectionsAnyOption = this.collectionsAnyOption;
+            let collectionsAnyFlag = true;
+            for (let i = 0, len = collections.length; i < len; i++) {
+                if (collectionsAnyOption !== collections[i]) {
+                    const collectionId = collections[i].id.toString();
+                    const checked = collectionsIds.includes(collectionId);
+                    collections[i].checked = checked;
+                    if (checked) {
+                        collectionsAnyFlag = false;
+                        searchParamsToSubmit.append('collection', collectionId);
+                    }
+                }
+            }
+            collectionsAnyOption.checked = collectionsAnyFlag;
+
+            // Сбор параметров для отправки запроса /products на сервер
+            searchParamsToSubmit.set('ordering', sortBy);
+            searchParamsToSubmit.set('categories', searchParams.get('category'));
+            searchParamsToSubmit.set('price_with_discount_min', minPrice);
+            searchParamsToSubmit.set('price_with_discount_max', maxPrice);
+            searchParamsToSubmit.set('page', page);
+            searchParamsToSubmit.set('page_size', pageSize);
+
+            // Отправка запроса /products
+            const searchParamsToUpdateStr = searchParamsToSubmit.toString();
+            if (this.lastSearchParams !== searchParamsToUpdateStr) {
+                this.controlsDisabled = true;
+                $('.products-loader').removeClass('loaded');
+                this.disablePriceSliderFilter(true);
+                this.lastSearchParams = searchParamsToUpdateStr;
+                clearInterval(this.timer);
+                this.timer = null;
+            }
+            if (!this.timer) {
+                this.sendRequestForProducts(this.lastSearchParams);
+                this.timer = setInterval(() => {
+                    this.controlsDisabled = false;
+                    this.disablePriceSliderFilter(false);
+                    this.sendRequestForProducts(this.lastSearchParams);
+                }, 10000);
+            }
+
+            return state;
+        });
+	}
+
+    disablePriceSliderFilter(disable) {
+        const rangePriceSliderDOM = $("#range-price-slider").data("ionRangeSlider");
+        if (rangePriceSliderDOM) {
+            rangePriceSliderDOM.update({disable});
+        }        
+    }
+
+    sendRequestForProducts(searchParamsToUpdateStr) {
+        this.lastRequestId++;
+        const requestId = this.lastRequestId;
+        fetch(`${CONFIG.ROOT_API_URL}/products/?${searchParamsToUpdateStr}`, {
             headers: new Headers({
                 'Content-Type': 'application/json'
             })
         }).then((response) => {
             return response.json();
         }).then((data) => {
-            this.setState({
-                products: data.results
-            });
+            if (this.lastRequestId === requestId) {
+                setTimeout(() => {
+                    this.setState(state => {
+                        state.products = data.results || [];
+                        const products = state.products;
+                        const categoriesIcons = {};
+                        const categories = this.props.categories;
+                        const manufacturers = state.filters.manufacturers;
+                        const collections = state.filters.collections;
+                        const manufacturersNames = {};
+                        const collectionsNames = {};
+                        for (let i = 0, len = categories.length; i < len; i++) {
+                            const icon = categories[i].icon;
+                            categoriesIcons[categories[i].id] = {
+                                type: icon ? 'img' : 'char',
+                                value: icon || categories[i].icon_code
+                            };
+                        }
+                        for (let i = 0, len = manufacturers.length; i < len; i++) {
+                            manufacturersNames[manufacturers[i].id] = manufacturers[i].name;
+                        }
+                        for (let i = 0, len = collections.length; i < len; i++) {
+                            collectionsNames[collections[i].id] = collections[i].name;
+                        }
+                        for (let i = 0, len = products.length; i < len; i++) {
+                            products[i].manufacturerName = manufacturersNames[products[i].manufacturer];
+                            products[i].collectionName = collectionsNames[products[i].collection];
+                            if (products[i].images.length) {
+                                const productImage = products[i].images[0];
+                                products[i].preview_img = {
+                                    type: 'img',
+                                    value: productImage.preview || productImage.full
+                                };
+                            } else {
+                                products[i].preview_img = categoriesIcons[products[i].categories[0]];                            
+                            }
+                        }
+                        this.controlsDisabled = false;
+                        this.disablePriceSliderFilter(false);
+                        clearInterval(this.timer);
+                        this.timer = null;
+                        this.lastRequestId = 0;                    
+                        $('.products-loader').addClass('loaded');
+
+                        return state;
+                    });
+                }, 500);
+            }
         });        
     }
 
 	setUpFilters() {
+        let manufacturers, collections;
+
 		// Manufacturers
 		let manufacturersDataGet = new Promise((resolve) => {
 			fetch(`${CONFIG.ROOT_API_URL}/manufacturers`, {
@@ -62,83 +233,96 @@ export default withRouter(class ProductsPage extends ReloadPageMixin(React.Compo
 			}).then((response) => {
 				return response.json();
 			}).then((data) => {
-				this.setState((state) => {
-					state.filters.manufacturers = data.results;
-					state.filters.manufacturers.unshift({
-						any: true,
-						checked: true,
-						name: "Любой"
-					});
-					return state;
-				});
+                manufacturers = data.results;
+                manufacturers.unshift({
+                    any: true,
+                    checked: true,
+                    name: "Любой"
+                });
 				resolve();
 			});
 		});
 
-		Promise.all([manufacturersDataGet]).then(() => {
+		// Collections
+		let collectionsDataGet = new Promise((resolve) => {
+			fetch(`${CONFIG.ROOT_API_URL}/collections`, {
+				headers: new Headers({
+					'Content-Type': 'application/json'
+				})
+			}).then((response) => {
+				return response.json();
+			}).then((data) => {
+                collections = data.results;
+                collections.unshift({
+                    any: true,
+                    checked: true,
+                    name: "Любая"
+                });
+				resolve();
+			});
+		});
+
+		Promise.all([manufacturersDataGet, collectionsDataGet]).then(() => {
+            this.manufacturersAnyOption = manufacturers.find((manufacturer) => {
+                return manufacturer.any;
+            });
+            this.collectionsAnyOption = collections.find((collection) => {
+                return collection.any;
+            });
 			this.setState((state) => {
+                state.filters.manufacturers = manufacturers;
+                state.filters.collections = collections;
 				state.filters.isReady = true;
 				return state;
 			});
+            this.onURLChanged(this.history.location);
 		});
 	}
 
-	updateFiltersData(changes) {
-		this.setState((state) => {
-			const filterType = changes.filterType;
-
-			if (filterType === 'price') {
-				state.filters[filterType] = {
-					from: changes.from,
-					to: changes.to
-				};
-			} else {
-				let filters = state.filters[filterType];
-				filters[changes.idx].checked = changes.checked;				
-				const anyOption = filters.find((filterOption) => {
-					return filterOption.any;
-				});
-				if (changes.checked) {
-					if (changes.any) {
-						filters.forEach((filterOption) => {
-							if (!filterOption.any) {
-								filterOption.checked = false;								
-							}
-						});
-					} else if (anyOption) {
-						anyOption.checked = false;							
-					}					
-				} else if (filters.every((filterOption) => {
-					return !filterOption.checked;
-				})) {
-					anyOption.checked = true;
-				}
-			}
-			return state;
-		});
-	}
-
-	updateSortingData(changes) {
-		const option = changes.option;
-		this.setState((state) => {
-			if (option === 'itemsPerPage') {
-				state.pagination.activePage = 1;
-			}
-			state.sorting[option] = changes.value;
-			return state;
-		});
-	}
-
-	updatePaginationData(changes) {
-		this.setState((state) => {
-			state.pagination.activePage = changes.activePage;
-			return state;
-		});
-	}
+    updateSearchParams(changes) {
+        const searchParams = new URLSearchParams(this.history.location.search);
+        const searchParamsToUpdate = new URLSearchParams(this.history.location.search);
+        changes.forEach((change) => {
+            const key = change.key;
+            const value = change.value && change.value.toString();
+            const operationType = change.operationType;
+            let targetValues = [...new Set(searchParams.getAll(key))];
+            const isTargetExists = targetValues.includes(value);
+            if (operationType === 'add' && !isTargetExists) {
+                targetValues.push(value);
+            } else if (operationType === 'remove' && isTargetExists) {
+                targetValues.splice(targetValues.indexOf(value), 1);
+            } else if (operationType === 'update') {
+                targetValues = [value];
+            } else if (operationType === 'any') {
+                targetValues = [];
+            }
+            if (key === 'manufacturer' && targetValues.length) {
+                searchParamsToUpdate.delete('collection');
+                const collections = this.state.filters.collections;
+                for (let i = 0, len = collections.length; i < len; i++) {
+                    const manufacturerId = collections[i].manufacturer && collections[i].manufacturer.toString();
+                    if (targetValues.includes(manufacturerId) && collections[i].checked) {
+                        searchParamsToUpdate.append('collection', collections[i].id);
+                    }
+                }
+            }
+            searchParamsToUpdate.delete(key);
+            for (var i = 0, len = targetValues.length; i < len; i++) {
+                searchParamsToUpdate.append(key, targetValues[i]);
+            }
+        });
+        const searchParamsToUpdateStr = searchParamsToUpdate.toString();
+        if (searchParamsToUpdateStr !== searchParams.toString()) {
+            this.history.push({
+                search: `?${searchParamsToUpdateStr}`
+            });            
+        }
+    }
 
 	getBreadCrumbs() {
 		const categories = this.props.categories;
-		const searchParams = new URLSearchParams(this.props.location.search);
+		const searchParams = new URLSearchParams(this.history.location.search);
 		const currentCategoryId = parseInt(searchParams.get('category'));
 		const result = [];
 		if (currentCategoryId) {
@@ -191,192 +375,19 @@ export default withRouter(class ProductsPage extends ReloadPageMixin(React.Compo
 		                <div className="row">
 
 		                    <div className="col-md-3 col-xs-12">
-								{this.state.filters.isReady ? <Filters filters={this.state.filters} updateState={this.updateFiltersData}/> : null}
+								{this.state.filters.isReady ? <Filters filters={this.state.filters} minPrice={this.minPrice} maxPrice={this.maxPrice} updateState={this.updateSearchParams}/> : null}
 		                    </div>
 
 		                    <div className="col-md-9 col-xs-12">
-								<SortBar updateState={this.updateSortingData} itemsPerPage={this.state.sorting.itemsPerPage} price={this.state.sorting.price} name={this.state.sorting.name}/>
+								<SortBar updateState={this.updateSearchParams} itemsPerPage={this.state.sorting.itemsPerPage} sortBy={this.state.sorting.value} itemsPerPageOptions={this.itemsPerPageOptions} sortByOptions={this.sortByOptions}/>
 
 		                        <div id="products" className="row">
-
-		                            <div className="col-md-6 col-xs-6 item price-discount category-sofa material-leather">
-		                                <article>
-		                                    <div className="info">
-		                                        <span className="add-favorite">
-		                                            <a href="javascript:void(0);" data-title="Add to favorites" data-title-added="Added to favorites list"><i className="icon icon-heart"></i></a>
-		                                        </span>
-		                                        <span>
-		                                            <a href="#productid1" className="mfp-open" data-title="Quick wiew"><i className="icon icon-eye"></i></a>
-		                                        </span>
-		                                    </div>
-		                                    <div className="btn btn-add">
-		                                        <i className="icon icon-cart"></i>
-		                                    </div>
-		                                    <div className="figure-grid">
-		                                        <span className="label">-50%</span>
-		                                        <div className="image">
-		                                            <a href="#productid1" className="mfp-open">
-		                                                <img src="assets/images/product-1.png" alt="" width="360" />
-		                                            </a>
-		                                        </div>
-		                                        <div className="text">
-		                                            <h2 className="title h4"><a href="product.html">Green corner <small>Sofa</small></a></h2>
-		                                            <sub>$ 1499,-</sub>
-		                                            <sup>$ <span className="price">1099</span>,-</sup>
-		                                            <span className="description clearfix">Gubergren amet dolor ea diam takimata consetetur facilisis blandit et aliquyam lorem ea duo labore diam sit et consetetur nulla</span>
-		                                        </div>
-		                                    </div>
-		                                </article>
-		                            </div>
-
-		                            <div className="col-md-6 col-xs-6 item price-discount category-armchair material-wood">
-		                                <article>
-		                                    <div className="info">
-		                                        <span className="add-favorite">
-		                                            <a href="javascript:void(0);" data-title="Add to favorites" data-title-added="Added to favorites list"><i className="icon icon-heart"></i></a>
-		                                        </span>
-		                                        <span>
-		                                            <a href="#productid1" className="mfp-open" data-title="Quick wiew"><i className="icon icon-eye"></i></a>
-		                                        </span>
-		                                    </div>
-		                                    <div className="btn btn-add">
-		                                        <i className="icon icon-cart"></i>
-		                                    </div>
-		                                    <div className="figure-grid">
-		                                        <div className="image">
-		                                            <a href="#productid1" className="mfp-open">
-		                                                <img src="assets/images/product-2.png" alt="" width="360" />
-		                                            </a>
-		                                        </div>
-		                                        <div className="text">
-		                                            <h2 className="title h4"><a href="product.html">Laura <small>Armchair</small></a></h2>
-		                                            <sub>$ 3999,-</sub>
-		                                            <sup>$ <span className="price">3499</span>,-</sup>
-		                                            <span className="description clearfix">Gubergren amet dolor ea diam takimata consetetur facilisis blandit et aliquyam lorem ea duo labore diam sit et consetetur nulla</span>
-		                                        </div>
-		                                    </div>
-		                                </article>
-		                            </div>
-
-		                            <div className="col-md-6 col-xs-6 item price-regular category-armchair material-leather">
-		                                <article>
-		                                    <div className="info">
-		                                        <span className="add-favorite">
-		                                            <a href="javascript:void(0);" data-title="Add to favorites" data-title-added="Added to favorites list"><i className="icon icon-heart"></i></a>
-		                                        </span>
-		                                        <span>
-		                                            <a href="#productid1" className="mfp-open" data-title="Quick wiew"><i className="icon icon-eye"></i></a>
-		                                        </span>
-		                                    </div>
-		                                    <div className="btn btn-add">
-		                                        <i className="icon icon-cart"></i>
-		                                    </div>
-		                                    <div className="figure-grid">
-		                                        <div className="image">
-		                                            <a href="#productid1" className="mfp-open">
-		                                                <img src="assets/images/product-3.png" alt="" width="360" />
-		                                            </a>
-		                                        </div>
-		                                        <div className="text">
-		                                            <h2 className="title h4"><a href="product.html">Nude <small>Armchair</small></a></h2>
-		                                            <sup>$ <span className="price">2999</span>,-</sup>
-		                                            <span className="description clearfix">Gubergren amet dolor ea diam takimata consetetur facilisis blandit et aliquyam lorem ea duo labore diam sit et consetetur nulla</span>
-		                                        </div>
-		                                    </div>
-		                                </article>
-		                            </div>
-
-		                            <div className="col-md-6 col-xs-6 item price-regular category-armchair material-wood">
-		                                <article>
-		                                    <div className="info">
-		                                        <span className="add-favorite">
-		                                            <a href="javascript:void(0);" data-title="Add to favorites" data-title-added="Added to favorites list"><i className="icon icon-heart"></i></a>
-		                                        </span>
-		                                        <span>
-		                                            <a href="#productid1" className="mfp-open" data-title="Quick wiew"><i className="icon icon-eye"></i></a>
-		                                        </span>
-		                                    </div>
-		                                    <div className="btn btn-add">
-		                                        <i className="icon icon-cart"></i>
-		                                    </div>
-		                                    <div className="figure-grid">
-		                                        <span className="label label-warning">New</span>
-		                                        <div className="image">
-		                                            <a href="#productid1" className="mfp-open">
-		                                                <img src="assets/images/product-4.png" alt="" width="360" />
-		                                            </a>
-		                                        </div>
-		                                        <div className="text">
-		                                            <h2 className="title h4"><a href="product.html">Aurora <small>Armchair</small></a></h2>
-		                                            <sup>$ <span className="price">299</span>,-</sup>
-		                                            <span className="description clearfix">Gubergren amet dolor ea diam takimata consetetur facilisis blandit et aliquyam lorem ea duo labore diam sit et consetetur nulla</span>
-		                                        </div>
-		                                    </div>
-		                                </article>
-		                            </div>
-
-		                            <div className="col-md-6 col-xs-6 item price-discount category-armchair material-metal">
-		                                <article>
-		                                    <div className="info">
-		                                        <span className="add-favorite">
-		                                            <a href="javascript:void(0);" data-title="Add to favorites" data-title-added="Added to favorites list"><i className="icon icon-heart"></i></a>
-		                                        </span>
-		                                        <span>
-		                                            <a href="#productid1" className="mfp-open" data-title="Quick wiew"><i className="icon icon-eye"></i></a>
-		                                        </span>
-		                                    </div>
-		                                    <div className="btn btn-add">
-		                                        <i className="icon icon-cart"></i>
-		                                    </div>
-		                                    <div className="figure-grid">
-		                                        <span className="label label-warning">New</span>
-		                                        <div className="image">
-		                                            <a href="#productid1" className="mfp-open">
-		                                                <img src="assets/images/product-5.png" alt="" width="360" />
-		                                            </a>
-		                                        </div>
-		                                        <div className="text">
-		                                            <h2 className="title h4"><a href="product.html">Dining set <small>Armchair</small></a></h2>
-		                                            <sub>$ 1999,-</sub>
-		                                            <sup>$ <span className="price">1499</span>,-</sup>
-		                                            <span className="description clearfix">Gubergren amet dolor ea diam takimata consetetur facilisis blandit et aliquyam lorem ea duo labore diam sit et consetetur nulla</span>
-		                                        </div>
-		                                    </div>
-		                                </article>
-		                            </div>
-
-		                            <div className="col-md-6 col-xs-6 item price-regular category-sofa material-wood">
-		                                <article>
-		                                    <div className="info">
-		                                        <span className="add-favorite">
-		                                            <a href="javascript:void(0);" data-title="Add to favorites" data-title-added="Added to favorites list"><i className="icon icon-heart"></i></a>
-		                                        </span>
-		                                        <span>
-		                                            <a href="#productid1" className="mfp-open" data-title="Quick wiew"><i className="icon icon-eye"></i></a>
-		                                        </span>
-		                                    </div>
-		                                    <div className="btn btn-add">
-		                                        <i className="icon icon-cart"></i>
-		                                    </div>
-		                                    <div className="figure-grid">
-		                                        <div className="image">
-		                                            <a href="#productid1" className="mfp-open">
-		                                                <img src="assets/images/product-6.png" alt="" width="360" />
-		                                            </a>
-		                                        </div>
-		                                        <div className="text">
-		                                            <h2 className="title h4"><a href="product.html">Seat chair <small>Sofa</small></a></h2>
-		                                            <sup>$ <span className="price">896</span>,-</sup>
-		                                            <span className="description clearfix">Gubergren amet dolor ea diam takimata consetetur facilisis blandit et aliquyam lorem ea duo labore diam sit et consetetur nulla</span>
-		                                        </div>
-		                                    </div>
-		                                </article>
-		                            </div>
-
-
-
+                                    <div className="products-loader loaded"/>
+                                    {this.state.products.map((product) => {
+                                        return <Product key={product.id} data={product}/>;
+                                    })}
 		                        </div>
-					            <Pagination updateState={this.updatePaginationData} totalItems={50} itemsPerPage={this.state.sorting.itemsPerPage} activePage={this.state.pagination.activePage}/>
+                                {Math.ceil(this.state.products.length / this.state.sorting.itemsPerPage) > 1 ? <Pagination updateState={this.updateSearchParams} totalItems={this.state.products.length} itemsPerPage={this.state.sorting.itemsPerPage} activePage={this.state.pagination.activePage}/> : null}
 
 		                    </div>
 
@@ -463,4 +474,4 @@ export default withRouter(class ProductsPage extends ReloadPageMixin(React.Compo
 		    </div>
 		);
 	}
-});
+}

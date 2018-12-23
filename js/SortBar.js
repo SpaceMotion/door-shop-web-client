@@ -26,9 +26,9 @@ export default class SortBar extends React.Component {
 	            <div className="sort-options pull-right">
 	                <span className="hidden-xs">Сортировать по&nbsp;&nbsp;</span>
 	                <select id="sort-price" data-option="sortBy" onChange={this.onStateChange} value={this.props.sortBy}>
-                        {this.props.sortByOptions.map((sortByOption) => {
-                            return <option key={sortByOption.id} value={sortByOption.id}>{sortByOption.label}</option>;
-                        })}	                    
+                        {[...this.props.sortByOptions.entries()].map(([id, options]) => {
+                            return <option key={id} value={id}>{options.label}</option>;
+                        })}
 	                </select>
 	                <span className="grid-list">
                     	<a className="toggle-filters-mobile"><i className="fa fa-search"></i></a>

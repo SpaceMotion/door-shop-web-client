@@ -27,7 +27,7 @@ module.exports = (env) => {
 				}
 			};
 			break;
-		case 'prod':
+		default:
 			config = {
 				mode: 'production',
 				entry: './js/App.js',

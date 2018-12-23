@@ -6,6 +6,7 @@ import Product from "./Product";
 import {Link} from "react-router-dom";
 import ReloadPageMixin from "./ReloadPageMixin";
 import {createHashHistory} from "history";
+import Utils from "./Utils";
 
 export default class ProductsPage extends ReloadPageMixin(React.Component) {
 	constructor(props) {
@@ -16,25 +17,17 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
         this.minPrice = 0;
         this.maxPrice = 200000;
         this.itemsPerPageOptions = [12, 60, 96];
-        this.sortByOptions = [{
-            id: 'price_with_discount',
-            label: 'Цена: по возрастанию'
-        }, {
-            id: '-price_with_discount',
-            label: 'Цена: по убыванию'
-        }, {
-            id: 'name',
-            label: 'Название: от А до Я'
-        }, {
-            id: '-name',
-            label: 'Название: от Я до А'
-        }, {
-            id: 'popularity',
-            label: 'Популярность: по возрастанию'
-        }, {
-            id: '-popularity',
-            label: 'Популярность: по убыванию'
-        }];
+
+        this.sortByOptions = new Map([
+            ['price_with_discount', {label: 'Цена: по возрастанию'}],
+            ['-price_with_discount', {label: 'Цена: по убыванию'}],
+            ['name', {label: 'Название: от А до Я'}],
+            ['-name', {label: 'Название: от Я до А'}],
+            ['popularity', {label: 'Популярность: по возрастанию'}],
+            ['-popularity', {label: 'Популярность: по убыванию'}]
+        ]);
+        this.sortByOptions.defaultId = 'price_with_discount';
+
         this.controlsDisabled = false;
         this.lastSearchParams =  '';
         this.lastRequestId = 0;
@@ -52,7 +45,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
             },
             sorting: {
                 itemsPerPage: this.itemsPerPageOptions[0],
-                value: this.sortByOptions[0].id
+                value: this.sortByOptions.defaultId
             },
             pagination: {
                 activePage: 1
@@ -85,33 +78,12 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
             const searchParams = new URLSearchParams(this.history.location.search);
 
             const category = parseInt(searchParams.get('category'));
-
-            let minPrice = parseInt(searchParams.get('min_price'));
-            if (!minPrice) {
-                minPrice = this.minPrice;
-            }
-
-            let maxPrice = parseInt(searchParams.get('max_price'));
-            if (!maxPrice) {
-                maxPrice = this.maxPrice;
-            }
-
-            let page = parseInt(searchParams.get('page'));
-            if (!page) {
-                page = 1;
-            }
-
-            let pageSize = parseInt(searchParams.get('page_size'));
-            if (!pageSize || !this.itemsPerPageOptions.includes(pageSize)) {
-                pageSize = this.itemsPerPageOptions[0];
-            }
-
-            let sortBy = searchParams.get('sort_by');
-            if (!this.sortByOptions.find((sortByOption) => {
-                return sortByOption.id === sortBy;
-            })) {
-                sortBy = this.sortByOptions[0].id;
-            }
+            const minPrice = Utils.parseValueToInt(searchParams.get('min_price'), this.minPrice);
+            const maxPrice = Utils.parseValueToInt(searchParams.get('max_price'), this.maxPrice);
+            const page = Utils.parseValueToInt(searchParams.get('page'), 1);
+            const pageSize = Utils.parseValueToInt(searchParams.get('page_size'), this.itemsPerPageOptions[0]);
+            const sortById = searchParams.get('sort_by');
+            const sortBy = this.sortByOptions.has(sortById) ? sortById : this.sortByOptions.defaultId;
 
             const manufacturersIds = searchParams.getAll('manufacturer');
             const collectionsIds = searchParams.getAll('collection');
@@ -273,7 +245,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
                 manufacturers.unshift({
                     any: true,
                     checked: true,
-                    name: "Любой"
+                    name: "Все"
                 });
 				resolve();
 			});
@@ -292,7 +264,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
                 collections.unshift({
                     any: true,
                     checked: true,
-                    name: "Любая"
+                    name: "Все"
                 });
 				resolve();
 			});

@@ -15,7 +15,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
         this.history = createHashHistory();
         this.minPrice = 0;
         this.maxPrice = 200000;
-        this.itemsPerPageOptions = [10, 50, 100];
+        this.itemsPerPageOptions = [12, 60, 96];
         this.sortByOptions = [{
             id: 'price_with_discount',
             label: 'Цена: по возрастанию'
@@ -40,7 +40,10 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
         this.lastRequestId = 0;
 
         this.state = {
-            products: [],
+            products: {
+                items: [],
+                count: 0
+            },
             filters: {
                 isReady: false,
                 price: {},
@@ -205,8 +208,9 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
             if (this.lastRequestId === requestId) {
                 setTimeout(() => {
                     this.setState(state => {
-                        state.products = data.results || [];
-                        const products = state.products;
+                        state.products.items = data.results || [];
+                        state.products.count = data.count;
+                        const products = state.products.items;
                         const categoriesIcons = {};
                         const categories = this.props.categories;
                         const manufacturers = state.filters.manufacturers;
@@ -416,11 +420,11 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 
 		                        <div id="products" className="row">
                                     <div className="products-loader loaded"/>
-                                    {this.state.products.map((product) => {
+                                    {this.state.products.items.map((product) => {
                                         return <Product key={product.id} data={product}/>;
                                     })}
 		                        </div>
-                                {Math.ceil(this.state.products.length / this.state.sorting.itemsPerPage) > 1 ? <Pagination updateState={this.updateSearchParams} totalItems={this.state.products.length} itemsPerPage={this.state.sorting.itemsPerPage} activePage={this.state.pagination.activePage}/> : null}
+                                {Math.ceil(this.state.products.count / this.state.sorting.itemsPerPage) > 1 ? <Pagination updateState={this.updateSearchParams} totalItems={this.state.products.count} itemsPerPage={this.state.sorting.itemsPerPage} activePage={this.state.pagination.activePage}/> : null}
 
 		                    </div>
 

@@ -7,7 +7,7 @@ export default class Pagination extends React.Component {
 				activePage--;
 			}
 		} else if (controlName === 'next') {
-			if (parseInt(this.props.totalItems / this.props.itemsPerPage) > activePage) {
+			if (this.props.totalItems / this.props.itemsPerPage > activePage) {
 				activePage++;	
 			}
 		}

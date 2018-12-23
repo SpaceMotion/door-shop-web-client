@@ -72,6 +72,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 
     componentWillUnmount() {
         this.removeURLChangeListener();
+        clearInterval(this.timer);
     }
 
 	onURLChanged(location) {
@@ -80,36 +81,26 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
             // Обработка параметров запроса
             const searchParams = new URLSearchParams(this.history.location.search);
 
-            let minPrice = searchParams.get('min_price');
-            const minPriceParsed = parseInt(minPrice);
-            if (minPrice === null || minPriceParsed != minPrice) {
+            const category = parseInt(searchParams.get('category'));
+
+            let minPrice = parseInt(searchParams.get('min_price'));
+            if (!minPrice) {
                 minPrice = this.minPrice;
-            } else {
-                minPrice = minPriceParsed;
             }
 
-            let maxPrice = searchParams.get('max_price');
-            const maxPriceParsed = parseInt(maxPrice);
-            if (maxPrice === null || maxPriceParsed != maxPrice) {
+            let maxPrice = parseInt(searchParams.get('max_price'));
+            if (!maxPrice) {
                 maxPrice = this.maxPrice;
-            } else {
-                maxPrice = maxPriceParsed;
             }
 
-            let page = searchParams.get('page');
-            const pageParsed = parseInt(page);
-            if (page === null || pageParsed != page) {
+            let page = parseInt(searchParams.get('page'));
+            if (!page) {
                 page = 1;
-            } else {
-                page = pageParsed;
             }
 
-            let pageSize = searchParams.get('page_size');
-            const pageSizeParsed = parseInt(pageSize);
-            if (pageSize === null || pageSizeParsed != pageSize || !this.itemsPerPageOptions.includes(pageSizeParsed)) {
+            let pageSize = parseInt(searchParams.get('page_size'));
+            if (!pageSize || !this.itemsPerPageOptions.includes(pageSize)) {
                 pageSize = this.itemsPerPageOptions[0];
-            } else {
-                pageSize = pageSizeParsed;
             }
 
             let sortBy = searchParams.get('sort_by');
@@ -132,38 +123,40 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
             state.pagination.activePage = page;
             const manufacturers = filters.manufacturers;
             const manufacturersAnyOption = this.manufacturersAnyOption;
-            let manufacturersAnyFlag = true;
+            let isManufacturersAny = true;
             for (let i = 0, len = manufacturers.length; i < len; i++) {
-                if (manufacturersAnyOption !== manufacturers[i]) {
-                    const manufacturerId = manufacturers[i].id.toString();
-                    const checked = manufacturersIds.includes(manufacturerId);
-                    manufacturers[i].checked = checked;
-                    if (checked) {
-                        manufacturersAnyFlag = false;
-                        searchParamsToSubmit.append('manufacturer', manufacturerId);
-                    }                    
-                }                
+                if (manufacturersAnyOption === manufacturers[i])
+                    continue;
+                const manufacturerId = manufacturers[i].id.toString();
+                const checked = manufacturersIds.includes(manufacturerId);
+                manufacturers[i].checked = checked;
+                if (checked) {
+                    isManufacturersAny = false;
+                    searchParamsToSubmit.append('manufacturer', manufacturerId);
+                }                    
             }
-            manufacturersAnyOption.checked = manufacturersAnyFlag;
+            manufacturersAnyOption.checked = isManufacturersAny;
             const collections = filters.collections;
             const collectionsAnyOption = this.collectionsAnyOption;
-            let collectionsAnyFlag = true;
+            let isCollectionsAny = true;
             for (let i = 0, len = collections.length; i < len; i++) {
-                if (collectionsAnyOption !== collections[i]) {
-                    const collectionId = collections[i].id.toString();
-                    const checked = collectionsIds.includes(collectionId);
-                    collections[i].checked = checked;
-                    if (checked) {
-                        collectionsAnyFlag = false;
-                        searchParamsToSubmit.append('collection', collectionId);
-                    }
+                if (collectionsAnyOption === collections[i])
+                    continue;
+                const collectionId = collections[i].id.toString();
+                const checked = collectionsIds.includes(collectionId);
+                collections[i].checked = checked;
+                if (checked) {
+                    isCollectionsAny = false;
+                    searchParamsToSubmit.append('collection', collectionId);
                 }
             }
-            collectionsAnyOption.checked = collectionsAnyFlag;
+            collectionsAnyOption.checked = isCollectionsAny;
 
             // Сбор параметров для отправки запроса /products на сервер
             searchParamsToSubmit.set('ordering', sortBy);
-            searchParamsToSubmit.set('categories', searchParams.get('category'));
+            if (category) {
+                searchParamsToSubmit.set('categories', category);
+            }
             searchParamsToSubmit.set('price_with_discount_min', minPrice);
             searchParamsToSubmit.set('price_with_discount_max', maxPrice);
             searchParamsToSubmit.set('page', page);
@@ -364,10 +357,11 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 		const searchParams = new URLSearchParams(this.history.location.search);
 		const currentCategoryId = parseInt(searchParams.get('category'));
 		const result = [];
-		if (currentCategoryId) {
-			result.push(categories.find((category) => {
-				return category.id === currentCategoryId;
-			}));
+        const currentCategory = categories.find((category) => {
+                return category.id === currentCategoryId;
+        });
+		if (currentCategory) {
+			result.push(currentCategory);
 			let lastFound;
 			do {
 				lastFound = categories.find((category) => {

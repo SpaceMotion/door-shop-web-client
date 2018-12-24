@@ -2037,7 +2037,6 @@ nav .cart-wrapper.open {
     .sort-bar {
         padding: 0;
         margin-top: -45px;
-        opacity: 0.2;
         -moz-transition: all 0.2s;
         -o-transition: all 0.2s;
         -webkit-transition: all 0.2s;

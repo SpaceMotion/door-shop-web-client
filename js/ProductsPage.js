@@ -16,7 +16,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
         this.history = createHashHistory();
         this.minPrice = 0;
         this.maxPrice = 200000;
-        this.itemsPerPageOptions = [10, 50, 100];
+        this.itemsPerPageOptions = [12, 60, 96];
 
         this.sortByOptions = new Map([
             ['price_with_discount', {label: 'Цена: по возрастанию'}],
@@ -33,7 +33,10 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
         this.lastRequestId = 0;
 
         this.state = {
-            products: [],
+            products: {
+                items: [],
+                count: 0
+            },
             filters: {
                 isReady: false,
                 price: {},
@@ -65,6 +68,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 
     componentWillUnmount() {
         this.removeURLChangeListener();
+        clearInterval(this.timer);
     }
 
 	onURLChanged(location) {
@@ -73,6 +77,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
             // Обработка параметров запроса
             const searchParams = new URLSearchParams(this.history.location.search);
 
+            const category = parseInt(searchParams.get('category'));
             const minPrice = Utils.parseValueToInt(searchParams.get('min_price'), this.minPrice);
             const maxPrice = Utils.parseValueToInt(searchParams.get('max_price'), this.maxPrice);
             const page = Utils.parseValueToInt(searchParams.get('page'), 1);
@@ -93,38 +98,40 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
             state.pagination.activePage = page;
             const manufacturers = filters.manufacturers;
             const manufacturersAnyOption = this.manufacturersAnyOption;
-            let manufacturersAnyFlag = true;
+            let isManufacturersAny = true;
             for (let i = 0, len = manufacturers.length; i < len; i++) {
-                if (manufacturersAnyOption !== manufacturers[i]) {
-                    const manufacturerId = manufacturers[i].id.toString();
-                    const checked = manufacturersIds.includes(manufacturerId);
-                    manufacturers[i].checked = checked;
-                    if (checked) {
-                        manufacturersAnyFlag = false;
-                        searchParamsToSubmit.append('manufacturer', manufacturerId);
-                    }                    
-                }                
+                if (manufacturersAnyOption === manufacturers[i])
+                    continue;
+                const manufacturerId = manufacturers[i].id.toString();
+                const checked = manufacturersIds.includes(manufacturerId);
+                manufacturers[i].checked = checked;
+                if (checked) {
+                    isManufacturersAny = false;
+                    searchParamsToSubmit.append('manufacturer', manufacturerId);
+                }                    
             }
-            manufacturersAnyOption.checked = manufacturersAnyFlag;
+            manufacturersAnyOption.checked = isManufacturersAny;
             const collections = filters.collections;
             const collectionsAnyOption = this.collectionsAnyOption;
-            let collectionsAnyFlag = true;
+            let isCollectionsAny = true;
             for (let i = 0, len = collections.length; i < len; i++) {
-                if (collectionsAnyOption !== collections[i]) {
-                    const collectionId = collections[i].id.toString();
-                    const checked = collectionsIds.includes(collectionId);
-                    collections[i].checked = checked;
-                    if (checked) {
-                        collectionsAnyFlag = false;
-                        searchParamsToSubmit.append('collection', collectionId);
-                    }
+                if (collectionsAnyOption === collections[i])
+                    continue;
+                const collectionId = collections[i].id.toString();
+                const checked = collectionsIds.includes(collectionId);
+                collections[i].checked = checked;
+                if (checked) {
+                    isCollectionsAny = false;
+                    searchParamsToSubmit.append('collection', collectionId);
                 }
             }
-            collectionsAnyOption.checked = collectionsAnyFlag;
+            collectionsAnyOption.checked = isCollectionsAny;
 
             // Сбор параметров для отправки запроса /products на сервер
             searchParamsToSubmit.set('ordering', sortBy);
-            searchParamsToSubmit.set('categories', searchParams.get('category'));
+            if (category) {
+                searchParamsToSubmit.set('categories', category);
+            }
             searchParamsToSubmit.set('price_with_discount_min', minPrice);
             searchParamsToSubmit.set('price_with_discount_max', maxPrice);
             searchParamsToSubmit.set('page', page);
@@ -173,8 +180,9 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
             if (this.lastRequestId === requestId) {
                 setTimeout(() => {
                     this.setState(state => {
-                        state.products = data.results || [];
-                        const products = state.products;
+                        state.products.items = data.results || [];
+                        state.products.count = data.count;
+                        const products = state.products.items;
                         const categoriesIcons = {};
                         const categories = this.props.categories;
                         const manufacturers = state.filters.manufacturers;
@@ -325,10 +333,11 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 		const searchParams = new URLSearchParams(this.history.location.search);
 		const currentCategoryId = parseInt(searchParams.get('category'));
 		const result = [];
-		if (currentCategoryId) {
-			result.push(categories.find((category) => {
-				return category.id === currentCategoryId;
-			}));
+        const currentCategory = categories.find((category) => {
+                return category.id === currentCategoryId;
+        });
+		if (currentCategory) {
+			result.push(currentCategory);
 			let lastFound;
 			do {
 				lastFound = categories.find((category) => {
@@ -383,11 +392,11 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 
 		                        <div id="products" className="row">
                                     <div className="products-loader loaded"/>
-                                    {this.state.products.map((product) => {
+                                    {this.state.products.items.map((product) => {
                                         return <Product key={product.id} data={product}/>;
                                     })}
 		                        </div>
-                                {Math.ceil(this.state.products.length / this.state.sorting.itemsPerPage) > 1 ? <Pagination updateState={this.updateSearchParams} totalItems={this.state.products.length} itemsPerPage={this.state.sorting.itemsPerPage} activePage={this.state.pagination.activePage}/> : null}
+                                {Math.ceil(this.state.products.count / this.state.sorting.itemsPerPage) > 1 ? <Pagination updateState={this.updateSearchParams} totalItems={this.state.products.count} itemsPerPage={this.state.sorting.itemsPerPage} activePage={this.state.pagination.activePage}/> : null}
 
 		                    </div>
 

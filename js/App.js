@@ -7,7 +7,7 @@ import ProductsPage from "./ProductsPage";
 import DeliveryPage from "./DeliveryPage";
 import ContactsPage from "./ContactsPage";
 import CategoriesPage from "./CategoriesPage";
-import {HashRouter, Route} from "react-router-dom";
+import {HashRouter, Route, Switch} from "react-router-dom";
 
 class App extends React.Component {
 	closeMenuMobile() {
@@ -177,11 +177,13 @@ class App extends React.Component {
 			    <div className="page-loader"></div>
 			    <div className="wrapper">
 					<Header categories={this.props.categories} companyInfo={this.props.companyInfo}/>
-					<Route exact path="/" render={() => <MainPage categories={this.props.categories}/>}/>
-					<Route path="/categories" render={() => <CategoriesPage categories={this.props.categories}/>}/>
-					<Route path="/products" render={() => <ProductsPage categories={this.props.categories}/>}/>
-					<Route path="/delivery" render={() => <DeliveryPage/>}/>
-					<Route path="/contacts" render={() => <ContactsPage/>}/>
+                    <Switch>
+    					<Route path="/categories" render={() => <CategoriesPage categories={this.props.categories}/>}/>
+    					<Route path="/products" render={() => <ProductsPage categories={this.props.categories}/>}/>
+    					<Route path="/delivery" render={() => <DeliveryPage/>}/>
+    					<Route path="/contacts" render={() => <ContactsPage/>}/>
+                        <Route render={() => <MainPage categories={this.props.categories}/>}/>
+                    </Switch>
 					<Footer companyInfo={this.props.companyInfo}/>
 			    </div>
 			</div>

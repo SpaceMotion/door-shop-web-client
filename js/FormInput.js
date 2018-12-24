@@ -8,7 +8,7 @@ export default class FormInput extends React.Component {
                 	<input type={this.props.type} checked={!!this.props.checked} onChange={(event) => {
                         if (!any || !this.props.checked) {
                             this.props.updateState({
-                                operationType: any ? 'any' : event.target.checked ? 'add' : 'remove',
+                                operationType: any ? 'any' : (event.target.checked ? 'add' : 'remove'),
                                 any
                             });                            
                         }

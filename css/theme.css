@@ -2745,7 +2745,7 @@ nav .cart-wrapper.open {
         margin: 0;
     }
     .products .container,
-    .products .row > div {
+    .products .row > div:not(.products-loader) {
         padding-left: 1px;
         padding-right: 1px;
         padding-bottom: 1px;
@@ -2774,6 +2774,16 @@ nav .cart-wrapper.open {
     20. Product page
     ----------------------------------
 */
+
+.no-products {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    text-align: center;
+    width: 100%;
+    font-size: 30px;
+}
+
 .product {
     position: relative;
     padding: 0;
@@ -2940,7 +2950,17 @@ nav .cart-wrapper.open {
     background-color: rgba(0, 0, 0, 0.5);
 }
 
+@media (min-width: 768px) {
+    .no-products {
+        font-size: 40px;
+    }
+}
+
 @media (min-width: 992px) {
+    .no-products {
+        font-size: 50px;
+    }
+
     .product .main {
         padding: 50px 0;
         margin-bottom: 50px;

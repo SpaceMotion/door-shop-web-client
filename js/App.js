@@ -7,6 +7,7 @@ import ProductsPage from "./ProductsPage";
 import DeliveryPage from "./DeliveryPage";
 import ContactsPage from "./ContactsPage";
 import CategoriesPage from "./CategoriesPage";
+import globals from "./globalFunctions";
 import {HashRouter, Route, Switch} from "react-router-dom";
 
 class App extends React.Component {
@@ -158,9 +159,7 @@ class App extends React.Component {
 		    });
 
 		    $scrollbtn.on('click', function () {
-		        $('html,body').animate({
-		            scrollTop: $('body').offset().top
-		        }, CONSTANTS.SCROLL_TO_TOP_ANIMATION_TIME);
+		    	globals.scrollTo();
 		        return false;
 		    });
 

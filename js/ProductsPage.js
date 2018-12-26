@@ -7,6 +7,7 @@ import {Link} from "react-router-dom";
 import ReloadPageMixin from "./ReloadPageMixin";
 import {createHashHistory} from "history";
 import Utils from "./Utils";
+import constants from "./constants";
 
 export default class ProductsPage extends ReloadPageMixin(React.Component) {
 	constructor(props) {
@@ -141,7 +142,6 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
             const searchParamsToUpdateStr = searchParamsToSubmit.toString();
             if (this.lastSearchParams !== searchParamsToUpdateStr) {
                 this.controlsDisabled = true;
-                $('.products-loader').removeClass('loaded');
                 this.disablePriceSliderFilter(true);
                 this.lastSearchParams = searchParamsToUpdateStr;
                 clearInterval(this.timer);
@@ -178,53 +178,51 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
             return response.json();
         }).then((data) => {
             if (this.lastRequestId === requestId) {
-                setTimeout(() => {
-                    this.setState(state => {
-                        state.products.items = data.results || [];
-                        state.products.count = data.count;
-                        const products = state.products.items;
-                        const categoriesIcons = {};
-                        const categories = this.props.categories;
-                        const manufacturers = state.filters.manufacturers;
-                        const collections = state.filters.collections;
-                        const manufacturersNames = {};
-                        const collectionsNames = {};
-                        for (let i = 0, len = categories.length; i < len; i++) {
-                            const icon = categories[i].icon;
-                            categoriesIcons[categories[i].id] = {
-                                type: icon ? 'img' : 'char',
-                                value: icon || categories[i].icon_code
+                this.setState(state => {
+                    state.products.items = data.results || [];
+                    state.products.count = data.count || 0;
+                    const products = state.products.items;
+                    const categoriesIcons = {};
+                    const categories = this.props.categories;
+                    const manufacturers = state.filters.manufacturers;
+                    const collections = state.filters.collections;
+                    const manufacturersNames = {};
+                    const collectionsNames = {};
+                    for (let i = 0, len = categories.length; i < len; i++) {
+                        const icon = categories[i].icon;
+                        categoriesIcons[categories[i].id] = {
+                            type: icon ? 'img' : 'char',
+                            value: icon || categories[i].icon_code
+                        };
+                    }
+                    for (let i = 0, len = manufacturers.length; i < len; i++) {
+                        manufacturersNames[manufacturers[i].id] = manufacturers[i].name;
+                    }
+                    for (let i = 0, len = collections.length; i < len; i++) {
+                        collectionsNames[collections[i].id] = collections[i].name;
+                    }
+                    for (let i = 0, len = products.length; i < len; i++) {
+                        products[i].manufacturerName = manufacturersNames[products[i].manufacturer];
+                        products[i].collectionName = collectionsNames[products[i].collection];
+                        if (products[i].images.length) {
+                            const productImage = products[i].images[0];
+                            products[i].preview_img = {
+                                type: 'img',
+                                value: productImage.preview || productImage.full
                             };
+                        } else {
+                            products[i].preview_img = categoriesIcons[products[i].categories[0]];                            
                         }
-                        for (let i = 0, len = manufacturers.length; i < len; i++) {
-                            manufacturersNames[manufacturers[i].id] = manufacturers[i].name;
-                        }
-                        for (let i = 0, len = collections.length; i < len; i++) {
-                            collectionsNames[collections[i].id] = collections[i].name;
-                        }
-                        for (let i = 0, len = products.length; i < len; i++) {
-                            products[i].manufacturerName = manufacturersNames[products[i].manufacturer];
-                            products[i].collectionName = collectionsNames[products[i].collection];
-                            if (products[i].images.length) {
-                                const productImage = products[i].images[0];
-                                products[i].preview_img = {
-                                    type: 'img',
-                                    value: productImage.preview || productImage.full
-                                };
-                            } else {
-                                products[i].preview_img = categoriesIcons[products[i].categories[0]];                            
-                            }
-                        }
-                        this.controlsDisabled = false;
-                        this.disablePriceSliderFilter(false);
-                        clearInterval(this.timer);
-                        this.timer = null;
-                        this.lastRequestId = 0;                    
-                        $('.products-loader').addClass('loaded');
+                    }
+                    this.controlsDisabled = false;
+                    this.disablePriceSliderFilter(false);
+                    clearInterval(this.timer);
+                    this.timer = null;
+                    this.lastRequestId = 0;                    
+                    $('.products-loader').addClass('loaded');
 
-                        return state;
-                    });
-                }, 500);
+                    return state;
+                });
             }
         });        
     }
@@ -288,6 +286,11 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 	}
 
     updateSearchParams(changes) {
+        $('.products-loader').removeClass('loaded');
+        const offsetFromTop = $('.products').offset().top -
+            (window.innerWidth < constants.DESKTOP_MORE_THAN ? 0 : $('.header-nav').height());
+        const documentScrollTop = $(document).scrollTop();
+        Utils.scrollTo(documentScrollTop - offsetFromTop > 0 ? offsetFromTop : documentScrollTop, 0);
         const searchParams = new URLSearchParams(this.history.location.search);
         const searchParamsToUpdate = new URLSearchParams(this.history.location.search);
         changes.forEach((change) => {
@@ -392,6 +395,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 
 		                        <div id="products" className="row">
                                     <div className="products-loader loaded"/>
+                                    {this.state.products.items.length ? null : <div className="no-products">Товары не найдены</div>}
                                     {this.state.products.items.map((product) => {
                                         return <Product key={product.id} data={product}/>;
                                     })}

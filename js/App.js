@@ -8,6 +8,7 @@ import DeliveryPage from "./DeliveryPage";
 import ContactsPage from "./ContactsPage";
 import CategoriesPage from "./CategoriesPage";
 import {HashRouter, Route, Switch} from "react-router-dom";
+import Utils from "./Utils";
 
 class App extends React.Component {
 	closeMenuMobile() {
@@ -158,9 +159,7 @@ class App extends React.Component {
 		    });
 
 		    $scrollbtn.on('click', function () {
-		        $('html,body').animate({
-		            scrollTop: $('body').offset().top
-		        }, CONSTANTS.SCROLL_TO_TOP_ANIMATION_TIME);
+		    	Utils.scrollTo();
 		        return false;
 		    });
 

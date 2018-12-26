@@ -7,6 +7,7 @@ import {Link} from "react-router-dom";
 import ReloadPageMixin from "./ReloadPageMixin";
 import {createHashHistory} from "history";
 import Utils from "./Utils";
+import constants from "./constants";
 
 export default class ProductsPage extends ReloadPageMixin(React.Component) {
 	constructor(props) {
@@ -286,7 +287,8 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 
     updateSearchParams(changes) {
         $('.products-loader').removeClass('loaded');
-        const offsetFromTop = $('.products').offset().top - (window.innerWidth < 992 ? 0 : $('.header-nav').height());
+        const offsetFromTop = $('.products').offset().top -
+            (window.innerWidth < constants.DESKTOP_MORE_THAN ? 0 : $('.header-nav').height());
         const documentScrollTop = $(document).scrollTop();
         Utils.scrollTo(documentScrollTop - offsetFromTop > 0 ? offsetFromTop : documentScrollTop, 0);
         const searchParams = new URLSearchParams(this.history.location.search);

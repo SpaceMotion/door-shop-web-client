@@ -7,8 +7,8 @@ import ProductsPage from "./ProductsPage";
 import DeliveryPage from "./DeliveryPage";
 import ContactsPage from "./ContactsPage";
 import CategoriesPage from "./CategoriesPage";
-import globals from "./globalFunctions";
 import {HashRouter, Route, Switch} from "react-router-dom";
+import Utils from "./Utils";
 
 class App extends React.Component {
 	closeMenuMobile() {
@@ -159,7 +159,7 @@ class App extends React.Component {
 		    });
 
 		    $scrollbtn.on('click', function () {
-		    	globals.scrollTo();
+		    	Utils.scrollTo();
 		        return false;
 		    });
 

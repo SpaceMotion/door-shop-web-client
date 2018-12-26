@@ -7,7 +7,7 @@ import {Link} from "react-router-dom";
 import ReloadPageMixin from "./ReloadPageMixin";
 import {createHashHistory} from "history";
 import Utils from "./Utils";
-import globals from "./globalFunctions";
+import constants from "./constants";
 
 export default class ProductsPage extends ReloadPageMixin(React.Component) {
 	constructor(props) {
@@ -298,9 +298,9 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 
     updateSearchParams(changes, anyway = false) {
         if (!this.controlsDisabled || anyway) {
-            const offsetFromTop = $('.products').offset().top - (window.innerWidth < 992 ? 0 : $('.header-nav').height());
+            const offsetFromTop = $('.products').offset().top - (window.innerWidth < constants.DESKTOP_MORE_THAN ? 0 : $('.header-nav').height());
             const documentScrollTop = $(document).scrollTop();
-            globals.scrollTo(documentScrollTop - offsetFromTop > 0 ? offsetFromTop : documentScrollTop, 0);
+            Utils.scrollTo(documentScrollTop - offsetFromTop > 0 ? offsetFromTop : documentScrollTop, 0);
             const searchParams = new URLSearchParams(this.history.location.search);
             const searchParamsToUpdate = new URLSearchParams(this.history.location.search);
             changes.forEach((change) => {
@@ -337,7 +337,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
             if (searchParamsToUpdateStr !== searchParams.toString()) {
                 this.history.push({
                     search: `?${searchParamsToUpdateStr}`
-                });            
+                });
             }
         }
     }

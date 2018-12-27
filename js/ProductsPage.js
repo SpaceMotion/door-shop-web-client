@@ -181,11 +181,11 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
             if (response.status === 404) {
                 searchParams.parsed.set('page', '1');
                 searchParams.string = searchParams.parsed.toString();
-                this.updateSearchParams([{
-                    key: 'page',
-                    value: '1',
-                    operationType: 'update'
-                }], true);
+                this.setState(state => {
+                    state.pagination.activePage = 1;
+                    return state;
+                });
+                this.sendRequestForProducts(searchParams);
                 return Promise.reject();
             }
             return response.json();
@@ -296,8 +296,8 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 		});
 	}
 
-    updateSearchParams(changes, anyway = false) {
-        if (!this.controlsDisabled || anyway) {
+    updateSearchParams(changes) {
+        if (!this.controlsDisabled) {
             const offsetFromTop = $('.products').offset().top - (window.innerWidth < constants.DESKTOP_MORE_THAN ? 0 : $('.header-nav').height());
             const documentScrollTop = $(document).scrollTop();
             Utils.scrollTo(documentScrollTop - offsetFromTop > 0 ? offsetFromTop : documentScrollTop, 0);

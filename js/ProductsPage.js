@@ -61,9 +61,11 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
         this.onURLChanged = this.onURLChanged.bind(this);
         this.updateSearchParams = this.updateSearchParams.bind(this);
         this.disableControls = this.disableControls.bind(this);
+        this.setUpColors = this.setUpColors.bind(this);
 
 		this.removeURLChangeListener = this.history.listen(this.onURLChanged);
 
+        this.setUpColors();
 		this.setUpFilters();
 	}
 
@@ -77,8 +79,6 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
     }
 
 	onURLChanged(location) {
-        this.disableControls(true);
-        $('.products-loader').removeClass('loaded');
         const searchParamsToSubmit = new URLSearchParams();
         this.setState((state) => {
             // Обработка параметров запроса
@@ -145,18 +145,39 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
             searchParamsToSubmit.set('page_size', pageSize);
 
             // Отправка запроса /products
-            this.lastSearchParams.parsed = searchParamsToSubmit;
-            this.lastSearchParams.string = this.lastSearchParams.parsed.toString();
-            clearInterval(this.timer);
-            this.sendRequestForProducts(this.lastSearchParams);
-            this.timer = setInterval(() => {
-                this.disableControls(false);
+            if (searchParamsToSubmit.toString() !== this.lastSearchParams.string) {
+                this.disableControls(true);
+                $('.products-loader').removeClass('loaded');
+                this.lastSearchParams.parsed = searchParamsToSubmit;
+                this.lastSearchParams.string = this.lastSearchParams.parsed.toString();
+                clearInterval(this.timer);
                 this.sendRequestForProducts(this.lastSearchParams);
-            }, 10000);
+                this.timer = setInterval(() => {
+                    this.disableControls(false);
+                    this.sendRequestForProducts(this.lastSearchParams);
+                }, 10000);    
+            }
 
             return state;
         });
 	}
+
+    setUpColors() {
+        fetch(`${CONFIG.ROOT_API_URL}/colors`, {
+            headers: new Headers({
+                'Content-Type': 'application/json'
+            })
+        }).then((response) => {
+            return response.json();
+        }).then((data) => {
+            const colors = {};
+            const results = data.results;
+            for (let i = 0, len = results.length; i < len; i++) {
+                colors[results[i].id] = results[i];
+            }
+            this.colors = colors;
+        });    
+    }
 
     disableControls(disable) {
         this.controlsDisabled = disable;
@@ -408,7 +429,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
                                     <div className="products-loader loaded"/>
                                     {this.state.products.items.length ? null : <div className="no-products">Товары не найдены</div>}
                                     {this.state.products.items.map((product) => {
-                                        return <Product key={product.id} data={product}/>;
+                                        return <Product key={product.id} data={product} colors={this.colors}/>;
                                     })}
 		                        </div>
                                 {Math.ceil(this.state.products.count / this.state.sorting.itemsPerPage) > 1 ? <Pagination updateState={this.updateSearchParams} totalItems={this.state.products.count} itemsPerPage={this.state.sorting.itemsPerPage} activePage={this.state.pagination.activePage}/> : null}
@@ -417,82 +438,6 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 
 		                </div>
 
-		                <div className="popup-main mfp-hide" id="productid1">
-
-		                    <div className="product">
-
-		                        <div className="popup-title">
-		                            <div className="h1 title">Laura <small>product category</small></div>
-		                        </div>
-
-		                        <div className="owl-product-gallery">
-		                            <img src="assets/images/product-1.png" alt="" width="640" />
-		                            <img src="assets/images/product-2.png" alt="" width="640" />
-		                            <img src="assets/images/product-3.png" alt="" width="640" />
-		                            <img src="assets/images/product-4.png" alt="" width="640" />
-		                        </div>
-
-		                        <div className="popup-content">
-		                            <div className="product-info-wrapper">
-		                                <div className="row">
-
-		                                    <div className="col-sm-6">
-		                                        <div className="info-box">
-		                                            <strong>Maifacturer</strong>
-		                                            <span>Brand name</span>
-		                                        </div>
-		                                        <div className="info-box">
-		                                            <strong>Materials</strong>
-		                                            <span>Wood, Leather, Acrylic</span>
-		                                        </div>
-		                                        <div className="info-box">
-		                                            <strong>Availability</strong>
-		                                            <span><i className="fa fa-check-square-o"></i> in stock</span>
-		                                        </div>
-		                                    </div>
-
-		                                    <div className="col-sm-6">
-		                                        <div className="info-box">
-		                                            <strong>Available Colors</strong>
-		                                            <div className="product-colors clearfix">
-		                                                <span className="color-btn color-btn-red"></span>
-		                                                <span className="color-btn color-btn-blue checked"></span>
-		                                                <span className="color-btn color-btn-green"></span>
-		                                                <span className="color-btn color-btn-gray"></span>
-		                                                <span className="color-btn color-btn-biege"></span>
-		                                            </div>
-		                                        </div>
-		                                        <div className="info-box">
-		                                            <strong>Choose size</strong>
-		                                            <div className="product-colors clearfix">
-		                                                <span className="color-btn color-btn-biege">S</span>
-		                                                <span className="color-btn color-btn-biege checked">M</span>
-		                                                <span className="color-btn color-btn-biege">XL</span>
-		                                                <span className="color-btn color-btn-biege">XXL</span>
-		                                            </div>
-		                                        </div>
-		                                    </div>
-
-		                                </div>
-		                            </div>
-		                        </div>
-
-		                        <div className="popup-table">
-		                            <div className="popup-cell">
-		                                <div className="price">
-		                                    <span className="h3">$ 1999,00 <small>$ 2999,00</small></span>
-		                                </div>
-		                            </div>
-		                            <div className="popup-cell">
-		                                <div className="popup-buttons">
-		                                    <a href="product.html"><span className="icon icon-eye"></span> <span className="hidden-xs">View more</span></a>
-		                                    <a href="javascript:void(0);"><span className="icon icon-cart"></span> <span className="hidden-xs">Buy</span></a>
-		                                </div>
-		                            </div>
-		                        </div>
-
-		                    </div> 
-		                </div>
 		            </div>
 		        </section>
 		    </div>

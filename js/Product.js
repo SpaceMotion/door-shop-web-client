@@ -1,10 +1,13 @@
+import ProductQuickView from "./ProductQuickView";
+
 export default class Prouct extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
             imgWidth: 'auto',
-            imgHeight: 'auto'
+            imgHeight: 'auto',
+            isQuickView: false
         };
     }
 
@@ -19,6 +22,38 @@ export default class Prouct extends React.Component {
                 imgHeight: dimensions[1]
             });
         }
+
+        const productId = this.props.data.id;
+        $(`*[data-product-id='${productId}'] .mfp-open`).magnificPopup({
+            type: 'inline',
+            fixedContentPos: false,
+            fixedBgPos: true,
+            overflowY: 'auto',
+            closeBtnInside: true,
+            preloader: false,
+            midClick: true,
+            removalDelay: 300,
+            mainClass: 'my-mfp-zoom-in',
+            callbacks: {
+                beforeOpen: () => {
+                    this.props.data.colorValues = this.props.data.colors.map((colorId) => {
+                        return this.props.colors[colorId].value;
+                    });
+                    this.setState({
+                        isQuickView: true
+                    });
+                },
+                afterClose: () => {
+                    this.setState({
+                        isQuickView: false
+                    });
+                }
+            }
+        });
+    }
+
+    componentWillUnmount() {
+        $.magnificPopup.close();
     }
 
     getCorrectImgDimensions(width, height, maxSize) {
@@ -50,7 +85,7 @@ export default class Prouct extends React.Component {
                     <div className="figure-grid">
                         {this.props.data.is_new ? <span className="label label-warning">Новый</span> : null}                        
                         <div className="image">
-                            <a href="#" className={`mfp-open ${isPreviewImg ? '' : 'f-icon'}`}>
+                            <a href="#productid1" className={`mfp-open ${isPreviewImg ? '' : 'f-icon'}`}>
                                 {isPreviewImg ? <img style={{width: `${this.state.imgWidth}`, height: `${this.state.imgHeight}`}} src={this.props.data.preview_img.value} alt=""/> : <span>{String.fromCharCode(this.props.data.preview_img.value)}</span>}
                             </a>
                         </div>
@@ -61,6 +96,7 @@ export default class Prouct extends React.Component {
                         </div>
                     </div>
                 </article>
+                {this.state.isQuickView && <ProductQuickView data={this.props.data}/>}
             </div>
 		);
 	}

@@ -30,7 +30,10 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
         this.sortByOptions.defaultId = 'price_with_discount';
 
         this.controlsDisabled = false;
-        this.lastSearchParams =  '';
+        this.lastSearchParams =  {
+            string: '',
+            parsed: null
+        };
         this.lastRequestId = 0;
 
         this.state = {
@@ -57,6 +60,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 		this.getBreadCrumbs = this.getBreadCrumbs.bind(this);
         this.onURLChanged = this.onURLChanged.bind(this);
         this.updateSearchParams = this.updateSearchParams.bind(this);
+        this.disableControls = this.disableControls.bind(this);
 
 		this.removeURLChangeListener = this.history.listen(this.onURLChanged);
 
@@ -73,6 +77,8 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
     }
 
 	onURLChanged(location) {
+        this.disableControls(true);
+        $('.products-loader').removeClass('loaded');
         const searchParamsToSubmit = new URLSearchParams();
         this.setState((state) => {
             // Обработка параметров запроса
@@ -139,26 +145,23 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
             searchParamsToSubmit.set('page_size', pageSize);
 
             // Отправка запроса /products
-            const searchParamsToUpdateStr = searchParamsToSubmit.toString();
-            if (this.lastSearchParams !== searchParamsToUpdateStr) {
-                this.controlsDisabled = true;
-                this.disablePriceSliderFilter(true);
-                this.lastSearchParams = searchParamsToUpdateStr;
-                clearInterval(this.timer);
-                this.timer = null;
-            }
-            if (!this.timer) {
+            this.lastSearchParams.parsed = searchParamsToSubmit;
+            this.lastSearchParams.string = this.lastSearchParams.parsed.toString();
+            clearInterval(this.timer);
+            this.sendRequestForProducts(this.lastSearchParams);
+            this.timer = setInterval(() => {
+                this.disableControls(false);
                 this.sendRequestForProducts(this.lastSearchParams);
-                this.timer = setInterval(() => {
-                    this.controlsDisabled = false;
-                    this.disablePriceSliderFilter(false);
-                    this.sendRequestForProducts(this.lastSearchParams);
-                }, 10000);
-            }
+            }, 10000);
 
             return state;
         });
 	}
+
+    disableControls(disable) {
+        this.controlsDisabled = disable;
+        this.disablePriceSliderFilter(disable);
+    }
 
     disablePriceSliderFilter(disable) {
         const rangePriceSliderDOM = $("#range-price-slider").data("ionRangeSlider");
@@ -167,14 +170,24 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
         }        
     }
 
-    sendRequestForProducts(searchParamsToUpdateStr) {
+    sendRequestForProducts(searchParams) {
         this.lastRequestId++;
         const requestId = this.lastRequestId;
-        fetch(`${CONFIG.ROOT_API_URL}/products/?${searchParamsToUpdateStr}`, {
+        fetch(`${CONFIG.ROOT_API_URL}/products/?${searchParams.string}`, {
             headers: new Headers({
                 'Content-Type': 'application/json'
             })
         }).then((response) => {
+            if (response.status === 404) {
+                searchParams.parsed.set('page', '1');
+                searchParams.string = searchParams.parsed.toString();
+                this.setState(state => {
+                    state.pagination.activePage = 1;
+                    return state;
+                });
+                this.sendRequestForProducts(searchParams);
+                return Promise.reject();
+            }
             return response.json();
         }).then((data) => {
             if (this.lastRequestId === requestId) {
@@ -214,17 +227,15 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
                             products[i].preview_img = categoriesIcons[products[i].categories[0]];                            
                         }
                     }
-                    this.controlsDisabled = false;
-                    this.disablePriceSliderFilter(false);
+                    this.disableControls(false);
                     clearInterval(this.timer);
-                    this.timer = null;
                     this.lastRequestId = 0;                    
                     $('.products-loader').addClass('loaded');
 
                     return state;
                 });
             }
-        });        
+        }, () => null);        
     }
 
 	setUpFilters() {
@@ -286,48 +297,48 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 	}
 
     updateSearchParams(changes) {
-        $('.products-loader').removeClass('loaded');
-        const offsetFromTop = $('.products').offset().top -
-            (window.innerWidth < constants.DESKTOP_MORE_THAN ? 0 : $('.header-nav').height());
-        const documentScrollTop = $(document).scrollTop();
-        Utils.scrollTo(documentScrollTop - offsetFromTop > 0 ? offsetFromTop : documentScrollTop, 0);
-        const searchParams = new URLSearchParams(this.history.location.search);
-        const searchParamsToUpdate = new URLSearchParams(this.history.location.search);
-        changes.forEach((change) => {
-            const key = change.key;
-            const value = change.value && change.value.toString();
-            const operationType = change.operationType;
-            let targetValues = [...new Set(searchParams.getAll(key))];
-            const isTargetExists = targetValues.includes(value);
-            if (operationType === 'add' && !isTargetExists) {
-                targetValues.push(value);
-            } else if (operationType === 'remove' && isTargetExists) {
-                targetValues.splice(targetValues.indexOf(value), 1);
-            } else if (operationType === 'update') {
-                targetValues = [value];
-            } else if (operationType === 'any') {
-                targetValues = [];
-            }
-            if (key === 'manufacturer' && targetValues.length) {
-                searchParamsToUpdate.delete('collection');
-                const collections = this.state.filters.collections;
-                for (let i = 0, len = collections.length; i < len; i++) {
-                    const manufacturerId = collections[i].manufacturer && collections[i].manufacturer.toString();
-                    if (targetValues.includes(manufacturerId) && collections[i].checked) {
-                        searchParamsToUpdate.append('collection', collections[i].id);
+        if (!this.controlsDisabled) {
+            const offsetFromTop = $('.products').offset().top - (window.innerWidth < constants.DESKTOP_MORE_THAN ? 0 : $('.header-nav').height());
+            const documentScrollTop = $(document).scrollTop();
+            Utils.scrollTo(documentScrollTop - offsetFromTop > 0 ? offsetFromTop : documentScrollTop, 0);
+            const searchParams = new URLSearchParams(this.history.location.search);
+            const searchParamsToUpdate = new URLSearchParams(this.history.location.search);
+            changes.forEach((change) => {
+                const key = change.key;
+                const value = change.value && change.value.toString();
+                const operationType = change.operationType;
+                let targetValues = [...new Set(searchParams.getAll(key))];
+                const isTargetExists = targetValues.includes(value);
+                if (operationType === 'add' && !isTargetExists) {
+                    targetValues.push(value);
+                } else if (operationType === 'remove' && isTargetExists) {
+                    targetValues.splice(targetValues.indexOf(value), 1);
+                } else if (operationType === 'update') {
+                    targetValues = [value];
+                } else if (operationType === 'any') {
+                    targetValues = [];
+                }
+                if (key === 'manufacturer' && targetValues.length) {
+                    searchParamsToUpdate.delete('collection');
+                    const collections = this.state.filters.collections;
+                    for (let i = 0, len = collections.length; i < len; i++) {
+                        const manufacturerId = collections[i].manufacturer && collections[i].manufacturer.toString();
+                        if (targetValues.includes(manufacturerId) && collections[i].checked) {
+                            searchParamsToUpdate.append('collection', collections[i].id);
+                        }
                     }
                 }
+                searchParamsToUpdate.delete(key);
+                for (var i = 0, len = targetValues.length; i < len; i++) {
+                    searchParamsToUpdate.append(key, targetValues[i]);
+                }
+            });
+            const searchParamsToUpdateStr = searchParamsToUpdate.toString();
+            if (searchParamsToUpdateStr !== searchParams.toString()) {
+                this.history.push({
+                    search: `?${searchParamsToUpdateStr}`
+                });
             }
-            searchParamsToUpdate.delete(key);
-            for (var i = 0, len = targetValues.length; i < len; i++) {
-                searchParamsToUpdate.append(key, targetValues[i]);
-            }
-        });
-        const searchParamsToUpdateStr = searchParamsToUpdate.toString();
-        if (searchParamsToUpdateStr !== searchParams.toString()) {
-            this.history.push({
-                search: `?${searchParamsToUpdateStr}`
-            });            
         }
     }
 

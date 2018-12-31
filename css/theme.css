@@ -117,6 +117,7 @@ label,
 }
 
 .page-loader:before, .products-loader:before {
+    pointer-events: none;
     font-family: 'LinearIcons';
     speak: none;
     font-style: normal;

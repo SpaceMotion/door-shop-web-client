@@ -3026,8 +3026,22 @@ nav .cart-wrapper.open {
     cursor: pointer;
 }
 
-.color-btn.checked {
-    border-color: black;
+.color-btn::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 1px solid;
+    border-color: inherit;
+}
+
+.color-btn.checked::before {
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
 }
 
 .color-btn.color-btn-red {

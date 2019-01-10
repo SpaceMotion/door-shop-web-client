@@ -8,6 +8,7 @@ import ReloadPageMixin from "./ReloadPageMixin";
 import {createHashHistory} from "history";
 import Utils from "./Utils";
 import constants from "./constants";
+import ProductQuickView from "./ProductQuickView";
 
 export default class ProductsPage extends ReloadPageMixin(React.Component) {
 	constructor(props) {
@@ -53,7 +54,8 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
             },
             pagination: {
                 activePage: 1
-            }
+            },
+            quickViewData: null
         };
 
 		this.setUpFilters = this.setUpFilters.bind(this);
@@ -62,6 +64,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
         this.updateSearchParams = this.updateSearchParams.bind(this);
         this.disableControls = this.disableControls.bind(this);
         this.setUpColors = this.setUpColors.bind(this);
+        this.setQuickViewData = this.setQuickViewData.bind(this);
 
 		this.removeURLChangeListener = this.history.listen(this.onURLChanged);
 
@@ -78,23 +81,92 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
         clearInterval(this.timer);
     }
 
+    setQuickViewData(productId) {
+        let quickViewData = null;
+        this.setState({quickViewData});
+        if (productId) {
+            quickViewData = this.state.products.items.find((product) => {
+                return product.id === productId;
+            });
+
+            if (!quickViewData) {
+                fetch(`${CONFIG.ROOT_API_URL}/products/${productId}/`, {
+                    headers: new Headers({
+                        'Content-Type': 'application/json'
+                    })
+                }).then((response) => {
+                    if (response.status === 404) {
+                        return Promise.reject();
+                    }
+                    return response.json();
+                }).then((data) => {
+                    this.setState({
+                        quickViewData: data
+                    }, this.showHideQuickViewPopup);
+                }, () => null);
+                return;
+            }
+        }
+        this.setState({quickViewData}, this.showHideQuickViewPopup);
+    }
+
+    showHideQuickViewPopup() {
+        if (this.state.quickViewData) {
+            $.magnificPopup.open({
+                items: {
+                    src: '.popup-main'
+                },
+                type: 'inline',
+                fixedContentPos: false,
+                fixedBgPos: true,
+                overflowY: 'auto',
+                closeBtnInside: true,
+                preloader: false,
+                midClick: true,
+                removalDelay: 300,
+                mainClass: 'my-mfp-zoom-in',
+                callbacks: {
+                    beforeOpen: () => {
+                        this.setState(state => {
+                            state.quickViewData.colorValues = state.quickViewData.colors.map((colorId) => {
+                                return this.colors[colorId].value;
+                            });
+                            return state;
+                        });
+                    },
+                    afterClose: () => {
+                        this.updateSearchParams([{
+                            key: 'product',
+                            value: 'null',
+                            operationType: 'update'
+                        }]);
+                    }
+                }
+            });
+        } else {
+            $.magnificPopup.close();
+        }
+    }    
+
 	onURLChanged(location) {
         const searchParamsToSubmit = new URLSearchParams();
+
+        // Обработка параметров запроса
+        const searchParams = new URLSearchParams(this.history.location.search);
+
+        const category = parseInt(searchParams.get('category'));
+        const minPrice = Utils.parseValueToInt(searchParams.get('min_price'), this.minPrice);
+        const maxPrice = Utils.parseValueToInt(searchParams.get('max_price'), this.maxPrice);
+        const page = Utils.parseValueToInt(searchParams.get('page'), 1);
+        const pageSize = Utils.parseValueToInt(searchParams.get('page_size'), this.itemsPerPageOptions[0]);
+        const sortById = searchParams.get('sort_by');
+        const sortBy = this.sortByOptions.has(sortById) ? sortById : this.sortByOptions.defaultId;
+        const productId = Utils.parseValueToInt(searchParams.get('product'), null);
+
+        const manufacturersIds = searchParams.getAll('manufacturer');
+        const collectionsIds = searchParams.getAll('collection');
+
         this.setState((state) => {
-            // Обработка параметров запроса
-            const searchParams = new URLSearchParams(this.history.location.search);
-
-            const category = parseInt(searchParams.get('category'));
-            const minPrice = Utils.parseValueToInt(searchParams.get('min_price'), this.minPrice);
-            const maxPrice = Utils.parseValueToInt(searchParams.get('max_price'), this.maxPrice);
-            const page = Utils.parseValueToInt(searchParams.get('page'), 1);
-            const pageSize = Utils.parseValueToInt(searchParams.get('page_size'), this.itemsPerPageOptions[0]);
-            const sortById = searchParams.get('sort_by');
-            const sortBy = this.sortByOptions.has(sortById) ? sortById : this.sortByOptions.defaultId;
-
-            const manufacturersIds = searchParams.getAll('manufacturer');
-            const collectionsIds = searchParams.getAll('collection');
-
             // Установка состояния
             const filters = state.filters;
             const priceFilter = filters.price;
@@ -148,6 +220,9 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
             if (searchParamsToSubmit.toString() !== this.lastSearchParams.string) {
                 this.disableControls(true);
                 $('.products-loader').removeClass('loaded');
+                const offsetFromTop = $('.products').offset().top - (window.innerWidth < constants.DESKTOP_MORE_THAN ? 0 : $('.header-nav').height());
+                const documentScrollTop = $(document).scrollTop();
+                Utils.scrollTo(documentScrollTop - offsetFromTop > 0 ? offsetFromTop : documentScrollTop, 0);
                 this.lastSearchParams.parsed = searchParamsToSubmit;
                 this.lastSearchParams.string = this.lastSearchParams.parsed.toString();
                 clearInterval(this.timer);
@@ -160,6 +235,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 
             return state;
         });
+        this.setQuickViewData(productId);
 	}
 
     setUpColors() {
@@ -200,13 +276,16 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
             })
         }).then((response) => {
             if (response.status === 404) {
-                searchParams.parsed.set('page', '1');
-                searchParams.string = searchParams.parsed.toString();
+                const tempSearchParams = {
+                    parsed: new URLSearchParams(searchParams.parsed.toString())
+                };
+                tempSearchParams.parsed.set('page', '1');
+                tempSearchParams.string = tempSearchParams.parsed.toString();
                 this.setState(state => {
                     state.pagination.activePage = 1;
                     return state;
                 });
-                this.sendRequestForProducts(searchParams);
+                this.sendRequestForProducts(tempSearchParams);
                 return Promise.reject();
             }
             return response.json();
@@ -319,9 +398,6 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 
     updateSearchParams(changes) {
         if (!this.controlsDisabled) {
-            const offsetFromTop = $('.products').offset().top - (window.innerWidth < constants.DESKTOP_MORE_THAN ? 0 : $('.header-nav').height());
-            const documentScrollTop = $(document).scrollTop();
-            Utils.scrollTo(documentScrollTop - offsetFromTop > 0 ? offsetFromTop : documentScrollTop, 0);
             const searchParams = new URLSearchParams(this.history.location.search);
             const searchParamsToUpdate = new URLSearchParams(this.history.location.search);
             changes.forEach((change) => {
@@ -387,8 +463,10 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 	}
 
 	render() {
+        const quickViewData = this.state.quickViewData;
 		return (
 			<div>
+                {quickViewData && <ProductQuickView data={quickViewData} colors={this.colors}/>}
 		        <section className="main-header" style={{backgroundImage: "url(assets/images/gallery-3.jpg)"}}>
 		            <header>
 		                <div className="container">
@@ -429,7 +507,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
                                     <div className="products-loader loaded"/>
                                     {this.state.products.items.length ? null : <div className="no-products">Товары не найдены</div>}
                                     {this.state.products.items.map((product) => {
-                                        return <Product key={product.id} data={product} colors={this.colors}/>;
+                                        return <Product key={product.id} data={product} colors={this.colors} updateSearchParams={this.updateSearchParams}/>;
                                     })}
 		                        </div>
                                 {Math.ceil(this.state.products.count / this.state.sorting.itemsPerPage) > 1 ? <Pagination updateState={this.updateSearchParams} totalItems={this.state.products.count} itemsPerPage={this.state.sorting.itemsPerPage} activePage={this.state.pagination.activePage}/> : null}

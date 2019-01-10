@@ -1,13 +1,12 @@
-import ProductQuickView from "./ProductQuickView";
-
 export default class Prouct extends React.Component {
     constructor(props) {
         super(props);
 
+        this.onQuickViewRefClick = this.onQuickViewRefClick.bind(this);
+
         this.state = {
             imgWidth: 'auto',
-            imgHeight: 'auto',
-            isQuickView: false
+            imgHeight: 'auto'
         };
     }
 
@@ -22,38 +21,6 @@ export default class Prouct extends React.Component {
                 imgHeight: dimensions[1]
             });
         }
-
-        const productId = this.props.data.id;
-        $(`*[data-product-id='${productId}'] .mfp-open`).magnificPopup({
-            type: 'inline',
-            fixedContentPos: false,
-            fixedBgPos: true,
-            overflowY: 'auto',
-            closeBtnInside: true,
-            preloader: false,
-            midClick: true,
-            removalDelay: 300,
-            mainClass: 'my-mfp-zoom-in',
-            callbacks: {
-                beforeOpen: () => {
-                    this.props.data.colorValues = this.props.data.colors.map((colorId) => {
-                        return this.props.colors[colorId].value;
-                    });
-                    this.setState({
-                        isQuickView: true
-                    });
-                },
-                afterClose: () => {
-                    this.setState({
-                        isQuickView: false
-                    });
-                }
-            }
-        });
-    }
-
-    componentWillUnmount() {
-        $.magnificPopup.close();
     }
 
     getCorrectImgDimensions(width, height, maxSize) {
@@ -68,6 +35,14 @@ export default class Prouct extends React.Component {
         return [width / parseInt($(elem).css('width')) * 100 + '%', height / parseInt($(elem).css('height')) * 100 + '%'];
     }
 
+    onQuickViewRefClick() {
+        this.props.updateSearchParams([{
+            key: 'product',
+            value: this.props.data.id,
+            operationType: 'update'
+        }]);        
+    }
+
 	render() {
         const isPreviewImg = this.props.data.preview_img.type === 'img';
 
@@ -76,7 +51,7 @@ export default class Prouct extends React.Component {
                 <article>
                     <div className="info">
                         <span>
-                            <a href="#productid1" className="mfp-open" data-title="Быстрый просмотр"><i className="icon icon-eye"></i></a>
+                            <a href="javascript:void(0);" onClick={this.onQuickViewRefClick} className="mfp-open" data-title="Быстрый просмотр"><i className="icon icon-eye"></i></a>
                         </span>
                     </div>
                     <div className="btn btn-add">
@@ -85,7 +60,7 @@ export default class Prouct extends React.Component {
                     <div className="figure-grid">
                         {this.props.data.is_new ? <span className="label label-warning">Новый</span> : null}                        
                         <div className="image">
-                            <a href="#productid1" className={`mfp-open ${isPreviewImg ? '' : 'f-icon'}`}>
+                            <a href="javascript:void(0);" onClick={this.onQuickViewRefClick} className={`mfp-open ${isPreviewImg ? '' : 'f-icon'}`}>
                                 {isPreviewImg ? <img style={{width: `${this.state.imgWidth}`, height: `${this.state.imgHeight}`}} src={this.props.data.preview_img.value} alt=""/> : <span>{String.fromCharCode(this.props.data.preview_img.value)}</span>}
                             </a>
                         </div>
@@ -96,7 +71,6 @@ export default class Prouct extends React.Component {
                         </div>
                     </div>
                 </article>
-                {this.state.isQuickView && <ProductQuickView data={this.props.data}/>}
             </div>
 		);
 	}

@@ -1,6 +1,6 @@
 import CONSTANTS from "./constants";
 
-export default (superclass) => class ReloadPageMixin extends React.Component {
+export default (superclass) => class ReloadPageMixin extends superclass {
     closePopUps() {
         window.dispatchEvent(new CustomEvent('closeCart'));
         window.dispatchEvent(new CustomEvent('closeSearch'));

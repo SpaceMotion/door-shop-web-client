@@ -4505,7 +4505,7 @@ nav .cart-wrapper.open {
     border-left: 1px solid #fff;
     padding: 32px 30px;
     display: inline-block;
-    margin-left: -3px;
+    margin-left: -0.5px;
 }
 
 .popup-main .popup-buttons a:hover {

@@ -15,7 +15,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 		super(props);
 
 		this.showPreLoader();
-        this.props.setPageNotFound();
+        this.props.setPageNotFound(false);
         this.history = createHashHistory();
         this.minPrice = 0;
         this.maxPrice = 200000;

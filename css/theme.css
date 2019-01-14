@@ -2799,6 +2799,26 @@ nav .cart-wrapper.open {
     font-size: 30px;
 }
 
+.product-detail {
+    background-color: white;
+}
+
+.product-detail .owl-carousel .owl-item {
+    text-align: center;
+}
+
+.product-detail .owl-carousel .owl-item a {
+    height: 350px;
+    display: inline-block;
+}
+
+.product-detail .owl-carousel .owl-item img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+}
+
 .product {
     position: relative;
     padding: 0;
@@ -2818,18 +2838,6 @@ nav .cart-wrapper.open {
     color: black;
     font-weight: 600;
     position: relative;
-}
-
-.product .title:before {
-    content: attr(data-title);
-    font-size: 550%;
-    color: rgba(99, 99, 99, 0.07);
-    position: absolute;
-    width: inherit;
-    white-space: nowrap;
-    left: -30%;
-    top: -100%;
-    z-index: 1;
 }
 
 .product .title small {
@@ -2950,7 +2958,7 @@ nav .cart-wrapper.open {
 .product .info .content h3:after {
     background: #fbb700;
     content: "";
-    width: 50px;
+    width: 100%;
     height: 1px;
     position: absolute;
     top: 100%;
@@ -4497,7 +4505,7 @@ nav .cart-wrapper.open {
     border-left: 1px solid #fff;
     padding: 32px 30px;
     display: inline-block;
-    margin-left: -3px;
+    margin-left: -0.5px;
 }
 
 .popup-main .popup-buttons a:hover {

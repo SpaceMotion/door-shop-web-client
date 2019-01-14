@@ -5,6 +5,7 @@ export default class CategoriesPage extends ReloadPageMixin(React.Component) {
 	constructor(props) {
 		super(props);
 
+		this.props.setPageNotFound(false);
 		this.showPreLoader();
 	}
 

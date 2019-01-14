@@ -4,10 +4,12 @@ import Header from "./Header";
 import Footer from "./Footer";
 import MainPage from "./MainPage";
 import ProductsPage from "./ProductsPage";
+import ProductDetailPage from "./ProductDetailPage";
 import DeliveryPage from "./DeliveryPage";
 import ContactsPage from "./ContactsPage";
 import CategoriesPage from "./CategoriesPage";
-import {HashRouter, Route, Switch} from "react-router-dom";
+import PageNotFound from "./PageNotFound";
+import {HashRouter, Route} from "react-router-dom";
 import Utils from "./Utils";
 
 class App extends React.Component {
@@ -29,6 +31,13 @@ class App extends React.Component {
         $('.open-cart').removeClass('open');
     }
 
+	constructor(props) {
+		super(props);
+
+		this.setPageNotFound = this.setPageNotFound.bind(this);
+
+		this.state = {};
+	}
 
 	componentDidMount() {
 		//Обработчики глобальных событий
@@ -162,12 +171,13 @@ class App extends React.Component {
 		    	Utils.scrollTo();
 		        return false;
 		    });
-
-		    setTimeout(function () {
-		        $('.page-loader').addClass('loaded');
-		    }, CONSTANTS.DELAY_REMOVE_PAGE_LOADER);
-
 		})();		
+	}
+
+	setPageNotFound(is) {
+		this.setState({
+			pageNotFound: is
+		});
 	}
 
 	render() {
@@ -176,13 +186,17 @@ class App extends React.Component {
 			    <div className="page-loader"></div>
 			    <div className="wrapper">
 					<Header categories={this.props.categories} companyInfo={this.props.companyInfo}/>
-                    <Switch>
-    					<Route path="/categories" render={() => <CategoriesPage categories={this.props.categories}/>}/>
-    					<Route path="/products" render={() => <ProductsPage categories={this.props.categories}/>}/>
-    					<Route path="/delivery" render={() => <DeliveryPage/>}/>
-    					<Route path="/contacts" render={() => <ContactsPage/>}/>
-                        <Route render={() => <MainPage categories={this.props.categories}/>}/>
-                    </Switch>
+					<div style={{
+						display: this.state.pageNotFound ? 'none' : 'block'
+					}}>
+						<Route path="/categories" render={() => <CategoriesPage categories={this.props.categories} setPageNotFound={this.setPageNotFound}/>}/>
+						<Route exact path="/products" render={() => <ProductsPage categories={this.props.categories} setPageNotFound={this.setPageNotFound}/>}/>
+						<Route path="/products/:id" render={() => <ProductDetailPage categories={this.props.categories} setPageNotFound={this.setPageNotFound}/>}/>
+						<Route path="/delivery" render={() => <DeliveryPage setPageNotFound={this.setPageNotFound}/>}/>
+						<Route path="/contacts" render={() => <ContactsPage setPageNotFound={this.setPageNotFound}/>}/>
+						<Route exact path="/" render={() => <MainPage categories={this.props.categories} setPageNotFound={this.setPageNotFound}/>}/>
+					</div>
+					{this.state.pageNotFound && <PageNotFound/>}
 					<Footer companyInfo={this.props.companyInfo}/>
 			    </div>
 			</div>

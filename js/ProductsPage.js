@@ -15,6 +15,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 		super(props);
 
 		this.showPreLoader();
+        this.props.setPageNotFound(false);
         this.history = createHashHistory();
         this.minPrice = 0;
         this.maxPrice = 200000;
@@ -65,6 +66,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
         this.disableControls = this.disableControls.bind(this);
         this.setUpColors = this.setUpColors.bind(this);
         this.setQuickViewData = this.setQuickViewData.bind(this);
+        this.blockUpdateSearchParams = this.blockUpdateSearchParams.bind(this);
 
 		this.removeURLChangeListener = this.history.listen(this.onURLChanged);
 
@@ -79,6 +81,10 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
     componentWillUnmount() {
         this.removeURLChangeListener();
         clearInterval(this.timer);
+    }
+
+    blockUpdateSearchParams(isBlock) {
+        this.updateSearchParamsBlocked = isBlock;
     }
 
     setQuickViewData(productId) {
@@ -397,7 +403,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 	}
 
     updateSearchParams(changes) {
-        if (!this.controlsDisabled) {
+        if (!this.controlsDisabled && !this.updateSearchParamsBlocked) {
             const searchParams = new URLSearchParams(this.history.location.search);
             const searchParamsToUpdate = new URLSearchParams(this.history.location.search);
             changes.forEach((change) => {
@@ -466,7 +472,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
         const quickViewData = this.state.quickViewData;
 		return (
 			<div>
-                {quickViewData && <ProductQuickView data={quickViewData} colors={this.colors}/>}
+                {quickViewData && <ProductQuickView data={quickViewData} colors={this.colors} blockUpdateSearchParams={this.blockUpdateSearchParams}/>}
 		        <section className="main-header" style={{backgroundImage: "url(assets/images/gallery-3.jpg)"}}>
 		            <header>
 		                <div className="container">

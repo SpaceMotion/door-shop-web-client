@@ -1,4 +1,6 @@
-export default class ProductQuickView extends React.Component {
+import { withRouter } from "react-router";
+
+export default withRouter(class ProductQuickView extends React.Component {
     constructor(props) {
         super(props);
 
@@ -84,7 +86,16 @@ export default class ProductQuickView extends React.Component {
                             </div>
                             <div className="popup-cell">
                                 <div className="popup-buttons">
-                                    <a href="javascript:void(0);"><span className="icon icon-eye"></span> <span className="hidden-xs">Узнать больше</span></a>
+                                    <a href="javascript:void(0);" onClick={() => {
+                                        this.props.blockUpdateSearchParams(true);
+                                        $.magnificPopup.close();
+                                        this.props.history.push({
+                                            pathname: `/products/${this.props.data.id}`,
+                                            state: {
+                                                data: this.props.data
+                                            }
+                                        });
+                                    }}><span className="icon icon-eye"></span> <span className="hidden-xs">Узнать больше</span></a>
                                     <a href="javascript:void(0);"><span className="icon icon-cart"></span> <span className="hidden-xs">Купить</span></a>
                                 </div>
                             </div>
@@ -95,4 +106,4 @@ export default class ProductQuickView extends React.Component {
             </div>
         );
     }
-}
+});

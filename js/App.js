@@ -8,6 +8,7 @@ import ProductDetailPage from "./ProductDetailPage";
 import DeliveryPage from "./DeliveryPage";
 import ContactsPage from "./ContactsPage";
 import CategoriesPage from "./CategoriesPage";
+import CartActionInfoPlaque from "./CartActionInfoPlaque";
 import PageNotFound from "./PageNotFound";
 import {HashRouter, Route} from "react-router-dom";
 import Utils from "./Utils";
@@ -35,8 +36,22 @@ class App extends React.Component {
 		super(props);
 
 		this.setPageNotFound = this.setPageNotFound.bind(this);
+		this.addCartProduct = this.addCartProduct.bind(this);
+		this.setCartProduct = this.setCartProduct.bind(this);
+		this.removeCartProduct = this.removeCartProduct.bind(this);
+		this.getCartData = this.getCartData.bind(this);
+		this.setCartData = this.setCartData.bind(this);
+		this.setCartActionInfo = this.setCartActionInfo.bind(this);
 
-		this.state = {};
+		this.cartEditFunctions = {
+			addCartProduct: this.addCartProduct,
+			setCartProduct: this.setCartProduct,
+			removeCartProduct: this.removeCartProduct
+		};
+		this.setUpCategoryIcons();
+		this.state = {
+			cartData: this.getCartData().cartData
+		};
 	}
 
 	componentDidMount() {
@@ -55,11 +70,8 @@ class App extends React.Component {
 		    // Global menu variables
 
 		    var objSearch = $('.search-wrapper'),
-		        objCart = $('.cart-wrapper'),
 		        objMenu = $('.floating-menu'),
-		        objMenuLink = $('.floating-menu a'),
 		        $search = $('.open-search'),
-		        $cart = $('.open-cart'),
 		        $menu = $('.open-menu'),
 		        $openDropdown = $('.open-dropdown'),
 		        $close = $('.close-menu');
@@ -72,15 +84,6 @@ class App extends React.Component {
 		        toggleOpen($(this));
 		        objSearch.toggleClass('open');
 		        objSearch.find('input').focus();
-		    });
-
-		    // Open/close cart
-
-		    $cart.on('click', function () {
-		        window.dispatchEvent(new CustomEvent('closeSearch'));
-		    	window.dispatchEvent(new CustomEvent('closeMenuMobile'));
-		        toggleOpen($(this));
-		        objCart.toggleClass('open');
 		    });
 
 		    // Mobile menu open/close
@@ -180,32 +183,220 @@ class App extends React.Component {
 		});
 	}
 
+    getCartData() {
+        return {
+            localStorage: window.localStorage,
+            cartData: JSON.parse(localStorage.getItem('cartData')) || {
+				items: {},
+				count: 0
+			}
+        };
+    }
+
+	setCartData(localStorage, cartData) {
+        localStorage.setItem('cartData', JSON.stringify(cartData));
+		this.setState({cartData});        
+	}
+
+    removeCartProduct(id) {
+		const {localStorage, cartData} = this.getCartData();
+		delete cartData.items[id];
+		if (!Object.keys(cartData.items).length) {
+			window.dispatchEvent(new CustomEvent('closeCart'));
+		}
+		this.calculateCartTotals(cartData);
+		this.setCartData(localStorage, cartData);	
+	}
+	
+	addCartProduct(data) {
+		const cartData = this.getCartData().cartData;
+		this.setCartActionInfo({
+			exists: !!cartData.items[data.id],
+			product: data
+		});
+		data.quantity = 1;
+		this.setCartProduct(data);
+	}
+	
+	calculateCartProductCosts(product) {
+		product.computedPrice = {
+			price: (parseFloat(product.price) * product.quantity).toFixed(2),
+			price_with_discount: (parseFloat(product.price_with_discount) * product.quantity).toFixed(2)
+		};
+	}
+
+    setCartProduct(data) {
+		let {localStorage, cartData} = this.getCartData();
+        cartData.items[data.id] = data;
+		this.calculateCartProductCosts(data);
+		this.calculateCartTotals(cartData);
+		this.setCartData(localStorage, cartData);
+	}
+	
+	calculateCartTotals(cartData) {
+		const items = Object.values(cartData.items);
+		const {totalSum, totalSumDiscount} = items.reduce(({totalSum, totalSumDiscount}, currentItem) => {
+			return {
+				totalSum: totalSum + parseFloat(currentItem.price) * currentItem.quantity,
+				totalSumDiscount: totalSumDiscount + parseFloat(currentItem.price_with_discount) * currentItem.quantity
+			};
+		}, {
+			totalSum: 0,
+			totalSumDiscount: 0
+		});
+		cartData.totalSumDiscount = totalSumDiscount.toFixed(2);
+		cartData.discountValue = (totalSum - totalSumDiscount).toFixed(2);
+		cartData.discountPercent = cartData.discountValue > 0 ? Math.floor(cartData.discountValue / totalSum * 100) : 0;
+		cartData.count = items.length;
+	}
+
+	setCartActionInfo(info) {
+		this.setState({
+			cartActionInfo: info
+		});
+	}
+
+	setUpCategoryIcons() {
+		const categories = this.props.categories;
+		const categoryItems = Object.values(categories);
+		for (let category of categoryItems) {
+			category.computedIconData = {
+				type: category.icon ? 'img' : 'char',
+				value: category.icon || category.icon_code
+			};
+		}
+	}
+	
+	prepareProductData(data, commonData) {
+		const categories = commonData.categories;
+		const colors = commonData.colors;
+		const manufacturers = commonData.manufacturers;
+		const collections = commonData.collections;
+		const currentCategories = data.categories;
+		const currentColors = data.colors;
+		const currentManufacturer = data.manufacturer;
+		const currentCollection = data.collection;
+
+		// Setup categories
+		if (categories && Array.isArray(data.categories)) {
+			data.categories = {};
+			for (let categoryId of currentCategories) {
+				data.categories[categoryId] = categories[categoryId];
+			}
+		}
+
+		// Setup colors
+		if (colors && Array.isArray(data.colors)) {
+			data.colors = {};
+			for (let colorId of currentColors) {
+				data.colors[colorId] = colors[colorId];
+			}
+		}
+
+		// Setup manufacturer
+		if (manufacturers && Number.isInteger(currentManufacturer)) {
+			data.manufacturer = {...manufacturers[currentManufacturer]};
+		}
+
+		// Setup collection
+		if (collections && Number.isInteger(currentCollection)) {
+			data.collection = {...collections[currentCollection]};
+		}
+
+		return data;
+	}
+
+	setUpProductInfoCommonData(callback) {
+        const commonData = {
+            colors: {},
+            manufacturers: {},
+            collections: {}
+        };
+
+        // Colors
+        const colorsDataFetch = new Promise((resolve) => {
+            fetch(`${CONFIG.ROOT_API_URL}/colors`, {
+                headers: new Headers({
+                    'Content-Type': 'application/json'
+                })
+            }).then((response) => {
+                return response.json();
+            }).then((data) => {
+                const colors = data.results;
+                for (let color of colors) {
+                    commonData.colors[color.id] = color;
+                }
+                resolve();
+            });        
+        });
+
+        // Manufacturers
+        const manufacturersDataFetch = new Promise((resolve) => {
+            fetch(`${CONFIG.ROOT_API_URL}/manufacturers`, {
+                headers: new Headers({
+                    'Content-Type': 'application/json'
+                })
+            }).then((response) => {
+                return response.json();
+            }).then((data) => {
+                const manufacturers = data.results;
+                for (let manufacturer of manufacturers) {
+                    commonData.manufacturers[manufacturer.id] = manufacturer;
+                }
+                resolve();
+            });        
+        });
+
+        // Collections
+        const collectionsDataFetch = new Promise((resolve) => {
+            fetch(`${CONFIG.ROOT_API_URL}/collections`, {
+                headers: new Headers({
+                    'Content-Type': 'application/json'
+                })
+            }).then((response) => {
+                return response.json();
+            }).then((data) => {
+                const collections = data.results;
+                for (let collection of collections) {
+                    commonData.collections[collection.id] = collection;
+                }
+                resolve();
+            });    
+        });
+        
+        Promise.all([colorsDataFetch, manufacturersDataFetch, collectionsDataFetch]).then(() => {
+			callback(commonData);
+		});
+    }
+
 	render() {
 		return (
 			<div>
 			    <div className="page-loader"></div>
 			    <div className="wrapper">
-					<Header categories={this.props.categories} companyInfo={this.props.companyInfo}/>
+					<Header categories={this.props.categories} companyInfo={this.props.companyInfo} cartData={this.state.cartData} cartEditFunctions={this.cartEditFunctions}/>
 					<div style={{
 						display: this.state.pageNotFound ? 'none' : 'block'
 					}}>
 						<Route path="/categories" render={() => <CategoriesPage categories={this.props.categories} setPageNotFound={this.setPageNotFound}/>}/>
-						<Route exact path="/products" render={() => <ProductsPage categories={this.props.categories} setPageNotFound={this.setPageNotFound}/>}/>
-						<Route path="/products/:id" render={() => <ProductDetailPage categories={this.props.categories} setPageNotFound={this.setPageNotFound}/>}/>
+						<Route exact path="/products" render={() => <ProductsPage prepareProductData={this.prepareProductData} categories={this.props.categories} setPageNotFound={this.setPageNotFound} cartEditFunctions={this.cartEditFunctions} setUpProductInfoCommonData={this.setUpProductInfoCommonData}/>}/>
+						<Route path="/products/:id" render={() => <ProductDetailPage prepareProductData={this.prepareProductData} categories={this.props.categories} setPageNotFound={this.setPageNotFound} {...this.cartEditFunctions} setUpProductInfoCommonData={this.setUpProductInfoCommonData}/>}/>
 						<Route path="/delivery" render={() => <DeliveryPage setPageNotFound={this.setPageNotFound}/>}/>
 						<Route path="/contacts" render={() => <ContactsPage setPageNotFound={this.setPageNotFound}/>}/>
 						<Route exact path="/" render={() => <MainPage categories={this.props.categories} setPageNotFound={this.setPageNotFound}/>}/>
 					</div>
 					{this.state.pageNotFound && <PageNotFound/>}
 					<Footer companyInfo={this.props.companyInfo}/>
+					{this.state.cartActionInfo && <CartActionInfoPlaque message={this.state.cartActionInfo} updateState={this.setCartActionInfo}></CartActionInfoPlaque>}
 			    </div>
 			</div>
 		);
 	}
 }
 
-const setUpDataPromises = [];
-const appProps = {};
+const appProps = {
+	categories: {}
+};
 
 // Set up categories
 const categoriesPromise = new Promise((resolve) => {
@@ -216,11 +407,13 @@ const categoriesPromise = new Promise((resolve) => {
 	}).then((response) => {
 		return response.json();
 	}).then((data) => {
-		appProps.categories = data.results;
+		const categories = data.results;
+		for (let category of categories) {
+			appProps.categories[category.id] = category;
+		}
 		resolve();
 	});
 });
-setUpDataPromises.push(categoriesPromise);
 
 const companyInfoPromise = new Promise((resolve) => {
 	fetch(`${CONFIG.ROOT_API_URL}/company`, {
@@ -234,8 +427,7 @@ const companyInfoPromise = new Promise((resolve) => {
 		resolve();
 	});		
 });
-setUpDataPromises.push(companyInfoPromise);
 
-Promise.all(setUpDataPromises).then(() => {
+Promise.all([categoriesPromise, companyInfoPromise]).then(() => {
 	ReactDOM.render(<HashRouter><App {...appProps}/></HashRouter>, document.getElementById('app'));
 });

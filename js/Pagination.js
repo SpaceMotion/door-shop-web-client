@@ -31,14 +31,14 @@ export default class Pagination extends React.Component {
             <div className="pagination-wrapper">
                 <ul className="pagination">
                     <li className={previousControlDisabled ? 'disabled' : ''}>
-                        <a href="#" aria-label="Previous" onClick={(event) => {
+                        <a href="#" aria-label="Previous" onClick={event => {
                         	this.onControlItemClick(event, 'previous');
                         }}>
                             <span aria-hidden="true">&laquo;</span>
                         </a>
                     </li>
                     {pages.map((page, idx) => {
-                    	return <li key={idx} className={idx + 1 === activePage ? 'active' : ''}><a href="#" onClick={(event) => {
+                    	return <li key={idx} className={idx + 1 === activePage ? 'active' : ''}><a href="#" onClick={event => {
                     		event.preventDefault();
                             const activePage = idx + 1;
                             if (this.props.activePage !== activePage) {
@@ -51,7 +51,7 @@ export default class Pagination extends React.Component {
                     	}}>{idx + 1}</a></li>;
                     })}
                     <li className={nextControlDisabled ? 'disabled' : ''}>
-                        <a href="#" aria-label="Next" onClick={(event) => {
+                        <a href="#" aria-label="Next" onClick={event => {
                         	this.onControlItemClick(event, 'next');
                         }}>
                             <span aria-hidden="true">&raquo;</span>

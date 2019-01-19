@@ -31,9 +31,7 @@ export default class CategoriesPage extends ReloadPageMixin(React.Component) {
 		                </header>
 
 		                <div className="row">
-		                	{this.props.categories.map((category) => {
-		                		return <CategoriesPageItem key={category.id} {...category}/>;
-		                	})}
+		                	{Object.values(this.props.categories).map(category => <CategoriesPageItem key={category.id} {...category}/>)}
 		                </div>	       
 		            </div>
 		        </section>

@@ -428,50 +428,11 @@ input, textarea, select {
     width: 100%;
     height: 100%;
     line-height: 80px;
-    -moz-transition: all 0.3s;
-    -o-transition: all 0.3s;
-    -webkit-transition: all 0.3s;
-    transition: all 0.3s;
 }
 
 .btn.btn-buy:before {
     font-family: 'LinearIcons';
     content: "\e82e";
-    -moz-transform: translate3d(0, 0, 0);
-    -ms-transform: translate3d(0, 0, 0);
-    -o-transform: translate3d(0, 0, 0);
-    -webkit-transform: translate3d(0, 0, 0);
-    transform: translate3d(0, 0, 0);
-}
-
-.btn.btn-buy:after {
-    font-family: "Montserrat",sans-serif;
-    text-transform: uppercase;
-    font-weight: 600;
-    content: attr(data-text);
-    -moz-transform: translate3d(0, 100%, 0);
-    -ms-transform: translate3d(0, 100%, 0);
-    -o-transform: translate3d(0, 100%, 0);
-    -webkit-transform: translate3d(0, 100%, 0);
-    transform: translate3d(0, 100%, 0);
-}
-
-.btn.btn-buy:hover:before {
-    font-family: 'LinearIcons';
-    content: "\e82e";
-    -moz-transform: translate3d(0, 100%, 0);
-    -ms-transform: translate3d(0, 100%, 0);
-    -o-transform: translate3d(0, 100%, 0);
-    -webkit-transform: translate3d(0, 100%, 0);
-    transform: translate3d(0, 100%, 0);
-}
-
-.btn.btn-buy:hover:after {
-    -moz-transform: translate3d(0, 0, 0);
-    -ms-transform: translate3d(0, 0, 0);
-    -o-transform: translate3d(0, 0, 0);
-    -webkit-transform: translate3d(0, 0, 0);
-    transform: translate3d(0, 0, 0);
 }
 
 /*  
@@ -730,6 +691,56 @@ header .text p:last-child {
     11. Main navigation
     ----------------------------------
 */
+
+.cart-info-plaque {
+    background-color: black;
+    border-top: 1px solid #ffbb00;
+    color: #ffbb00;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 999;
+    pointer-events: none;
+    transform: translateY(100%);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .5s;
+}
+
+.cart-info-plaque_state_opened {
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.cart-info-plaque__message {
+    font-size: 2rem;
+    margin-right: 20px;
+}
+
+.cart-info-plaque__action_type_show-cart {
+    border-color: #ffbb00;
+    border-radius: 3px;
+}
+
+.cart-info-plaque__action_type_show-cart:hover {
+    color: black;
+    background-color: #ffbb00;
+}
+
+@media (max-width: 768px) {
+    .cart-info-plaque {
+        flex-direction: column;
+    }
+
+    .cart-info-plaque__message {
+        font-size: 1.5rem;
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+}
+
 nav {
     position: absolute;
     background-color: black;
@@ -1646,7 +1657,9 @@ nav .cart-wrapper {
     max-width: 500px;
     background: #eeeeee;
     border: 1px solid #ffbb00;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: calc(100vh - 100px);
 }
 
 nav .cart-wrapper .checkout {
@@ -1678,7 +1691,12 @@ nav .cart-wrapper .checkout .cart-block {
     width: 48%;
     float: left;
     margin: 1%;
-    display: block;
+}
+
+nav .cart-wrapper .checkout .cart-block-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 nav .cart-wrapper .checkout .cart-block > div {
@@ -1688,16 +1706,66 @@ nav .cart-wrapper .checkout .cart-block > div {
 nav .cart-wrapper .checkout .cart-block > div.image {
     width: initial;
     float: left;
+    width: 100%;
+    margin-bottom: 10px;
 }
 
-nav .cart-wrapper .checkout .cart-block > div.title {
+nav .cart-wrapper .checkout .cart-block > div.image > a {
+    display: block;
+    width: 100%;
+}
+
+nav .cart-wrapper .checkout .cart-block > div.image .f-icon {
+    width: 100%;
+    height: 200px;
+    background: center center / contain no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+nav .cart-wrapper .checkout .cart-block > div.image .f-icon {
+    font-size: 125px;
+}    
+
+@media (min-width: 992px) {
+    nav .cart-wrapper .checkout .cart-block > div.image .f-icon {
+        font-size: 200px;
+    }    
+}
+
+nav .cart-wrapper .checkout .cart-block div.title {
     padding-left: 0;
     width: 100%;
 }
 
-nav .cart-wrapper .checkout .cart-block > div.quantity, nav .cart-wrapper .checkout .cart-block > div.price {
-    width: 50%;
-    float: left;
+.cart-wrapper__row.cart-wrapper__row.cart-wrapper__row.cart-wrapper__row {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    width: 100%;
+    padding: 0;
+}
+
+.cart-wrapper__row_type_quantity-price > .quantity {
+    width: 40%;
+}
+
+.cart-wrapper__row_type_quantity-price > .price {
+    width: 55%;
+}
+
+.cart-wrapper__items-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.cart-wrapper .form-control {
+    padding: 12px 10px;
+}
+
+.cart-wrapper__row > .price {
+    flex-shrink: 0;
 }
 
 nav .cart-wrapper .checkout .cart-block > div.quantity {
@@ -1706,12 +1774,11 @@ nav .cart-wrapper .checkout .cart-block > div.quantity {
 }
 
 nav .cart-wrapper .checkout .cart-block > div.quantity .form-control {
-    width: 60px;
     height: inherit;
 }
 
 nav .cart-wrapper .checkout .cart-block > div.price {
-    padding-right: 10px;
+    padding: 0;
 }
 
 nav .cart-wrapper .checkout .cart-block.cart-block-footer {
@@ -1733,6 +1800,27 @@ nav .cart-wrapper .checkout .cart-block .icon-delete {
 
 nav .cart-wrapper .checkout .cart-block-buttons {
     margin: 20px 0;
+}
+
+.cart-block-buttons__container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+@media (max-width: 420px) {
+    .cart-block-buttons__container > * {
+        min-width: 100%;
+    }    
+}
+
+.cart-block-buttons__container > *:first-child {
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.cart-block-buttons__container > * a {
+    display: block;
 }
 
 nav .cart-wrapper.open .checkout {
@@ -3028,10 +3116,6 @@ nav .cart-wrapper.open {
     font-size: 10px;
     line-height: 21px;
     color: black;
-}
-
-.color-btn:hover {
-    cursor: pointer;
 }
 
 .color-btn::before {
@@ -4851,7 +4935,7 @@ nav .cart-wrapper.open {
         width: 45%;
     }
     .checkout .cart-block > div:nth-child(3) {
-        width: 10%;
+        /*width: 10%;*/
     }
     .checkout .cart-block > div:nth-child(4) {
         width: 30%;
@@ -4869,7 +4953,7 @@ nav .cart-wrapper.open {
         margin: 0;
     }
     .checkout .cart-block .price {
-        padding-right: 30px;
+        /*padding-right: 30px;*/
     }
     .checkout .cart-block .price > span {
         display: block;

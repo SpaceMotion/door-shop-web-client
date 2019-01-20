@@ -13,8 +13,8 @@ export default class Filters extends React.Component {
         });
         $("#range-price-slider").ionRangeSlider({
             type: "double",
-            min: this.props.minPrice,
-            max: this.props.maxPrice,
+            min: this.props.filters.price.from,
+            max: this.props.filters.price.to,
             prefix: String.fromCharCode(8381),
             onFinish: function (data) {
                 filters.props.updateState([{
@@ -46,20 +46,17 @@ export default class Filters extends React.Component {
 
 	render() {
         const priceSliderDOM = this.priceSliderDOM;
+        const manufacturers = this.props.filters.manufacturers;
+        const collections = this.props.filters.collections;
+        const noSelectedManufacturers = manufacturers.length === 0;
+
         if (priceSliderDOM) {
+            const price = this.props.filters.price;
             priceSliderDOM.update({
-                from: this.props.filters.price.from || this.props.minPrice,
-                to: this.props.filters.price.to || this.props.maxPrice,
+                from: price.from,
+                to: price.to,
             });            
         }
-
-        const manufacturers = this.props.filters.manufacturers;
-        const manufacturersCheckedIds = manufacturers.map((manufacturer) => {
-            return manufacturer.checked ? manufacturer.id : null;
-        });
-        const isManufacturersAnyChecked = manufacturers.find((manufacturer) => {
-            return manufacturer.any && manufacturer.checked;
-        });
 
 		return (
             <div id="filters" className="filters">
@@ -77,12 +74,16 @@ export default class Filters extends React.Component {
                         Производитель
                     </div>
                     <div className="filter-content">
-                    	{this.props.filters.manufacturers.map((manufacturer, idx) => {
-	                        return <FormInput key={idx} label={manufacturer.name} any={manufacturer.any} type="checkbox" updateState={(state) => {
+                        <FormInput label="Любой" type="checkbox" any={true} updateState={state => {
+                            state.key = 'manufacturer';
+                            this.props.updateState([state]);
+                        }} checked={noSelectedManufacturers}/>
+                    	{Object.values(this.props.manufacturers).map(manufacturer => {
+	                        return <FormInput key={manufacturer.id} label={manufacturer.name} type="checkbox" updateState={state => {
                                 state.key = 'manufacturer';
                                 state.value = manufacturer.id;
 								this.props.updateState([state]);
-	                        }} checked={manufacturer.checked}/>;
+	                        }} checked={manufacturers.includes(manufacturer.id)}/>;
                     	})}
                     </div>
                 </div>
@@ -92,12 +93,16 @@ export default class Filters extends React.Component {
                         Коллекция
                     </div>
                     <div className="filter-content">
-                        {this.props.filters.collections.map((collection, idx) => {
-                            return collection.any || isManufacturersAnyChecked || manufacturersCheckedIds.includes(collection.manufacturer) ? <FormInput key={idx} label={collection.name} type="checkbox" any={collection.any} updateState={(state) => {
+                        <FormInput label="Любая" type="checkbox" any={true} updateState={state => {
+                            state.key = 'collection';
+                            this.props.updateState([state]);
+                        }} checked={collections.length === 0}/>
+                        {Object.values(this.props.collections).map(collection => {
+                            return (noSelectedManufacturers || manufacturers.includes(collection.manufacturer)) && <FormInput key={collection.id} label={collection.name} type="checkbox" updateState={state => {
                                 state.key = 'collection';
                                 state.value = collection.id;
                                 this.props.updateState([state]);
-                            }} checked={collection.checked}/> : null;
+                            }} checked={collections.includes(collection.id)}/>;
                         })}
                     </div>
                 </div>

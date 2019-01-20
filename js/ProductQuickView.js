@@ -1,12 +1,6 @@
 import { withRouter } from "react-router";
 
 export default withRouter(class ProductQuickView extends React.Component {
-    constructor(props) {
-        super(props);
-
-        this.state = {};
-    }
-
     componentDidMount() {
         $(`*[data-product-id="${this.props.data.id}"] .owl-product-gallery`).owlCarousel({
             autoHeight: true,
@@ -23,15 +17,18 @@ export default withRouter(class ProductQuickView extends React.Component {
     }
 
     render() {
-        const colors = this.props.colors;
+        const data = this.props.data;
+        const manufacturerName = data.manufacturer && data.manufacturer.name;
+        const collectionName = data.collection && data.collection.name;
+        const roubleIcon = String.fromCharCode(8381);
 
         return (
-            <div data-product-id={this.props.data.id.toString()}>
+            <div data-product-id={this.props.data.id}>
                 <div className="popup-main mfp-hide">
                     <div className="product">
 
                         <div className="popup-title">
-                            <div className="h1 title">{this.props.data.name}<small>{this.props.data.collectionName || this.props.data.manufacturerName}</small></div>
+                            <div className="h1 title">{this.props.data.name}<small>{collectionName || manufacturerName}</small></div>
                         </div>
 
                         <div className="owl-product-gallery">
@@ -47,13 +44,13 @@ export default withRouter(class ProductQuickView extends React.Component {
                                 <div className="row">
 
                                     <div className="col-sm-6">
-                                        {this.props.data.manufacturerName && <div className="info-box">
+                                        {manufacturerName && <div className="info-box">
                                             <strong>Производитель&nbsp;</strong>
-                                            <span>{this.props.data.manufacturerName}</span>
+                                            <span>{manufacturerName}</span>
                                         </div>}
-                                        {this.props.data.collectionName && <div className="info-box">
+                                        {collectionName && <div className="info-box">
                                             <strong>Коллекция</strong>
-                                            <span>{this.props.data.collectionName}</span>
+                                            <span>{collectionName}</span>
                                         </div>}
                                     </div>
 
@@ -61,13 +58,9 @@ export default withRouter(class ProductQuickView extends React.Component {
                                         <div className="info-box">
                                             <strong>Доступные цвета</strong>
                                             <div className="product-colors clearfix">
-                                                {this.props.data.colors.map((colorId) => {
-                                                    const hex = colors[colorId].value;
-                                                    return <span key={hex} onClick={() => {
-                                                        this.setState({colorId});
-                                                    }} className={`color-btn ${this.state.colorId === colorId ? 'checked' : ''}`} style={{
-                                                        backgroundColor: `#${hex}`,
-                                                        borderColor: `#${hex}`
+                                                {Object.values(this.props.data.colors).map((color) => {
+                                                    return <span key={color.value} className="color-btn" style={{
+                                                        backgroundColor: `#${color.value}`
                                                     }}></span>;
                                                 })}
                                             </div>
@@ -81,12 +74,13 @@ export default withRouter(class ProductQuickView extends React.Component {
                         <div className="popup-table">
                             <div className="popup-cell">
                                 <div className="price">
-                                    <span className="h3">{`${String.fromCharCode(8381)} ${(+this.props.data.price_with_discount).toFixed(2)}`}<small>{this.props.data.price_with_discount !== this.props.data.price ? `${String.fromCharCode(8381)} ${(+this.props.data.price).toFixed(2)}` : null}</small></span>
+                                    <span className="h3">{`${roubleIcon} ${(+this.props.data.price_with_discount).toFixed(2)}`}<small>{this.props.data.price_with_discount !== this.props.data.price ? `${roubleIcon} ${(+this.props.data.price).toFixed(2)}` : null}</small></span>
                                 </div>
                             </div>
                             <div className="popup-cell">
                                 <div className="popup-buttons">
-                                    <a href="javascript:void(0);" onClick={() => {
+                                    <a href="#" onClick={event => {
+                                        event.preventDefault();
                                         this.props.blockUpdateSearchParams(true);
                                         $.magnificPopup.close();
                                         this.props.history.push({
@@ -96,7 +90,10 @@ export default withRouter(class ProductQuickView extends React.Component {
                                             }
                                         });
                                     }}><span className="icon icon-eye"></span> <span className="hidden-xs">Узнать больше</span></a>
-                                    <a href="javascript:void(0);"><span className="icon icon-cart"></span> <span className="hidden-xs">Купить</span></a>
+                                    <a href="#" onClick={event => {
+                                        event.preventDefault();
+                                        this.props.addCartProduct(this.props.data);
+                                    }}><span className="icon icon-cart"></span> <span className="hidden-xs">Купить</span></a>
                                 </div>
                             </div>
                         </div>

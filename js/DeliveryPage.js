@@ -5,7 +5,6 @@ export default class DeliveryPage extends ReloadPageMixin(React.Component) {
 		super(props);
 
 		this.showPreLoader();
-		this.props.setPageNotFound(false);
 	}
 
 	componentDidMount() {

@@ -9,28 +9,30 @@ export default class Cart extends React.Component {
     }
 
     render() {
-        const products = this.props.data.items;
+        const products = this.props.data.storage.products;
+        const cartLocal = this.props.data.local;
+        const productsLocal = cartLocal.products;
+        const manufacturers = this.props.manufacturers;
+        const collections = this.props.collections;
 
         return (
             <div className="cart-wrapper">
-                <div className="checkout">
+                {cartLocal.processing ? <div className="cart-preloader"></div> : <div className="checkout">
                     <div className="clearfix">
                         <div className="row cart-wrapper__items-container">
                             {Object.keys(products).map(productId => {
-                                const product = products[productId];
+                                const quantity = products[productId].quantity;
+                                const product = productsLocal[productId];
                                 const productDetailURL = `/products/${productId}`;
-                                let previewImg = product.images[0];
-                                previewImg = previewImg && {
-                                    type: 'img',
-                                    value: previewImg.preview || previewImg.full
-                                } || product.categories[Object.keys(product.categories)[0]].computedIconData;
+                                const previewImgType = /^http/.test(product.preview) ? 'img' : 'char';
+                                const totalPrice = productsLocal[productId].totalPrice;
 
                                 return (
                                     <div key={productId} className="cart-block cart-block-item clearfix">
                                         <div className="image">
                                             <Link to={productDetailURL}>
-                                                <div className="f-icon" style={{backgroundImage: previewImg.type === 'img' ? `url(${previewImg.value})` : 'none'}}>
-                                                    {previewImg.type === 'char' ? String.fromCharCode(previewImg.value) : ''}
+                                                <div className="f-icon" style={{backgroundImage: previewImgType === 'img' ? `url(${product.preview})` : 'none'}}>
+                                                    {previewImgType === 'char' ? String.fromCharCode(product.preview) : ''}
                                                 </div>                                                    
                                             </Link>
 
@@ -38,19 +40,18 @@ export default class Cart extends React.Component {
                                                 <div>
                                                     <Link to={productDetailURL}>{product.name}</Link>
                                                 </div>
-                                                <small>{product.collection && product.collection.name || product.manufacturer && product.manufacturer.name}&nbsp;</small>
+                                                <small>{product.collection && collections.get(product.collection).name || product.manufacturer && manufacturers.get(product.manufacturer).name}&nbsp;</small>
                                             </div>
                                         </div>
                                         <div className="cart-wrapper__row cart-wrapper__row_type_quantity-price">
                                             <div className="quantity">
-                                                <input type="number" min="1" onChange={(event) => {
-                                                    product.quantity = Math.abs(Utils.parseValueToInt(event.target.value, product.quantity));
-                                                    this.props.setCartProduct(product);
-                                                }} value={product.quantity} className="form-control form-quantity" />
+                                                <input type="number" min="1" onChange={event => {
+                                                    this.props.onCartProductQuantityChanged(productId, Math.abs(Utils.parseValueToInt(event.target.value, quantity)));
+                                                }} value={quantity} className="form-control form-quantity" />
                                             </div>
                                             <div className="price">
-                                                <span className="final">{this.roubleIcon}&nbsp;{product.computedPrice.price_with_discount}</span>
-                                                {product.computedPrice.price_with_discount !== product.computedPrice.price && <span className="discount">{this.roubleIcon}&nbsp;{product.computedPrice.price}</span>}
+                                                <span className="final">{this.roubleIcon}&nbsp;{totalPrice.price_with_discount}</span>
+                                                {totalPrice.price_with_discount !== totalPrice.price && <span className="discount">{this.roubleIcon}&nbsp;{totalPrice.price}</span>}
                                             </div>
                                         </div>
                                         <span className="icon icon-cross icon-delete" onClick={() => {
@@ -61,16 +62,16 @@ export default class Cart extends React.Component {
                             })}
                         </div>
 
-                        {this.props.data.discountPercent > 0 && (
+                        {cartLocal.discountPercent > 0 && (
                             <div>
                                 <hr />
                                 <div className="clearfix">
                                     <div className="cart-block cart-block-footer clearfix">
                                         <div>
-                                            <strong>Скидка {this.props.data.discountPercent}%</strong>
+                                            <strong>Скидка {cartLocal.discountPercent}%</strong>
                                         </div>
                                         <div>
-                                            <span>{`${this.roubleIcon} ${this.props.data.discountValue}`}</span>
+                                            <span>{`${this.roubleIcon} ${cartLocal.discountValue}`}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -85,7 +86,7 @@ export default class Cart extends React.Component {
                                     <strong>К оплате</strong>
                                 </div>
                                 <div>
-                                    <div className="h4 title">{`${this.roubleIcon} ${this.props.data.totalSumDiscount}`}</div>
+                                    <div className="h4 title">{`${this.roubleIcon} ${cartLocal.totalSumDiscount}`}</div>
                                 </div>
                             </div>
                         </div>
@@ -99,15 +100,12 @@ export default class Cart extends React.Component {
                                     }} className="btn btn-clean-dark">Продолжить покупки</a>
                                 </div>
                                 <div className="text-right">
-                                    <a href="#" onClick={event => {
-                                        event.preventDefault();
-                                    }} className="btn btn-main"><span className="icon icon-cart"></span> Оформить заказ</a>
+                                    <Link to="/order" className="btn btn-main"><span className="icon icon-cart"></span> Оформить заказ</Link>
                                 </div>
                             </div>
                         </div>
-
                     </div>
-                </div>
+                </div>}
             </div>
         );
     }

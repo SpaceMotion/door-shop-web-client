@@ -1,9 +1,12 @@
 import Cart from "./Cart";
 import {Link} from "react-router-dom";
-import ReloadPageMixin from "./ReloadPageMixin";
 
-export default class Header extends ReloadPageMixin(React.Component) {
+export default class Header extends React.Component {
 	render() {
+		const cart = this.props.cart;
+		const productsCount = Object.keys(cart.storage.products).length;
+		const phone = this.props.companyInfo.phone;
+
 		return (
 	        <nav className="navbar-fixed header-nav">
 	            <div className="container">
@@ -11,22 +14,17 @@ export default class Header extends ReloadPageMixin(React.Component) {
 	                    <ul>
 	                        <li><a href="#" onClick={event => {
 								event.preventDefault();
-							}} className="open-search"><i className="icon icon-magnifier"></i></a></li>
+							}} className="open-search" style={{display: 'none'}}><i className="icon icon-magnifier"></i></a></li>
 	                        <li><a href="#" onClick={event => {
 								event.preventDefault();
-								if (Object.keys(this.props.cartData.items).length) {
-									window.dispatchEvent(new CustomEvent('closeSearch'));
-									window.dispatchEvent(new CustomEvent('closeMenuMobile'));
-									$('.open-cart').toggleClass('open');
-									$('.cart-wrapper').toggleClass('open');	
-								}
-							}} className="open-cart"><i className="icon icon-cart"></i> <span>{this.props.cartData.count}</span></a></li>
+								this.props.toggleCartHandler();
+							}} className="open-cart"><i className="icon icon-cart"></i> <span>{productsCount}</span></a></li>
 	                    </ul>
 	                </div>
 	                <div className="navigation navigation-main">
 	                	<div className="logo-phone">
 							<Link to="/"><img src="assets/images/logo.png" alt="Логотип компании" style={{marginRight: '10px', width: '130px'}}/></Link>
-							<a href={`tel:${this.props.companyInfo.phone}`} style={{color: 'white'}}>{this.props.companyInfo.phone}</a>
+							<a href={`tel:${phone}`} style={{color: 'white'}}>{phone}</a>
 	                	</div>
 	                    <a href="#" onClick={event => {
 							event.preventDefault();
@@ -47,7 +45,7 @@ export default class Header extends ReloadPageMixin(React.Component) {
 	                                        <div className="box-2">
 	                                            <div className="box clearfix">
 	                                                <ul>
-	                                                	{Object.values(this.props.categories).map(category => (
+	                                                	{[...this.props.categories.values()].map(category => (
 															<li key={category.id}>
 																<Link to={`/products?category=${category.id}`}>{category.name}</Link>
 															</li>
@@ -86,7 +84,7 @@ export default class Header extends ReloadPageMixin(React.Component) {
 	                    </div>
 	                </div>
 					
-					<Cart data={this.props.cartData} {...this.props.cartEditFunctions}/>
+					<Cart data={cart} manufacturers={this.props.manufacturers} collections={this.props.collections} onCartProductQuantityChanged={this.props.onCartProductQuantityChanged} removeCartProduct={this.props.removeCartProduct}/>
 	            </div>
 	        </nav>
 		);

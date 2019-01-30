@@ -37,19 +37,17 @@ export default class Pagination extends React.Component {
                             <span aria-hidden="true">&laquo;</span>
                         </a>
                     </li>
-                    {pages.map((page, idx) => {
-                    	return <li key={idx} className={idx + 1 === activePage ? 'active' : ''}><a href="#" onClick={event => {
-                    		event.preventDefault();
-                            const activePage = idx + 1;
-                            if (this.props.activePage !== activePage) {
-                                this.props.updateState([{
-                                    key: 'page',
-                                    value: activePage,
-                                    operationType: 'update'
-                                }]);
-                            }
-                    	}}>{idx + 1}</a></li>;
-                    })}
+                    {pages.map((page, idx) => <li key={idx} className={idx + 1 === activePage ? 'active' : ''}><a href="#" onClick={event => {
+                        event.preventDefault();
+                        const activePage = idx + 1;
+                        if (this.props.activePage !== activePage) {
+                            this.props.updateState([{
+                                key: 'page',
+                                value: activePage,
+                                operationType: 'update'
+                            }]);
+                        }
+                    }}>{idx + 1}</a></li>)}
                     <li className={nextControlDisabled ? 'disabled' : ''}>
                         <a href="#" aria-label="Next" onClick={event => {
                         	this.onControlItemClick(event, 'next');

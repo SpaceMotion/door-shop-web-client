@@ -15,7 +15,6 @@ export default (superclass) => class ReloadPageMixin extends superclass {
 
 	hidePreLoader() {
 		setTimeout(() => {
-			$(document).scrollTop(0);
 			$('html').css('overflow', 'auto');
 			$('.page-loader').addClass('loaded');
 		}, CONSTANTS.DELAY_REMOVE_PAGE_LOADER);

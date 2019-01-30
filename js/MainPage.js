@@ -7,7 +7,6 @@ export default class MainPage extends ReloadPageMixin(React.Component) {
 		super(props);
 
 		this.showPreLoader();
-		this.props.setPageNotFound(false);
 	}
 
 	componentDidMount() {
@@ -56,7 +55,7 @@ export default class MainPage extends ReloadPageMixin(React.Component) {
 	        }
 	    });
 
-	    const categoriesCount = Object.keys(this.props.categories).length;
+	    const categoriesCount = this.props.categories.size;
     	let itemsDesktop = 4;
     	let itemsDesktopSmall = 4;
     	let itemsTablet = 3;
@@ -109,7 +108,7 @@ export default class MainPage extends ReloadPageMixin(React.Component) {
 		            <div className="container">
 
 		                <div className="owl-icons">
-		                	{Object.values(this.props.categories).map(category => (
+		                	{[...this.props.categories.values()].map(category => (
 								<Link to={`/products?category=${category.id}`} key={category.id}>
 									<figure>
 										<i className="f-icon" style={{backgroundImage: category.icon ? `url(${category.icon})` : 'none'}}>{category.icon_code && !category.icon ? String.fromCharCode(category.icon_code) : ''}</i>

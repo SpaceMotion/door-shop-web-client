@@ -1,3 +1,4 @@
+import React from "react";
 import FormInput from "./FormInput";
 
 export default class Filters extends React.Component {

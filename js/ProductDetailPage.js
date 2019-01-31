@@ -1,6 +1,6 @@
+import React from "react";
 import ReloadPageMixin from "./ReloadPageMixin";
 import {Link, withRouter} from "react-router-dom";
-import CONFIG from "./config";
 import DataService from "./DataService";
 
 export default withRouter(class ProductDetailPage extends ReloadPageMixin(React.Component) {

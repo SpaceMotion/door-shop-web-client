@@ -1,3 +1,4 @@
+import React from "react";
 import Filters from "./Filters";
 import SortBar from "./SortBar";
 import Pagination from "./Pagination";

@@ -1,3 +1,4 @@
+import React from "react";
 import CategoriesPageItem from "./CategoriesPageItem";
 import ReloadPageMixin from "./ReloadPageMixin";
 

@@ -1,3 +1,4 @@
+import React from "react";
 import ReloadPageMixin from "./ReloadPageMixin";
 
 export default class ContactsPage extends ReloadPageMixin(React.Component) {

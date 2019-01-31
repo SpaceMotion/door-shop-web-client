@@ -1,3 +1,4 @@
+import React from "react";
 import ReloadPageMixin from "./ReloadPageMixin";
 
 export default class DeliveryPage extends ReloadPageMixin(React.Component) {

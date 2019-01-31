@@ -12,7 +12,8 @@ module.exports = (env) => {
 				entry: './js/App.js',
 				output: {
 					path: path.resolve(__dirname, 'bundle'),
-					filename: 'bundle.js'
+					filename: 'bundle.js',
+					publicPath: `${vars.URI_PREFIX}bundle`
 				},
 				watch: true,
 				devtool: 'cheap-inline-module-source-map',
@@ -44,7 +45,8 @@ module.exports = (env) => {
 				entry: './js/App.js',
 				output: {
 					path: path.resolve(__dirname, 'bundle'),
-					filename: 'bundle.js'
+					filename: 'bundle.js',
+					publicPath: `${vars.URI_PREFIX}bundle`
 				},
 				watch: true,
 				devtool: 'cheap-inline-module-source-map',
@@ -59,7 +61,14 @@ module.exports = (env) => {
 							}
 						}]
 					}]
-				}
+				},
+				plugins: [
+					new htmlWebpackPlugin({
+						template: 'index_dev.html',
+						filename: '../index.html',
+						vars
+					})
+				]
 			};
 			break;
 	}

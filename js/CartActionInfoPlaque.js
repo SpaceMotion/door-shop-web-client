@@ -1,3 +1,4 @@
+import React from "react";
 import CONSTANTS from "./constants";
 
 export default class CartActionInfoPlaque extends React.Component {

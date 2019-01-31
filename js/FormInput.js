@@ -1,3 +1,5 @@
+import React from "react";
+
 export default class FormInput extends React.Component {
 	render() {
         const any = this.props.any;

@@ -1,3 +1,4 @@
+import React from "react";
 import ReloadPageMixin from "./ReloadPageMixin";
 
 export default class PageNotFound extends ReloadPageMixin(React.Component) {

@@ -1,3 +1,4 @@
+import React from "react";
 import ReloadPageMixin from "./ReloadPageMixin";
 
 export default class ContactsPage extends ReloadPageMixin(React.Component) {
@@ -5,7 +6,6 @@ export default class ContactsPage extends ReloadPageMixin(React.Component) {
 		super(props);
 
 		this.showPreLoader();
-		this.props.setPageNotFound(false);
 	}
 
 	componentDidMount() {
@@ -14,7 +14,7 @@ export default class ContactsPage extends ReloadPageMixin(React.Component) {
 
 	render() {
 		return (
-	        <section className="main-header" style={{backgroundImage: "url(assets/images/gallery-3.jpg)"}}></section>
+	        <section className="main-header" style={{backgroundImage: "url(%URI_PREFIX%assets/images/gallery-3.jpg)"}}></section>
 		);
 	}
 }

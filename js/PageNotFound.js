@@ -1,4 +1,17 @@
-export default class PageNotFound extends React.Component {
+import React from "react";
+import ReloadPageMixin from "./ReloadPageMixin";
+
+export default class PageNotFound extends ReloadPageMixin(React.Component) {
+    constructor(props) {
+        super(props);
+
+        this.showPreLoader();
+    }
+
+    componentDidMount() {
+        this.hidePreLoader();
+    }
+
     render() {
         return (
             <section className="not-found">

@@ -1,6 +1,7 @@
+import React from "react";
 import ReloadPageMixin from "./ReloadPageMixin";
 import {Link, withRouter} from "react-router-dom";
-import CONFIG from "./config";
+import DataService from "./DataService";
 
 export default withRouter(class ProductDetailPage extends ReloadPageMixin(React.Component) {
     constructor(props) {
@@ -9,16 +10,15 @@ export default withRouter(class ProductDetailPage extends ReloadPageMixin(React.
         this.onURLChanged = this.onURLChanged.bind(this);
         
         this.showPreLoader();
-        this.state = {
-            data: {}
-        };
-        this.props.setUpProductInfoCommonData(commonData => {
-            this.commonData = commonData;
+        this.state = {};
+        this.lastRequestId = 0;
+        DataService.getComplex(data => {
             this.dataIsReady = true;
-            if (this.lastURLChangeLocation) {
-                this.onURLChanged(this.lastURLChangeLocation);
-            }
-        });
+            this.colors = data[0].results;
+            this.manufacturers = data[1].results;
+            this.collections = data[2].results;
+            this.onURLChanged(this.props.location);
+        }, ['getColors', 'getManufacturers', 'getCollections']);
         this.removeURLChangeListener = this.props.history.listen(this.onURLChanged);
     }
 
@@ -33,48 +33,35 @@ export default withRouter(class ProductDetailPage extends ReloadPageMixin(React.
     onURLChanged(location) {
         if (/^\/products\/\d+/.test(location.pathname)) {
             this.showPreLoader();
+            this.setState({
+                data: null
+            });
             if (this.dataIsReady) {
                 const routeState = location.state;
                 let data = routeState && routeState.data;
-                this.setState({
-                    data: {}
-                });
                 if (data) {
-                    this.setDataAndUpdateUI(data);
+                    this.onDataUpdated(data);
                 } else {
-                    const productId = this.props.match.params.id;
-                    fetch(`${CONFIG.ROOT_API_URL}/products/${productId}/`, {
-                        headers: new Headers({
-                            'Content-Type': 'application/json'
-                        })
-                    }).then((response) => {
-                        if (response.status === 404) {
-                            return Promise.reject();
+                    const lastRequestId = ++this.lastRequestId;
+                    DataService.getProducts(data => {
+                        if (lastRequestId === this.lastRequestId) {
+                            this.lastRequestId = 0;
+                            this.onDataUpdated(data);
                         }
-                        return response.json();
-                    }).then((data) => {
-                        this.setDataAndUpdateUI(data);
-                    }, () => {
-                        this.props.setPageNotFound(true);
-                        this.hidePreLoader();
+                    }, {
+                        id: this.props.match.params.id
                     });
                 }
-            } else {
-                this.lastURLChangeLocation = location;
             }            
         }
     }
     
-    setDataAndUpdateUI(data) {
-        const commonData = this.commonData;
-        this.props.prepareProductData(data, {
-            categories: this.props.categories,
-            colors: commonData.colors,
-            manufacturers: commonData.manufacturers,
-            collections: commonData.collections    
-        });
-        this.setState({data}, () => {
-            this.initGallery();
+    onDataUpdated(data) {
+        const not_found = !!!data;
+        this.setState({data, not_found}, () => {
+            if (!not_found) {
+                this.initGallery();                
+            }
             this.hidePreLoader();
         });
     }
@@ -115,13 +102,22 @@ export default withRouter(class ProductDetailPage extends ReloadPageMixin(React.
 
     render() {
         const data = this.state.data;
+
+        if (!data) {
+            return null;
+        }
+
         const price = data.price;
         const discountPrice = data.price_with_discount;
         const roubleIcon = String.fromCharCode(8381);
+        const categories = this.props.categories;
+        const collections = this.collections;
+        const manufacturers = this.manufacturers;
+        const colors = this.colors;
 
         return (
             <div>
-                <section className="main-header" style={{backgroundImage: "url(assets/images/gallery-2.jpg)"}}>
+                <section className="main-header" style={{backgroundImage: "url(%URI_PREFIX%assets/images/gallery-2.jpg)"}}>
                     <header>
                         <div className="container">
                             <h1 className="h2 title">Описание товара</h1>
@@ -129,12 +125,10 @@ export default withRouter(class ProductDetailPage extends ReloadPageMixin(React.
                                 <li>
                                     <Link to="/"><span className="icon icon-home"></span></Link>
                                 </li>
-                                {this.state.data.categories && this.state.data.categories[0] && <li>
-                                    <Link to={`/products?category=${this.state.data.categories[0].id}`}>{this.state.data.categories[0].name}</Link>
+                                {data.categories && <li>
+                                    <Link to={`/products?category=${data.categories[0]}`}>{categories.get(data.categories[0]).name}</Link>
                                 </li>}
-                                <li>
-                                    {this.state.data.name}
-                                </li>
+                                <li>{data.name}</li>
                             </ol>
                         </div>
                     </header>
@@ -147,8 +141,8 @@ export default withRouter(class ProductDetailPage extends ReloadPageMixin(React.
                                 <div className="col-md-4 col-sm-12 product-flex-info">
                                     <div className="clearfix">
                                         <h1 className="title">
-                                            {this.state.data.name}
-                                            {this.state.data.collection && <small>{this.state.data.collection.name}</small>}
+                                            {data.name}
+                                            {data.collection && <small>{collections.get(data.collection).name}</small>}
                                         </h1>
                                         <div className="clearfix">
                                             <div className="price">
@@ -158,22 +152,22 @@ export default withRouter(class ProductDetailPage extends ReloadPageMixin(React.
                                                 </span>
                                             </div>
                                             <hr />
-                                            {this.state.data.manufacturer && <div className="info-box">
+                                            {data.manufacturer && <div className="info-box">
                                                 <span><strong>Производитель&nbsp;</strong></span>
-                                                <span>{this.state.data.manufacturer.name}</span>
+                                                <span>{manufacturers.get(data.manufacturer).name}</span>
                                             </div>}
-                                            {this.state.data.collection && <div className="info-box">
+                                            {data.collection && <div className="info-box">
                                                 <span><strong>Коллекция&nbsp;</strong></span>
-                                                <span>{this.state.data.collection.name}</span>
+                                                <span>{collections.get(data.collection).name}</span>
                                             </div>}
 
                                             <hr />
-                                            {this.state.data.colors && Object.keys(this.state.data.colors).length > 0 && (
+                                            {data.colors.length && (
                                                 <div className="info-box">
                                                     <span><strong>Доступные цвета&nbsp;</strong></span>
                                                     <div className="product-colors clearfix">
-                                                        {Object.values(this.state.data.colors).map((color, index) => <span key={color.id} className="color-btn" style={{
-                                                            backgroundColor: `#${color.value}`
+                                                        {data.colors.map(colorId => <span key={colors.get(colorId).id} className="color-btn" style={{
+                                                            backgroundColor: `#${colors.get(colorId).value}`
                                                         }}/>)}                                                    
                                                     </div>
                                                 </div>
@@ -183,10 +177,10 @@ export default withRouter(class ProductDetailPage extends ReloadPageMixin(React.
                                 </div>
                                 <div className="col-md-8 col-sm-12 product-flex-gallery">
                                     <button type="submit" className="btn btn-buy" onClick={() => {
-                                        this.props.addCartProduct(this.state.data);
+                                        this.props.addCartProduct(data);
                                     }}></button>
-                                    {this.state.data.images && <div className="owl-product-gallery open-popup-gallery">
-                                        {this.state.data.images.map((image) => {
+                                    {data.images.length && <div className="owl-product-gallery open-popup-gallery">
+                                        {data.images.map(image => {
                                             const imagePath = image.preview || image.full;
                                             return (
                                                 <a key={imagePath} href={imagePath}>
@@ -219,7 +213,7 @@ export default withRouter(class ProductDetailPage extends ReloadPageMixin(React.
                                                 <div>
                                                     <div>
                                                         <h3>Описание товара</h3>
-                                                        <p>{this.state.data.description || "Описание отсутствует"}</p>
+                                                        <p>{data.description || "Описание отсутствует"}</p>
                                                     </div>
 
                                                 </div>

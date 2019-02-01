@@ -1,3 +1,4 @@
+import React from "react";
 import CategoriesPageItem from "./CategoriesPageItem";
 import ReloadPageMixin from "./ReloadPageMixin";
 
@@ -5,7 +6,6 @@ export default class CategoriesPage extends ReloadPageMixin(React.Component) {
 	constructor(props) {
 		super(props);
 
-		this.props.setPageNotFound(false);
 		this.showPreLoader();
 	}
 
@@ -16,7 +16,7 @@ export default class CategoriesPage extends ReloadPageMixin(React.Component) {
 	render() {
 		return (
 			<div>
-				<section className="main-header" style={{backgroundImage: "url(assets/images/gallery-3.jpg)"}}></section>
+				<section className="main-header" style={{backgroundImage: "url(%URI_PREFIX%assets/images/gallery-3.jpg)"}}></section>
 		        <section className="products products_type_category">
 		            <div className="container">
 		                <header>
@@ -31,7 +31,7 @@ export default class CategoriesPage extends ReloadPageMixin(React.Component) {
 		                </header>
 
 		                <div className="row">
-		                	{Object.values(this.props.categories).map(category => <CategoriesPageItem key={category.id} {...category}/>)}
+		                	{[...this.props.categories.values()].map(category => <CategoriesPageItem key={category.id} {...category}/>)}
 		                </div>	       
 		            </div>
 		        </section>

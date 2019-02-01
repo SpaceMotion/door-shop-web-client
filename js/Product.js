@@ -1,3 +1,4 @@
+import React from "react";
 import {Link} from "react-router-dom";
 
 export default class Prouct extends React.Component {
@@ -10,12 +11,13 @@ export default class Prouct extends React.Component {
             imgWidth: 'auto',
             imgHeight: 'auto'
         };
-        const productImg = this.props.data.images[0];
-        const categories = this.props.data.categories;
+        const data = this.props.data;
+        const productImg = data.images[0];
+        const categories = this.props.categories;
         this.previewImg = (productImg && {
             type: 'img',
             value: productImg.preview || productImg.full
-        }) || categories[Object.keys(categories)[0]].computedIconData;
+        }) || categories.get(data.categories[0]).computedIconData;
     }
 
     componentDidMount() {
@@ -53,11 +55,13 @@ export default class Prouct extends React.Component {
     }
 
 	render() {
-        const isPreviewImg = this.previewImg.type === 'img';
+        const isPreviewTypeOfImg = this.previewImg.type === 'img';
         const roubleIcon = String.fromCharCode(8381);
+        const data = this.props.data;
+        const id = data.id;
 
 		return (
-            <div data-product-id={this.props.data.id} className="col-sm-4 col-xs-6 item price-discount category-sofa material-leather">
+            <div data-product-id={id} className="col-sm-4 col-xs-6 item price-discount category-sofa material-leather">
                 <article>
                     <div className="info">
                         <span>
@@ -65,21 +69,21 @@ export default class Prouct extends React.Component {
                         </span>
                     </div>
                     <div className="btn btn-add" onClick={() => {
-                        this.props.addCartProduct(this.props.data);
+                        this.props.addCartProduct(data);
                     }}>
                         <i className="icon icon-cart"></i>
                     </div>
                     <div className="figure-grid">
-                        {this.props.data.is_new && <span className="label label-warning">Новый</span>}                        
+                        {data.is_new && <span className="label label-warning">Новый</span>}                        
                         <div className="image">
-                            <a href="javascript:void(0);" onClick={this.onQuickViewRefClick} className={`mfp-open ${isPreviewImg ? '' : 'f-icon'}`}>
-                                {isPreviewImg ? <img style={{width: `${this.state.imgWidth}`, height: `${this.state.imgHeight}`}} src={this.previewImg.value} alt=""/> : <span>{String.fromCharCode(this.previewImg.value)}</span>}
+                            <a href="javascript:void(0);" onClick={this.onQuickViewRefClick} className={`mfp-open ${isPreviewTypeOfImg ? '' : 'f-icon'}`}>
+                                {isPreviewTypeOfImg ? <img style={{width: `${this.state.imgWidth}`, height: `${this.state.imgHeight}`}} src={this.previewImg.value} alt=""/> : <span>{String.fromCharCode(this.previewImg.value)}</span>}
                             </a>
                         </div>
                         <div className="text">
-                            <h2 className="title h4"><Link to={`/products/${this.props.data.id}`}>{this.props.data.name}<br/><small>{this.props.data.collection && this.props.data.collection.name || this.props.data.manufacturer && this.props.data.manufacturer.name}</small></Link></h2>
-                            {this.props.data.price_with_discount !== this.props.data.price ? <sub>{`${roubleIcon} ${(+this.props.data.price).toFixed(2)}`}</sub> : null}
-                            <sup>{roubleIcon} <span className="price">{(+this.props.data.price_with_discount).toFixed(2)}</span></sup>
+                            <h2 className="title h4"><Link to={`/products/${id}`}>{data.name}<br/><small>{data.collection && this.props.collections.get(data.collection).name || data.manufacturer && this.props.manufacturers.get(data.manufacturer).name}</small></Link></h2>
+                            {data.price_with_discount !== data.price ? <sub>{`${roubleIcon} ${(+data.price).toFixed(2)}`}</sub> : null}
+                            <sup>{roubleIcon} <span className="price">{(+data.price_with_discount).toFixed(2)}</span></sup>
                         </div>
                     </div>
                 </article>

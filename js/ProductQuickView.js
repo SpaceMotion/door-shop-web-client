@@ -1,3 +1,4 @@
+import React from "react";
 import { withRouter } from "react-router";
 
 export default withRouter(class ProductQuickView extends React.Component {
@@ -18,25 +19,27 @@ export default withRouter(class ProductQuickView extends React.Component {
 
     render() {
         const data = this.props.data;
-        const manufacturerName = data.manufacturer && data.manufacturer.name;
-        const collectionName = data.collection && data.collection.name;
+        const id = data.id;
+        const manufacturer = this.props.manufacturers.get(data.manufacturer);
+        const manufacturerName = manufacturer && manufacturer.name;
+        const collection = this.props.collections.get(data.collection);
+        const collectionName = collection && collection.name;
         const roubleIcon = String.fromCharCode(8381);
+        const colors = this.props.colors;
 
         return (
-            <div data-product-id={this.props.data.id}>
+            <div data-product-id={id}>
                 <div className="popup-main mfp-hide">
                     <div className="product">
 
                         <div className="popup-title">
-                            <div className="h1 title">{this.props.data.name}<small>{collectionName || manufacturerName}</small></div>
+                            <div className="h1 title">{data.name}<small>{collectionName || manufacturerName}</small></div>
                         </div>
 
                         <div className="owl-product-gallery">
-                            {this.props.data.images.map((image) => {
-                                return <div key={image.id} className="product__quick-view-img" style={{
+                            {data.images.map(image => <div key={image.id} className="product__quick-view-img" style={{
                                     backgroundImage: `url(${image.full})`
-                                }}/>;
-                            })}
+                            }}/>)}
                         </div>
 
                         <div className="popup-content">
@@ -58,11 +61,9 @@ export default withRouter(class ProductQuickView extends React.Component {
                                         <div className="info-box">
                                             <strong>Доступные цвета</strong>
                                             <div className="product-colors clearfix">
-                                                {Object.values(this.props.data.colors).map((color) => {
-                                                    return <span key={color.value} className="color-btn" style={{
-                                                        backgroundColor: `#${color.value}`
-                                                    }}></span>;
-                                                })}
+                                                {data.colors.map(colorId => <span key={colorId} className="color-btn" style={{
+                                                    backgroundColor: `#${colors.get(colorId).value}`
+                                                }}></span>)}
                                             </div>
                                         </div>
                                     </div>
@@ -74,7 +75,7 @@ export default withRouter(class ProductQuickView extends React.Component {
                         <div className="popup-table">
                             <div className="popup-cell">
                                 <div className="price">
-                                    <span className="h3">{`${roubleIcon} ${(+this.props.data.price_with_discount).toFixed(2)}`}<small>{this.props.data.price_with_discount !== this.props.data.price ? `${roubleIcon} ${(+this.props.data.price).toFixed(2)}` : null}</small></span>
+                                    <span className="h3">{`${roubleIcon} ${(+data.price_with_discount).toFixed(2)}`}<small>{data.price_with_discount !== data.price ? `${roubleIcon} ${(+data.price).toFixed(2)}` : null}</small></span>
                                 </div>
                             </div>
                             <div className="popup-cell">
@@ -84,20 +85,18 @@ export default withRouter(class ProductQuickView extends React.Component {
                                         this.props.blockUpdateSearchParams(true);
                                         $.magnificPopup.close();
                                         this.props.history.push({
-                                            pathname: `/products/${this.props.data.id}`,
-                                            state: {
-                                                data: this.props.data
-                                            }
+                                            pathname: `/products/${id}`,
+                                            state: {data}
                                         });
                                     }}><span className="icon icon-eye"></span> <span className="hidden-xs">Узнать больше</span></a>
                                     <a href="#" onClick={event => {
                                         event.preventDefault();
-                                        this.props.addCartProduct(this.props.data);
+                                        $.magnificPopup.close();
+                                        this.props.addCartProduct(data);
                                     }}><span className="icon icon-cart"></span> <span className="hidden-xs">Купить</span></a>
                                 </div>
                             </div>
                         </div>
-
                     </div> 
                 </div>
             </div>

@@ -1,4 +1,4 @@
-import CONFIG from "./config";
+import React from "react";
 import Filters from "./Filters";
 import SortBar from "./SortBar";
 import Pagination from "./Pagination";
@@ -9,20 +9,17 @@ import {createHashHistory} from "history";
 import Utils from "./Utils";
 import constants from "./constants";
 import ProductQuickView from "./ProductQuickView";
+import DataService from "./DataService";
 
 export default class ProductsPage extends ReloadPageMixin(React.Component) {
 	constructor(props) {
 		super(props);
 
 		this.showPreLoader();
-        //this.props.setPageNotFound(false);
         this.history = createHashHistory();
         this.minPrice = 0;
         this.maxPrice = 200000;
         this.itemsPerPageOptions = [12, 60, 96];
-        this.manufacturers = {};
-        this.collections = {};
-        this.colors = {};
         this.sortByOptions = new Map([
             ['price_with_discount', {label: 'Цена: по возрастанию'}],
             ['-price_with_discount', {label: 'Цена: по убыванию'}],
@@ -32,6 +29,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
             ['-popularity', {label: 'Популярность: по убыванию'}]
         ]);
         this.sortByOptions.defaultId = 'price_with_discount';
+        this.colors = new Map();
         this.controlsDisabled = false;
         this.lastSearchParams =  {
             string: '',
@@ -41,7 +39,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 
         this.state = {
             products: {
-                items: [],
+                items: new Map(),
                 count: 0
             },
             filters: {
@@ -70,10 +68,8 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 
 		this.removeURLChangeListener = this.history.listen(this.onURLChanged);
 
-        this.props.setUpProductInfoCommonData((data) => {
-            this.colors = data.colors;
-            this.manufacturers = data.manufacturers;
-            this.collections = data.collections;
+        DataService.getColors(data => {
+            this.colors = data.results;
             this.onURLChanged(this.history.location);
         });
 	}
@@ -88,7 +84,6 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
         $.magnificPopup.close();
     }
 
-    //todo: Надо подумать над реализацией
     blockUpdateSearchParams(isBlock) {
         this.updateSearchParamsBlocked = isBlock;
     }
@@ -97,34 +92,20 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
         let quickViewData = null;
         this.setState({quickViewData});
         if (productId) {
-            quickViewData = this.state.products.items.find((product) => {
-                return product.id === productId;
-            });
+            quickViewData = this.state.products.items.get(productId);
 
             if (!quickViewData) {
-                fetch(`${CONFIG.ROOT_API_URL}/products/${productId}/`, {
-                    headers: new Headers({
-                        'Content-Type': 'application/json'
-                    })
-                }).then((response) => {
-                    if (response.status === 404) {
-                        return Promise.reject();
-                    }
-                    return response.json();
-                }).then((data) => {
+                DataService.getProducts(data => {
                     this.setState({
-                        quickViewData: this.props.prepareProductData(data, {
-                            categories: this.props.categories,
-                            colors: this.colors,
-                            manufacturers: this.manufacturers,
-                            collections: this.collections
-                        })
+                        quickViewData: data
                     }, this.showHideQuickViewPopup);
-                }, () => null);
+                }, {
+                    id: productId
+                });
                 return;
             }
+            this.setState({quickViewData}, this.showHideQuickViewPopup);
         }
-        this.setState({quickViewData}, this.showHideQuickViewPopup);
     }
 
     showHideQuickViewPopup() {
@@ -161,7 +142,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
         const searchParamsToSubmit = new URLSearchParams();
 
         // Обработка параметров запроса
-        const searchParams = new URLSearchParams(this.history.location.search);
+        const searchParams = new URLSearchParams(location.search);
         const category = parseInt(searchParams.get('category'));
         const minPrice = Utils.parseValueToInt(searchParams.get('min_price'), this.minPrice);
         const maxPrice = Utils.parseValueToInt(searchParams.get('max_price'), this.maxPrice);
@@ -170,16 +151,16 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
         const sortById = searchParams.get('sort_by');
         const sortBy = this.sortByOptions.has(sortById) ? sortById : this.sortByOptions.defaultId;
         const productId = Utils.parseValueToInt(searchParams.get('product'), null);
-        const manufacturers = this.manufacturers;
+        const manufacturers = this.props.manufacturers;
         const manufacturersIds = ([...(new Set(searchParams.getAll('manufacturer')
         .map(manufacturer => Utils.parseValueToInt(manufacturer, 0))))]
-        .filter(manufacturer => manufacturers[manufacturer]));
-        const collections = this.collections;
+        .filter(manufacturer => manufacturers.has(manufacturer)));
+        const collections = this.props.collections;
         const collectionsIds = ([...(new Set(searchParams.getAll('collection')
         .map(collection => Utils.parseValueToInt(collection, 0))))]
-        .filter(collection => collections[collection]));
+        .filter(collection => collections.has(collection)));
 
-        // Сбор параметров для отправки запроса /products на сервер
+        // Сбор параметров для отправки запроса /products
         for (let i = 0, len = manufacturersIds.length; i < len; i++) {
             searchParamsToSubmit.append('manufacturer', manufacturersIds[i]);
         }
@@ -215,8 +196,8 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
         // Вызов модального окна "Быстрый просмотр" при необходимости
         this.setQuickViewData(productId);
 
-        this.setState((state) => {
-            // Установка состояния
+        // Установка состояния
+        this.setState(state => {
             const filters = state.filters;
             const priceFilter = filters.price;
 
@@ -245,56 +226,46 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
     }
 
     sendRequestForProducts(searchParams) {
-        this.lastRequestId++;
-        const requestId = this.lastRequestId;
-        fetch(`${CONFIG.ROOT_API_URL}/products/?${searchParams.string}`, {
-            headers: new Headers({
-                'Content-Type': 'application/json'
-            })
-        }).then((response) => {
-            if (response.status === 404) {
-                searchParams.parsed.set('page', '1');
-                searchParams.string = searchParams.parsed.toString();
+        const requestId = ++this.lastRequestId;
+        DataService.getProducts(data => {
+            if (data) {
+                if (this.lastRequestId === requestId) {
+                    this.disableControls(false);
+                    clearInterval(this.timer);
+                    this.lastRequestId = 0;                    
+                    $('.products-loader').addClass('loaded');
+                    
+                    this.setState({
+                        products: {
+                            items: data.results,
+                            count: data.count
+                        }
+                    });                    
+                }    
+            } else {
+                const tempSearchParams = {
+                    string: searchParams.string,
+                    parsed: new URLSearchParams(searchParams.string)
+                };
+                tempSearchParams.parsed.set('page', '1');
+                tempSearchParams.string = tempSearchParams.parsed.toString();
                 this.setState(state => {
                     state.pagination.activePage = 1;
                     return state;
                 });
-                this.sendRequestForProducts(searchParams);
-                return Promise.reject();
+                this.sendRequestForProducts(tempSearchParams);
             }
-            return response.json();
-        }).then((data) => {
-            if (this.lastRequestId === requestId) {
-                const products = data.results;
-                for (let i = 0, len = products.length; i < len; i++) {
-                    this.props.prepareProductData(products[i], {
-                        categories: this.props.categories,
-                        colors: this.colors,
-                        manufacturers: this.manufacturers,
-                        collections: this.collections
-                    });    
-                }
-                this.disableControls(false);
-                clearInterval(this.timer);
-                this.lastRequestId = 0;                    
-                $('.products-loader').addClass('loaded');
-
-                this.setState({
-                    products: {
-                        items: products,
-                        count: data.count
-                    }
-                });                    
-            }
-        }, () => null);        
+        }, {
+            search: searchParams.string
+        });
     }
 
     updateSearchParams(changes) {
         if (!this.controlsDisabled && !this.updateSearchParamsBlocked) {
-            const searchP = this.history.location.search;
-            const searchParams = new URLSearchParams(searchP);
-            const searchParamsToUpdate = new URLSearchParams(searchP);
-            const collections = Object.values(this.collections);
+            const search = this.history.location.search;
+            const searchParams = new URLSearchParams(search);
+            const searchParamsToUpdate = new URLSearchParams(search);
+            const collections = this.props.collections.values();
             const collectionIds = this.state.filters.collections;
         
             changes.forEach(change => {
@@ -312,7 +283,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
                 } else if (operationType === 'delete') {
                     targetValues = [];
                 }
-                if (key === 'manufacturer') {
+                if (key === 'manufacturer' && targetValues.length) {
                     searchParamsToUpdate.delete('collection');
                     for (let collection of collections) {
                         if (targetValues.includes(collection.manufacturer.toString()) && collectionIds.includes(collection.id)) {
@@ -325,10 +296,10 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
                     searchParamsToUpdate.append(key, targetValues[i]);
                 }
             });
-            const searchParamsToUpdateStr = searchParamsToUpdate.toString();
-            if (searchParamsToUpdateStr !== searchParams.toString()) {
+            const searchParamsToUpdateString = searchParamsToUpdate.toString();
+            if (searchParamsToUpdateString !== searchParams.toString()) {
                 this.history.push({
-                    search: `?${searchParamsToUpdateStr}`
+                    search: `?${searchParamsToUpdateString}`
                 });
             }
         }
@@ -336,11 +307,15 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 
 	render() {
         const quickViewData = this.state.quickViewData;
-        
+        const products = [...this.state.products.items.values()];
+        const searchParams = new URLSearchParams(this.history.location.search);
+        const categoryId = searchParams.get('category');
+        const category = this.props.categories.get(+categoryId);
+
 		return (
 			<div>
-                {quickViewData && <ProductQuickView data={quickViewData} blockUpdateSearchParams={this.blockUpdateSearchParams} {...this.props.cartEditFunctions}/>}
-		        <section className="main-header" style={{backgroundImage: "url(assets/images/gallery-3.jpg)"}}>
+                {quickViewData && <ProductQuickView data={quickViewData} blockUpdateSearchParams={this.blockUpdateSearchParams} addCartProduct={this.props.addCartProduct} colors={this.colors} manufacturers={this.props.manufacturers} collections={this.props.collections}/>}
+		        <section className="main-header" style={{backgroundImage: "url(%URI_PREFIX%assets/images/gallery-3.jpg)"}}>
 		            <header>
 		                <div className="container">
 		                    <h1 className="h2 title">Магазин</h1>
@@ -348,12 +323,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 		                        <li>
 									<Link to="/"><span className="icon icon-home"></span></Link>
 		                        </li>
-                                {(() => {
-                                    const searchParams = new URLSearchParams(this.history.location.search);
-                                    const categoryId = searchParams.get('category');
-                                    const category = this.props.categories[categoryId];
-                                    return category && <li>{category.name}</li>;
-                                })()}
+                                {category && <li>{category.name}</li>}
 		                    </ol>
 		                </div>
 		            </header>
@@ -369,7 +339,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 		                <div className="row">
 
 		                    <div className="col-md-3 col-xs-12">
-								<Filters filters={this.state.filters} updateState={this.updateSearchParams} manufacturers={this.manufacturers} collections={this.collections}/>
+								<Filters filters={this.state.filters} updateState={this.updateSearchParams} manufacturers={this.props.manufacturers} collections={this.props.collections}/>
 		                    </div>
 
 		                    <div className="col-md-9 col-xs-12">
@@ -377,17 +347,12 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 
 		                        <div id="products" className="row">
                                     <div className="products-loader loaded"/>
-                                    {this.state.products.items.length ? null : <div className="no-products">Товары не найдены</div>}
-                                    {this.state.products.items.map((product) => {
-                                        return <Product key={product.id} data={product} updateSearchParams={this.updateSearchParams} {...this.props.cartEditFunctions}/>;
-                                    })}
+                                    {!products.length && <div className="no-products">Товары не найдены</div>}
+                                    {products.map(product => <Product key={product.id} data={product} updateSearchParams={this.updateSearchParams} manufacturers={this.props.manufacturers} collections={this.props.collections} categories={this.props.categories} addCartProduct={this.props.addCartProduct}/>)}
 		                        </div>
                                 {Math.ceil(this.state.products.count / this.state.sorting.itemsPerPage) > 1 && <Pagination updateState={this.updateSearchParams} totalItems={this.state.products.count} itemsPerPage={this.state.sorting.itemsPerPage} activePage={this.state.pagination.activePage}/>}
-
 		                    </div>
-
 		                </div>
-
 		            </div>
 		        </section>
 		    </div>

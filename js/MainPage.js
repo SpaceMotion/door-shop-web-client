@@ -1,4 +1,5 @@
 import CONSTANTS from "./constants";
+import React from "react";
 import {Link} from "react-router-dom";
 import ReloadPageMixin from "./ReloadPageMixin";
 
@@ -7,7 +8,6 @@ export default class MainPage extends ReloadPageMixin(React.Component) {
 		super(props);
 
 		this.showPreLoader();
-		this.props.setPageNotFound(false);
 	}
 
 	componentDidMount() {
@@ -56,7 +56,7 @@ export default class MainPage extends ReloadPageMixin(React.Component) {
 	        }
 	    });
 
-	    const categoriesCount = Object.keys(this.props.categories).length;
+	    const categoriesCount = this.props.categories.size;
     	let itemsDesktop = 4;
     	let itemsDesktopSmall = 4;
     	let itemsTablet = 3;
@@ -95,9 +95,9 @@ export default class MainPage extends ReloadPageMixin(React.Component) {
 			<div>
 		        <section className="header-content">
 		            <div className="owl-slider">
-                        <img className="item" src="assets/images/7cc22dd2de2adf9fb842bfb4b9f0350e_slide01.jpg"/>
-                        <img className="item" src="assets/images/b09ecf5fb28e67be38ea8bdaca24f2f6_slide02.jpg"/>
-                        <img className="item" src="assets/images/27d192841d72cba553a10cf48ca4915a_slide03.jpg"/>
+                        <img className="item" src="%URI_PREFIX%assets/images/7cc22dd2de2adf9fb842bfb4b9f0350e_slide01.jpg"/>
+                        <img className="item" src="%URI_PREFIX%assets/images/b09ecf5fb28e67be38ea8bdaca24f2f6_slide02.jpg"/>
+                        <img className="item" src="%URI_PREFIX%assets/images/27d192841d72cba553a10cf48ca4915a_slide03.jpg"/>
 		            </div>
 		        </section>
 
@@ -109,7 +109,7 @@ export default class MainPage extends ReloadPageMixin(React.Component) {
 		            <div className="container">
 
 		                <div className="owl-icons">
-		                	{Object.values(this.props.categories).map(category => (
+		                	{[...this.props.categories.values()].map(category => (
 								<Link to={`/products?category=${category.id}`} key={category.id}>
 									<figure>
 										<i className="f-icon" style={{backgroundImage: category.icon ? `url(${category.icon})` : 'none'}}>{category.icon_code && !category.icon ? String.fromCharCode(category.icon_code) : ''}</i>

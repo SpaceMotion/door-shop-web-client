@@ -1,9 +1,8 @@
+import React from "react";
 import FormInput from "./FormInput";
 
 export default class Filters extends React.Component {
     componentDidMount() {
-        const filters = this;
-        
         $('.toggle-filters-close').on('click', function () {
             $('.filters').removeClass('active');
             $('html,body').animate({
@@ -16,8 +15,8 @@ export default class Filters extends React.Component {
             min: this.props.filters.price.from,
             max: this.props.filters.price.to,
             prefix: String.fromCharCode(8381),
-            onFinish: function (data) {
-                filters.props.updateState([{
+            onFinish: data => {
+                this.props.updateState([{
                     key: 'min_price',
                     value: data.from,
                     operationType: 'update'
@@ -78,13 +77,11 @@ export default class Filters extends React.Component {
                             state.key = 'manufacturer';
                             this.props.updateState([state]);
                         }} checked={noSelectedManufacturers}/>
-                    	{Object.values(this.props.manufacturers).map(manufacturer => {
-	                        return <FormInput key={manufacturer.id} label={manufacturer.name} type="checkbox" updateState={state => {
-                                state.key = 'manufacturer';
-                                state.value = manufacturer.id;
-								this.props.updateState([state]);
-	                        }} checked={manufacturers.includes(manufacturer.id)}/>;
-                    	})}
+                    	{[...this.props.manufacturers.values()].map(manufacturer => <FormInput key={manufacturer.id} label={manufacturer.name} type="checkbox" updateState={state => {
+                            state.key = 'manufacturer';
+                            state.value = manufacturer.id;
+                            this.props.updateState([state]);
+                        }} checked={manufacturers.includes(manufacturer.id)}/>)}
                     </div>
                 </div>
 
@@ -97,13 +94,11 @@ export default class Filters extends React.Component {
                             state.key = 'collection';
                             this.props.updateState([state]);
                         }} checked={collections.length === 0}/>
-                        {Object.values(this.props.collections).map(collection => {
-                            return (noSelectedManufacturers || manufacturers.includes(collection.manufacturer)) && <FormInput key={collection.id} label={collection.name} type="checkbox" updateState={state => {
-                                state.key = 'collection';
-                                state.value = collection.id;
-                                this.props.updateState([state]);
-                            }} checked={collections.includes(collection.id)}/>;
-                        })}
+                        {[...this.props.collections.values()].map(collection => (noSelectedManufacturers || manufacturers.includes(collection.manufacturer)) && <FormInput key={collection.id} label={collection.name} type="checkbox" updateState={state => {
+                            state.key = 'collection';
+                            state.value = collection.id;
+                            this.props.updateState([state]);
+                        }} checked={collections.includes(collection.id)}/>)}
                     </div>
                 </div>
 

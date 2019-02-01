@@ -16,7 +16,7 @@ export default class CategoriesPage extends ReloadPageMixin(React.Component) {
 	render() {
 		return (
 			<div>
-				<section className="main-header" style={{backgroundImage: "url(assets/images/gallery-3.jpg)"}}></section>
+				<section className="main-header" style={{backgroundImage: "url(%URI_PREFIX%assets/images/gallery-3.jpg)"}}></section>
 		        <section className="products products_type_category">
 		            <div className="container">
 		                <header>

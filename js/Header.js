@@ -24,7 +24,7 @@ export default class Header extends React.Component {
 	                </div>
 	                <div className="navigation navigation-main">
 	                	<div className="logo-phone">
-							<Link to="/"><img src="assets/images/logo.png" alt="Логотип компании" style={{marginRight: '10px', width: '130px'}}/></Link>
+							<Link to="/"><img src="%URI_PREFIX%assets/images/logo.png" alt="Логотип компании" style={{marginRight: '10px', width: '130px'}}/></Link>
 							<a href={`tel:${phone}`} style={{color: 'white'}}>{phone}</a>
 	                	</div>
 	                    <a href="#" onClick={event => {

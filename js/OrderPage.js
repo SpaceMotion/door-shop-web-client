@@ -129,7 +129,7 @@ export default class OrderPage extends ReloadPageMixin(React.Component) {
                     <div className="checkout__info-popup-message">{this.state.infoPopup.message}</div>
                 </div>
 
-                <section className="main-header" style={{backgroundImage: 'url(assets/images/gallery-2.jpg)'}}>
+                <section className="main-header" style={{backgroundImage: 'url(%URI_PREFIX%assets/images/gallery-2.jpg)'}}>
                     <header>
                         <div className="container text-center">
                             <h2 className="h2 title">Оформление заказа</h2>

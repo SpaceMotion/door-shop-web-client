@@ -117,7 +117,7 @@ export default withRouter(class ProductDetailPage extends ReloadPageMixin(React.
 
         return (
             <div>
-                <section className="main-header" style={{backgroundImage: "url(assets/images/gallery-2.jpg)"}}>
+                <section className="main-header" style={{backgroundImage: "url(%URI_PREFIX%assets/images/gallery-2.jpg)"}}>
                     <header>
                         <div className="container">
                             <h1 className="h2 title">Описание товара</h1>

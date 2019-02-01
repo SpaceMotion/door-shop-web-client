@@ -29,7 +29,7 @@ const DataService = {
 
     // Colors
     getColors(callback) {
-        fetch(`${CONFIG.ROOT_API_URL}/colors`, {headers}).then(response => {
+        fetch(`${CONFIG.ROOT_API_URL}/colors/`, {headers}).then(response => {
             return response.json();
         }).then(data => {
             prepareItems(data);
@@ -39,7 +39,7 @@ const DataService = {
 
     // Manufacturers
     getManufacturers(callback) {
-        fetch(`${CONFIG.ROOT_API_URL}/manufacturers`, {headers}).then(response => {
+        fetch(`${CONFIG.ROOT_API_URL}/manufacturers/`, {headers}).then(response => {
             return response.json();
         }).then(data => {
             prepareItems(data);
@@ -49,7 +49,7 @@ const DataService = {
 
     // Collections
     getCollections(callback) {
-        fetch(`${CONFIG.ROOT_API_URL}/collections`, {headers}).then(response => {
+        fetch(`${CONFIG.ROOT_API_URL}/collections/`, {headers}).then(response => {
             return response.json();
         }).then(data => {
             prepareItems(data);
@@ -59,7 +59,7 @@ const DataService = {
 
     // Categories
     getCategories(callback) {
-        fetch(`${CONFIG.ROOT_API_URL}/categories?no_parent=true`, {headers}).then(response => {
+        fetch(`${CONFIG.ROOT_API_URL}/categories/?no_parent=true`, {headers}).then(response => {
             return response.json();
         }).then(data => {
             prepareItems(data);
@@ -69,7 +69,7 @@ const DataService = {
 
     // Company info
     getCompanyInfo(callback) {
-        fetch(`${CONFIG.ROOT_API_URL}/company`, {headers}).then(response => {
+        fetch(`${CONFIG.ROOT_API_URL}/company/`, {headers}).then(response => {
             return response.json();
         }).then(callback);            
     },

@@ -14,7 +14,7 @@ export default class DeliveryPage extends ReloadPageMixin(React.Component) {
 
 	render() {
 		return (
-	        <section className="main-header" style={{backgroundImage: "url(assets/images/gallery-3.jpg)"}}></section>
+	        <section className="main-header" style={{backgroundImage: "url(%URI_PREFIX%assets/images/gallery-3.jpg)"}}></section>
 		);
 	}
 }

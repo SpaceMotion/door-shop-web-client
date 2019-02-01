@@ -315,7 +315,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 		return (
 			<div>
                 {quickViewData && <ProductQuickView data={quickViewData} blockUpdateSearchParams={this.blockUpdateSearchParams} addCartProduct={this.props.addCartProduct} colors={this.colors} manufacturers={this.props.manufacturers} collections={this.props.collections}/>}
-		        <section className="main-header" style={{backgroundImage: "url(assets/images/gallery-3.jpg)"}}>
+		        <section className="main-header" style={{backgroundImage: "url(%URI_PREFIX%assets/images/gallery-3.jpg)"}}>
 		            <header>
 		                <div className="container">
 		                    <h1 className="h2 title">Магазин</h1>

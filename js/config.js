@@ -8,7 +8,7 @@ switch (process.env.NODE_ENV) {
 		break;
 	case 'production':
 		config = {
-			ROOT_API_URL: 'http://komfort-moscow.ru/api/v1/'
+			ROOT_API_URL: '/api/v1'
 		};
 		break;
 }

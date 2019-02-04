@@ -3,9 +3,9 @@ module.exports = {
         URI_PREFIX: ""
     },
     DEV: {
-        URI_PREFIX: "/public_html/"
+        URI_PREFIX: ""
     },
     PROD: {
-        URI_PREFIX: "/public_html/"
+        URI_PREFIX: ""
     }
 };

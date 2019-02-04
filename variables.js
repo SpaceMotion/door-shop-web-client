@@ -3,7 +3,7 @@ module.exports = {
         URI_PREFIX: ""
     },
     DEV: {
-        URI_PREFIX: ""
+        URI_PREFIX: "/public_html/"
     },
     PROD: {
         URI_PREFIX: ""

@@ -48,7 +48,9 @@ export default class Header extends React.Component {
 	                                                <ul>
 	                                                	{[...this.props.categories.values()].map(category => (
 															<li key={category.id}>
-																<Link to={`/products?category=${category.id}`}>{category.name}</Link>
+																<Link to={`/products?category=${category.id}`} onClick={() => {
+															    	window.dispatchEvent(new CustomEvent('closeMenuMobile'));																	
+																}}>{category.name}</Link>
 															</li>
 	                                                	))}
 	                                                </ul>

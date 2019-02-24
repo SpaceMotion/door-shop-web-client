@@ -61,9 +61,13 @@ export default withRouter(class ProductQuickView extends React.Component {
                                         <div className="info-box">
                                             <strong>Доступные цвета</strong>
                                             <div className="product-colors clearfix">
-                                                {data.colors.map(colorId => <span key={colorId} className="color-btn" style={{
-                                                    backgroundColor: `#${colors.get(colorId).value}`
-                                                }}></span>)}
+                                                {data.colors.map(colorId => {
+                                                    const color = colors.get(colorId);
+                                                    return <span key={colorId} title={color.name} className="color-btn" style={{
+                                                        backgroundColor: `#${color.value}`,
+                                                        backgroundImage: color.texture ? `url('${color.texture}')` : 'none'
+                                                    }}></span>;
+                                                })}
                                             </div>
                                         </div>
                                     </div>

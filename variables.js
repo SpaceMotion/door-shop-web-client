@@ -6,6 +6,6 @@ module.exports = {
         URI_PREFIX: "/public_html/"
     },
     PROD: {
-        URI_PREFIX: "/static/"
+        URI_PREFIX: "/www/"
     }
 };

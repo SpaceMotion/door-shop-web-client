@@ -1,4 +1,5 @@
 import CONFIG from "./config";
+import CookieService from "./CookieService";
 
 const headers = new Headers({
     'Content-Type': 'application/json'
@@ -94,9 +95,11 @@ const DataService = {
     // Post a new order
     postOrder(callback, body) {
         let status;
+        const internalHeaders = new Headers(headers);
+        internalHeaders.append('X-CSRFToken', CookieService.get('csrftoken'));
 
         fetch(`${CONFIG.ROOT_API_URL}/orders/`, {
-            headers,
+            headers: internalHeaders,
             method: 'POST',
             body: JSON.stringify(body)
         }).then(response => {

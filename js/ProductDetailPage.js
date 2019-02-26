@@ -166,9 +166,13 @@ export default withRouter(class ProductDetailPage extends ReloadPageMixin(React.
                                                 <div className="info-box">
                                                     <span><strong>Доступные цвета&nbsp;</strong></span>
                                                     <div className="product-colors clearfix">
-                                                        {data.colors.map(colorId => <span key={colors.get(colorId).id} className="color-btn" style={{
-                                                            backgroundColor: `#${colors.get(colorId).value}`
-                                                        }}/>)}                                                    
+                                                        {data.colors.map(colorId => {
+                                                            const color = colors.get(colorId);
+                                                            return <span key={color.id} title={color.name} className="color-btn" style={{
+                                                                backgroundColor: `#${color.value}`,
+                                                                backgroundImage: color.texture ? `url('${color.texture}')` : 'none'
+                                                            }}/>;
+                                                        })}                                                    
                                                     </div>
                                                 </div>
                                             )}

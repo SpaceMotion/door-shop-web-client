@@ -19,7 +19,8 @@ export default class Header extends React.Component {
 	                        <li><a href="#" onClick={event => {
 								event.preventDefault();
 								this.props.toggleCartHandler();
-							}} className="open-cart"><i className="icon icon-cart"></i> <span>{productsCount}</span></a></li>
+							}} className="open-cart"><i className="icon icon-cart"></i>
+							{productsCount > 0 && <span>{productsCount}</span>}</a></li>
 	                    </ul>
 	                </div>
 	                <div className="navigation navigation-main">
@@ -48,7 +49,9 @@ export default class Header extends React.Component {
 	                                                <ul>
 	                                                	{[...this.props.categories.values()].map(category => (
 															<li key={category.id}>
-																<Link to={`/products?category=${category.id}`}>{category.name}</Link>
+																<Link to={`/products?category=${category.id}`} onClick={() => {
+															    	window.dispatchEvent(new CustomEvent('closeMenuMobile'));																	
+																}}>{category.name}</Link>
 															</li>
 	                                                	))}
 	                                                </ul>

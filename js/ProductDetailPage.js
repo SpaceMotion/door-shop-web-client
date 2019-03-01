@@ -10,7 +10,11 @@ export default withRouter(class ProductDetailPage extends ReloadPageMixin(React.
         this.onURLChanged = this.onURLChanged.bind(this);
         
         this.showPreLoader();
-        this.state = {};
+        this.state = {
+            descriptionTabs: {
+                activeIndex: 0
+            }
+        };
         this.lastRequestId = 0;
         DataService.getComplex(data => {
             this.dataIsReady = true;
@@ -199,35 +203,43 @@ export default withRouter(class ProductDetailPage extends ReloadPageMixin(React.
                         </div>
                     </div>
 
-                    <div className="info">
+                    {data.descriptions.length > 0 && <div className="info">
                         <div className="container">
                             <div>
                                 <div>
                                     <ul className="nav nav-tabs" role="tablist">
-                                        <li role="presentation" className='active'>
-                                            <a href="#design" aria-controls="design" role="tab" data-toggle="tab">
-                                                <i className="icon icon-sort-alpha-asc"></i>
-                                                <span>&nbsp;&nbsp;Описание</span>
-                                            </a>
-                                        </li>
+                                        {data.descriptions.map((tab, index) => (
+                                            <li key={tab.name} role="presentation" className={this.state.descriptionTabs.activeIndex === index ? 'active' : ''}>
+                                                <a href="#" onClick={event => {
+                                                    event.preventDefault();
+                                                    this.setState(state => {
+                                                        state.descriptionTabs.activeIndex = index;
+                                                        return state;
+                                                    });
+                                                }}>
+                                                    <span>{tab.name}</span>
+                                                </a>
+                                            </li>                                            
+                                        ))}                                        
                                     </ul>
                                     <div className="tab-content">
-                                        <div role="tabpanel" className="tab-pane active" id="design">
-                                            <div className="content">
-                                                <div>
+                                        {data.descriptions.map((tab, index) => (
+                                            <div key={tab.name} role="tabpanel" className={`tab-pane ${this.state.descriptionTabs.activeIndex === index ? 'active': ''}`}>
+                                                <div className="content">
                                                     <div>
-                                                        <h3>Описание товара</h3>
-                                                        <p>{data.description || "Описание отсутствует"}</p>
+                                                        <div>
+                                                            <h3>{tab.title}</h3>
+                                                            <p>{tab.text}</p>
+                                                        </div>
                                                     </div>
-
                                                 </div>
                                             </div>
-                                        </div>
+                                        ))}
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div>}
                 </section>
             </div>
         );

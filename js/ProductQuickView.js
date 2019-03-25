@@ -91,7 +91,7 @@ export default withRouter(class ProductQuickView extends React.Component {
                                     }}><span className="icon icon-eye"></span> <span className="hidden-xs">Узнать больше</span></a>
                                     <a href="#" onClick={event => {
                                         event.preventDefault();
-                                        $.magnificPopup.close();
+                                        //$.magnificPopup.close();
                                         this.props.addCartProduct(data);
                                     }}><span className="icon icon-cart"></span> <span className="hidden-xs">Купить</span></a>
                                 </div>

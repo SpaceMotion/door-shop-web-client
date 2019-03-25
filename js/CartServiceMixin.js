@@ -18,7 +18,7 @@ export default superclass => class extends superclass {
         this.toggleCartHandler = this.toggleCartHandler.bind(this);
         this.updateCartProducts = this.updateCartProducts.bind(this);
         
-        this.state = this.state || {};
+        this.state = {};
         this.initCartData();
     }
 
@@ -51,23 +51,33 @@ export default superclass => class extends superclass {
         this.recalculateCartInfo(cart, productIds);
     }
 
-	addCartProduct(data) {
+	addCartProduct(data, quantity = 1, isAction = true) {
         const cart = this.getCartData();
         const products = cart.storage.products;
         const productId = data.id;
         const exists = !!products[productId];
 
-        cart.local.action = {
-            product: {
-                id: productId,
-                name: data.name,
-                exists
-            },
-            type: 'add'
-        };
+        if (isAction) {
+            cart.local.action = {
+                product: {
+                    id: productId,
+                    name: data.name,
+                    exists
+                },
+                type: 'add'
+            };    
+        }
+        if (data.accompanying_products.length) {
+            this.setState({
+                accompanyingProduct: {
+                    is: true,
+                    productIds: data.accompanying_products
+                }
+            });    
+        }
         if (!exists) {
             products[productId] = {
-                quantity: 1
+                quantity
             };
             cart.local.products[productId] = {
                 ...data,

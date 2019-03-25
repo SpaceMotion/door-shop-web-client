@@ -43,7 +43,7 @@ class App extends CartServiceMixin(React.Component) {
 		this.state = this.state || {};
 		this.state.accompanyingProduct = {
 			is: false,
-			productId: null
+			productIds: []
 		};
 	}
 
@@ -188,7 +188,7 @@ class App extends CartServiceMixin(React.Component) {
 					<Header categories={this.props.categories} companyInfo={this.props.companyInfo} cart={cart} manufacturers={this.props.manufacturers} collections={this.props.collections} onCartProductQuantityChanged={this.onCartProductQuantityChanged} removeCartProduct={this.removeCartProduct} updateCartProductsIfExpired={this.updateCartProductsIfExpired} toggleCartHandler={this.toggleCartHandler}/>
 					<Switch>
 						<Route path="/categories" render={() => <CategoriesPage categories={this.props.categories}/>}/>
-						<Route exact path="/products" render={() => <ProductsPage categories={this.props.categories} addCartProduct={this.addCartProduct} manufacturers={this.props.manufacturers} collections={this.props.collections}/>}/>
+						<Route exact path="/products" render={() => <ProductsPage categories={this.props.categories} addCartProduct={this.addCartProduct} manufacturers={this.props.manufacturers} collections={this.props.collections} closePopup={this.closeAccompanyingProduct}/>}/>
 						<Route path="/products/:id" render={() => <ProductDetailPage categories={this.props.categories} addCartProduct={this.addCartProduct} cart={cart} onCartProductQuantityChanged={this.onCartProductQuantityChanged} addCartProduct={this.addCartProduct} openCartHandler={this.openCartHandler}/>}/>
 						<Route path="/delivery" render={() => <DeliveryPage/>}/>
 						<Route path="/contacts" render={() => <ContactsPage/>}/>
@@ -198,7 +198,7 @@ class App extends CartServiceMixin(React.Component) {
 					</Switch>
 					<Footer companyInfo={this.props.companyInfo}/>
 					{cartAction && <CartActionInfoPlaque action={cartAction} openCartHandler={this.openCartHandler} clearCartActionInfo={this.clearCartActionInfo}></CartActionInfoPlaque>}
-					{this.state.accompanyingProduct.is && <AccompanyingProduct products={this.state.accompanyingProduct.productIds} cart={this.state.cart} categories={this.props.categories} manufacturers={this.props.manufacturers} collections={this.props.collections} colors={this.props.colors} onCartProductQuantityChanged={this.onCartProductQuantityChanged} addCartProduct={this.addCartProduct} openCartHandler={this.openCartHandler} close={this.closeAccompanyingProduct}/>}
+					{this.state.accompanyingProduct.is && <AccompanyingProduct products={this.state.accompanyingProduct.productIds} cart={this.state.cart} categories={this.props.categories} manufacturers={this.props.manufacturers} collections={this.props.collections} colors={this.props.colors} onCartProductQuantityChanged={this.onCartProductQuantityChanged} addCartProduct={this.addCartProduct} openCartHandler={this.openCartHandler} closePopup={this.closeAccompanyingProduct}/>}
 			    </div>
 			</div>
 		);
@@ -215,5 +215,5 @@ DataService.getComplex(data => {
 		};
 	}
 
-	ReactDOM.render(<HashRouter><App categories={categories} companyInfo={data[1]} manufacturers={data[2].results} collections={data[3].results} colors={data[4].results}/></HashRouter>, document.getElementById('app'));
-}, ['getCategories', 'getCompanyInfo', 'getManufacturers', 'getCollections', 'getColors']);
+	ReactDOM.render(<HashRouter><App categories={categories} companyInfo={data[1]} manufacturers={data[2].results} collections={data[3].results}/></HashRouter>, document.getElementById('app'));
+}, ['getCategories', 'getCompanyInfo', 'getManufacturers', 'getCollections']);

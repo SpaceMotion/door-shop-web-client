@@ -83,7 +83,6 @@ export default withRouter(class ProductQuickView extends React.Component {
                                     <a href="#" onClick={event => {
                                         event.preventDefault();
                                         this.props.blockUpdateSearchParams(true);
-                                        $.magnificPopup.close();
                                         this.props.history.push({
                                             pathname: `/products/${id}`,
                                             state: {data}
@@ -91,7 +90,6 @@ export default withRouter(class ProductQuickView extends React.Component {
                                     }}><span className="icon icon-eye"></span> <span className="hidden-xs">Узнать больше</span></a>
                                     <a href="#" onClick={event => {
                                         event.preventDefault();
-                                        //$.magnificPopup.close();
                                         this.props.addCartProduct(data);
                                     }}><span className="icon icon-cart"></span> <span className="hidden-xs">Купить</span></a>
                                 </div>

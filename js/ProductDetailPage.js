@@ -29,6 +29,7 @@ export default withRouter(class ProductDetailPage extends ReloadPageMixin(React.
 
     componentWillUnmount() {
         this.removeURLChangeListener();
+        $.magnificPopup.close();
     }
 
     componentDidMount() {

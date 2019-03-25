@@ -74,6 +74,8 @@ export default superclass => class extends superclass {
                     productIds: data.accompanying_products
                 }
             });    
+        } else {
+            $.magnificPopup.close();
         }
         if (!exists) {
             products[productId] = {

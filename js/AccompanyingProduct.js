@@ -16,10 +16,8 @@ export default class AccompanyingProduct extends React.Component {
 
     componentDidMount() {
         const products = this.props.products;
-        if (products.length) {
-            this.openPopup();
-            this.getProductsData(products);
-        }
+        this.openPopup();
+        this.getProductsData(products);
     }
 
     onQuantityChanged(event) {
@@ -67,7 +65,6 @@ export default class AccompanyingProduct extends React.Component {
             const categories = this.props.categories;
             const collections = this.props.collections;
             const manufacturers = this.props.manufacturers;
-            const colors = this.props.colors;
             this.setState({
                 products: new Map(products.map(product => ([
                     product.id, {
@@ -78,7 +75,6 @@ export default class AccompanyingProduct extends React.Component {
                     categories: product.categories.map(category => categories.get(category)),
                     collection: product.collection && collections.get(product.collection),
                     manufacturer: product.manufacturer && manufacturers.get(product.manufacturer),
-                    colors: product.colors.map(colorId => colors.get(colorId)),
                     preview: {
                         type: product.images.length || product.categories[0].icon ? 'img' : 'char',
                         value: product.images[0] && (product.images[0].preview || product.images[0].full) || categories.get(product.categories[0]).icon || categories.get(product.categories[0]).icon_code
@@ -95,6 +91,7 @@ export default class AccompanyingProduct extends React.Component {
     }
 
     openPopup() {
+        const accompanyingProduct = this;
         $.magnificPopup.open({
             items: {
                 src: '.accompanying-products'
@@ -107,13 +104,17 @@ export default class AccompanyingProduct extends React.Component {
             preloader: false,
             midClick: true,
             removalDelay: 300,
-            mainClass: 'my-mfp-zoom-in'
+            mainClass: 'my-mfp-zoom-in',
+            callbacks: {
+                afterClose: () => {
+                    accompanyingProduct.props.closePopup();
+                }
+            }
         });
     }
 
     closePopup() {
         $.magnificPopup.close();
-        this.props.close();
     }
 
     render() {

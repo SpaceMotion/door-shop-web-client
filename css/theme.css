@@ -58,6 +58,7 @@
     47. Cards
     49. Single page
     50. Accompanying Product
+    51. Delivery info
 
     ----------------------------------
  */
@@ -6845,6 +6846,16 @@ footer .footer-social li a {
     .accompanying-products__item-quantity {
         width: 40%;
     }
+}
+
+/*  
+    ----------------------------------
+    50. Accompanying Product
+    ----------------------------------
+*/
+
+.delivery-info {
+    color: white;
 }
 
 /* Version 2.2.0. 

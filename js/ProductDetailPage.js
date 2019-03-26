@@ -2,7 +2,6 @@ import React from "react";
 import ReloadPageMixin from "./ReloadPageMixin";
 import {Link, withRouter} from "react-router-dom";
 import DataService from "./DataService";
-import AccompanyingProduct from './AccompanyingProduct';
 
 export default withRouter(class ProductDetailPage extends ReloadPageMixin(React.Component) {
     constructor(props) {
@@ -120,6 +119,7 @@ export default withRouter(class ProductDetailPage extends ReloadPageMixin(React.
         const collections = this.collections;
         const manufacturers = this.manufacturers;
         const colors = this.colors;
+        const productColors = [...new Set(data.images.map(image => image.color).filter(id => id).concat(data.colors))];
 
         return (
             <div>
@@ -168,13 +168,22 @@ export default withRouter(class ProductDetailPage extends ReloadPageMixin(React.
                                             </div>}
 
                                             <hr />
-                                            {data.colors.length && (
+                                            {productColors.length && (
                                                 <div className="info-box">
                                                     <span><strong>Доступные цвета&nbsp;</strong></span>
                                                     <div className="product-colors clearfix">
-                                                        {data.colors.map(colorId => <span key={colors.get(colorId).id} className="color-btn" style={{
-                                                            backgroundColor: `#${colors.get(colorId).value}`
-                                                        }}/>)}                                                    
+                                                        {productColors.map(colorId => {
+                                                            const position = data.images.findIndex(image => image.color === colorId);
+                                                            const isImage = position > -1;
+                                                            return <span key={colors.get(colorId).id} className="color-btn" style={{
+                                                                backgroundColor: `#${colors.get(colorId).value}`,
+                                                                cursor: isImage ? 'pointer' : 'default'
+                                                            }} onClick={() => {
+                                                                if (isImage) {
+                                                                    $(".product-detail .owl-product-gallery").data('owlCarousel').goTo(position);
+                                                                }                                                            
+                                                            }}/>;
+                                                        })}                                                    
                                                     </div>
                                                 </div>
                                             )}

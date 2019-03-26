@@ -26,6 +26,7 @@ export default withRouter(class ProductQuickView extends React.Component {
         const collectionName = collection && collection.name;
         const roubleIcon = String.fromCharCode(8381);
         const colors = this.props.colors;
+        const productColors = [...new Set(data.images.map(image => image.color).filter(id => id).concat(data.colors))];
 
         return (
             <div data-product-id={id}>
@@ -61,9 +62,18 @@ export default withRouter(class ProductQuickView extends React.Component {
                                         <div className="info-box">
                                             <strong>Доступные цвета</strong>
                                             <div className="product-colors clearfix">
-                                                {data.colors.map(colorId => <span key={colorId} className="color-btn" style={{
-                                                    backgroundColor: `#${colors.get(colorId).value}`
-                                                }}></span>)}
+                                                {productColors.map(colorId => {
+                                                    const position = data.images.findIndex(image => image.color === colorId);
+                                                    const isImage = position > -1;
+                                                    return <span key={colorId} className="color-btn" style={{
+                                                        backgroundColor: `#${colors.get(colorId).value}`,
+                                                        cursor: isImage ? 'pointer' : 'default'
+                                                    }} onClick={() => {
+                                                        if (isImage) {
+                                                            $(".popup-main .owl-product-gallery").data('owlCarousel').goTo(position);
+                                                        }
+                                                    }}></span>;
+                                                })}
                                             </div>
                                         </div>
                                     </div>

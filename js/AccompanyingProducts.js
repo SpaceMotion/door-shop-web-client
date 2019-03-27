@@ -63,32 +63,36 @@ export default class AccompanyingProduct extends React.Component {
 
     getProductsData(productIds) {
         DataService.getComplex(products => {
-            const categories = this.props.categories;
-            const collections = this.props.collections;
-            const manufacturers = this.props.manufacturers;
-            this.setState({
-                products: new Map(products.map(product => ([
-                    product.id, {
-                    ...product,
-                    originalData: {
-                        ...product
-                    },
-                    categories: product.categories.map(category => categories.get(category)),
-                    collection: product.collection && collections.get(product.collection),
-                    manufacturer: product.manufacturer && manufacturers.get(product.manufacturer),
-                    preview: {
-                        type: product.images.length || product.categories[0].icon ? 'img' : 'char',
-                        value: product.images[0] && (product.images[0].preview || product.images[0].full) || categories.get(product.categories[0]).icon || categories.get(product.categories[0]).icon_code
-                    },
-                    quantity: 0
-                }])))
-            });
+            this.setProductsData(products);
         }, productIds.map(productId => ({
             name: 'getProducts',
             options: {
                 id: productId
             }
         })));
+    }
+
+    setProductsData(products) {
+        const categories = this.props.categories;
+        const collections = this.props.collections;
+        const manufacturers = this.props.manufacturers;
+        this.setState({
+            products: new Map(products.map(product => ([
+                product.id, {
+                ...product,
+                originalData: {
+                    ...product
+                },
+                categories: product.categories.map(category => categories.get(category)),
+                collection: product.collection && collections.get(product.collection),
+                manufacturer: product.manufacturer && manufacturers.get(product.manufacturer),
+                preview: {
+                    type: product.images.length || product.categories[0].icon ? 'img' : 'char',
+                    value: product.images[0] && (product.images[0].preview || product.images[0].full) || categories.get(product.categories[0]).icon || categories.get(product.categories[0]).icon_code
+                },
+                quantity: 0
+            }])))
+        });
     }
 
     openPopup() {

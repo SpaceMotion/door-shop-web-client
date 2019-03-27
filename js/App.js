@@ -16,7 +16,7 @@ import Utils from "./Utils";
 import DataService from "./DataService";
 import CartServiceMixin from "./CartServiceMixin";
 import PageNotFound from "./PageNotFound";
-import AccompanyingProduct from "./AccompanyingProduct";
+import AccompanyingProducts from "./AccompanyingProducts";
 
 class App extends CartServiceMixin(React.Component) {
 	closeMenuMobile() {
@@ -198,7 +198,7 @@ class App extends CartServiceMixin(React.Component) {
 					</Switch>
 					<Footer companyInfo={this.props.companyInfo}/>
 					{cartAction && <CartActionInfoPlaque action={cartAction} openCartHandler={this.openCartHandler} clearCartActionInfo={this.clearCartActionInfo}></CartActionInfoPlaque>}
-					{this.state.accompanyingProduct.is && <AccompanyingProduct products={this.state.accompanyingProduct.productIds} cart={this.state.cart} categories={this.props.categories} manufacturers={this.props.manufacturers} collections={this.props.collections} colors={this.props.colors} onCartProductQuantityChanged={this.onCartProductQuantityChanged} addCartProduct={this.addCartProduct} openCartHandler={this.openCartHandler} closePopup={this.closeAccompanyingProduct}/>}
+					{this.state.accompanyingProduct.is && <AccompanyingProducts products={this.state.accompanyingProduct.productIds} cart={this.state.cart} categories={this.props.categories} manufacturers={this.props.manufacturers} collections={this.props.collections} colors={this.props.colors} onCartProductQuantityChanged={this.onCartProductQuantityChanged} addCartProduct={this.addCartProduct} openCartHandler={this.openCartHandler} closePopup={this.closeAccompanyingProduct}/>}
 			    </div>
 			</div>
 		);

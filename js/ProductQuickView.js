@@ -1,5 +1,6 @@
 import React from "react";
 import { withRouter } from "react-router";
+import CONSTANTS from "./constants";
 
 export default withRouter(class ProductQuickView extends React.Component {
     componentDidMount() {
@@ -24,7 +25,6 @@ export default withRouter(class ProductQuickView extends React.Component {
         const manufacturerName = manufacturer && manufacturer.name;
         const collection = this.props.collections.get(data.collection);
         const collectionName = collection && collection.name;
-        const roubleIcon = String.fromCharCode(8381);
         const colors = this.props.colors;
         const productColors = [...new Set(data.images.map(image => image.color).filter(id => id).concat(data.colors))];
 
@@ -85,7 +85,7 @@ export default withRouter(class ProductQuickView extends React.Component {
                         <div className="popup-table">
                             <div className="popup-cell">
                                 <div className="price">
-                                    <span className="h3">{`${roubleIcon} ${(+data.price_with_discount).toFixed(2)}`}<small>{data.price_with_discount !== data.price ? `${roubleIcon} ${(+data.price).toFixed(2)}` : null}</small></span>
+                                    <span className="h3">{`${CONSTANTS.ROUBLE_ICON} ${(+data.price_with_discount).toFixed(2)}`}<small>{data.price_with_discount !== data.price ? `${CONSTANTS.ROUBLE_ICON} ${(+data.price).toFixed(2)}` : null}</small></span>
                                 </div>
                             </div>
                             <div className="popup-cell">

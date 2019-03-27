@@ -2,6 +2,7 @@ import React from "react";
 import ReloadPageMixin from "./ReloadPageMixin";
 import {Link, withRouter} from "react-router-dom";
 import DataService from "./DataService";
+import CONSTANTS from "./constants";
 
 export default withRouter(class ProductDetailPage extends ReloadPageMixin(React.Component) {
     constructor(props) {
@@ -114,7 +115,6 @@ export default withRouter(class ProductDetailPage extends ReloadPageMixin(React.
 
         const price = data.price;
         const discountPrice = data.price_with_discount;
-        const roubleIcon = String.fromCharCode(8381);
         const categories = this.props.categories;
         const collections = this.collections;
         const manufacturers = this.manufacturers;
@@ -153,8 +153,8 @@ export default withRouter(class ProductDetailPage extends ReloadPageMixin(React.
                                         <div className="clearfix">
                                             <div className="price">
                                                 <span className="h3">
-                                                    {`${roubleIcon} ${discountPrice}`}
-                                                    {discountPrice !== price && <small>{`${roubleIcon} ${price}`}</small>}
+                                                    {`${CONSTANTS.ROUBLE_ICON} ${discountPrice}`}
+                                                    {discountPrice !== price && <small>{`${CONSTANTS.ROUBLE_ICON} ${price}`}</small>}
                                                 </span>
                                             </div>
                                             <hr />

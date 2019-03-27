@@ -1,5 +1,6 @@
 import React from 'react';
 import DataService from "./DataService";
+import CONSTANTS from "./constants";
 
 export default class AccompanyingProduct extends React.Component {
     constructor(props) {
@@ -7,7 +8,6 @@ export default class AccompanyingProduct extends React.Component {
         this.state = {
             products: new Map()
         };
-        this.roubleIcon = String.fromCharCode(8381);
         this.onQuantityChanged = this.onQuantityChanged.bind(this);
         this.applyAccompanyingProduct = this.applyAccompanyingProduct.bind(this);
         this.jumpToCart = this.jumpToCart.bind(this);
@@ -25,13 +25,14 @@ export default class AccompanyingProduct extends React.Component {
         const productId = +event.target.dataset.productId;
         this.setState(state => {
             state.products.get(productId).quantity = value;
+            state.isAtLeastOneProductQuantity = [...state.products.values()].find(product => product.quantity > 0);
             return state;
         });    
     }
 
     applyAccompanyingProduct(event) {
         event.preventDefault();
-        if ([...this.state.products.values()].find(product => product.quantity > 0)) {
+        if (this.state.isAtLeastOneProductQuantity) {
             const cartStorageProducts = this.props.cart.storage.products;
             this.state.products.forEach(product => {
                 if (product.quantity > 0) {
@@ -122,7 +123,6 @@ export default class AccompanyingProduct extends React.Component {
             return null;
         }
         const products = [...this.state.products.values()];
-        const isAtLeastOneProductQuantity = products.find(product => product.quantity > 0);
         return (
             <div>
                 <div className="accompanying-products mfp-hide">
@@ -144,8 +144,8 @@ export default class AccompanyingProduct extends React.Component {
                                     <div className="accompanying-products__item-quantity-price-wrapper">
                                         <input className="accompanying-products__item-quantity form-control" type="number" min="0" onChange={this.onQuantityChanged} data-product-id={product.id} value={product.quantity} />
                                         <div className="accompanying-products__item-price-wrapper">
-                                            <span className="accompanying-products__item-price accompanying-products__item-price_type_with-discount">{this.roubleIcon}&nbsp;{totalPrice.price_with_discount}</span>
-                                            {totalPrice.price_with_discount !== totalPrice.price && <span className="accompanying-products__item-price accompanying-products__item-price_type_without-discount">{this.roubleIcon}&nbsp;{totalPrice.price}</span>}
+                                            <span className="accompanying-products__item-price accompanying-products__item-price_type_with-discount">{CONSTANTS.ROUBLE_ICON}&nbsp;{totalPrice.price_with_discount}</span>
+                                            {totalPrice.price_with_discount !== totalPrice.price && <span className="accompanying-products__item-price accompanying-products__item-price_type_without-discount">{CONSTANTS.ROUBLE_ICON}&nbsp;{totalPrice.price}</span>}
                                         </div>
                                     </div>
                                 </div>    
@@ -153,7 +153,7 @@ export default class AccompanyingProduct extends React.Component {
                         })}
                     </div>
                     <div className='accompanying-products__actions'>
-                        <a href='#' className={`accompanying-products__action accompanying-products__action_type_apply ${isAtLeastOneProductQuantity ? '' : 'accompanying-products__action_state_disabled'}`} onClick={this.applyAccompanyingProduct}>Купить</a>
+                        <a href='#' className={`accompanying-products__action accompanying-products__action_type_apply ${this.state.isAtLeastOneProductQuantity ? '' : 'accompanying-products__action_state_disabled'}`} onClick={this.applyAccompanyingProduct}>Купить</a>
                         <a href='#' className='accompanying-products__action accompanying-products__action_type_to-cart' onClick={this.jumpToCart}>Перейти в корзину</a>
                         <a href='#' className='accompanying-products__action accompanying-products__action_type_continue-shopping' onClick={this.continueShopping}>Продолжить покупки</a>
                     </div>

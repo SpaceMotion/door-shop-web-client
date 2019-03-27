@@ -25,23 +25,21 @@ export default class AccompanyingProduct extends React.Component {
         const productId = +event.target.dataset.productId;
         this.setState(state => {
             state.products.get(productId).quantity = value;
-            state.isAtLeastOneProductQuantity = [...state.products.values()].find(product => product.quantity > 0);
+            state.productsWithQuantity = [...state.products.values()].filter(product => product.quantity > 0);
             return state;
         });    
     }
 
     applyAccompanyingProduct(event) {
         event.preventDefault();
-        if (this.state.isAtLeastOneProductQuantity) {
+        if (this.state.productsWithQuantity.length) {
             const cartStorageProducts = this.props.cart.storage.products;
-            this.state.products.forEach(product => {
-                if (product.quantity > 0) {
-                    const currentProduct = cartStorageProducts[product.id];
-                    if (currentProduct) {
-                        this.props.onCartProductQuantityChanged(product.id, currentProduct.quantity + product.quantity);
-                    } else {
-                        this.props.addCartProduct(product.originalData, product.quantity, false);
-                    }
+            this.state.productsWithQuantity.forEach(product => {
+                const currentProduct = cartStorageProducts[product.id];
+                if (currentProduct) {
+                    this.props.onCartProductQuantityChanged(product.id, currentProduct.quantity + product.quantity);
+                } else {
+                    this.props.addCartProduct(product.originalData, product.quantity, false);
                 }
             });
             this.continueShopping();    
@@ -157,7 +155,7 @@ export default class AccompanyingProduct extends React.Component {
                         })}
                     </div>
                     <div className='accompanying-products__actions'>
-                        <a href='#' className={`accompanying-products__action accompanying-products__action_type_apply ${this.state.isAtLeastOneProductQuantity ? '' : 'accompanying-products__action_state_disabled'}`} onClick={this.applyAccompanyingProduct}>Купить</a>
+                        <a href='#' className={`accompanying-products__action accompanying-products__action_type_apply ${this.state.productsWithQuantity.length ? '' : 'accompanying-products__action_state_disabled'}`} onClick={this.applyAccompanyingProduct}>Купить</a>
                         <a href='#' className='accompanying-products__action accompanying-products__action_type_to-cart' onClick={this.jumpToCart}>Перейти в корзину</a>
                         <a href='#' className='accompanying-products__action accompanying-products__action_type_continue-shopping' onClick={this.continueShopping}>Продолжить покупки</a>
                     </div>

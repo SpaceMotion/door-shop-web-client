@@ -110,6 +110,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
 
     showHideQuickViewPopup() {
         if (this.state.quickViewData) {
+            const productsPage = this;
             $.magnificPopup.open({
                 items: {
                     src: '.popup-main'
@@ -125,6 +126,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
                 mainClass: 'my-mfp-zoom-in',
                 callbacks: {
                     afterClose: () => {
+                        productsPage.props.closePopup();
                         this.updateSearchParams([{
                             key: 'product',
                             value: 'null',

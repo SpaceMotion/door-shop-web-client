@@ -1,5 +1,6 @@
 import React from "react";
 import {Link} from "react-router-dom";
+import CONSTANTS from "./constants";
 
 export default class Prouct extends React.Component {
     constructor(props) {
@@ -56,7 +57,6 @@ export default class Prouct extends React.Component {
 
 	render() {
         const isPreviewTypeOfImg = this.previewImg.type === 'img';
-        const roubleIcon = String.fromCharCode(8381);
         const data = this.props.data;
         const id = data.id;
 
@@ -82,8 +82,8 @@ export default class Prouct extends React.Component {
                         </div>
                         <div className="text">
                             <h2 className="title h4"><Link to={`/products/${id}`}>{data.name}<br/><small>{data.collection && this.props.collections.get(data.collection).name || data.manufacturer && this.props.manufacturers.get(data.manufacturer).name}</small></Link></h2>
-                            {data.price_with_discount !== data.price ? <sub>{`${roubleIcon} ${(+data.price).toFixed(2)}`}</sub> : null}
-                            <sup>{roubleIcon} <span className="price">{(+data.price_with_discount).toFixed(2)}</span></sup>
+                            {data.price_with_discount !== data.price ? <sub>{`${CONSTANTS.ROUBLE_ICON} ${(+data.price).toFixed(2)}`}</sub> : null}
+                            <sup>{CONSTANTS.ROUBLE_ICON} <span className="price">{(+data.price_with_discount).toFixed(2)}</span></sup>
                         </div>
                     </div>
                 </article>

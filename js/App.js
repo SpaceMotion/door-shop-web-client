@@ -16,6 +16,7 @@ import Utils from "./Utils";
 import DataService from "./DataService";
 import CartServiceMixin from "./CartServiceMixin";
 import PageNotFound from "./PageNotFound";
+import AccompanyingProducts from "./AccompanyingProducts";
 
 class App extends CartServiceMixin(React.Component) {
 	closeMenuMobile() {
@@ -36,6 +37,16 @@ class App extends CartServiceMixin(React.Component) {
         $('.open-cart').removeClass('open');
 	}
 	
+	constructor(props) {
+		super(props);
+		this.closeAccompanyingProduct = this.closeAccompanyingProduct.bind(this);
+		this.state = this.state || {};
+		this.state.accompanyingProduct = {
+			is: false,
+			productIds: []
+		};
+	}
+
 	componentDidMount() {
 		//Обработчики глобальных событий
 		window.addEventListener('closeMenuMobile', this.closeMenuMobile.bind(this));
@@ -159,6 +170,13 @@ class App extends CartServiceMixin(React.Component) {
 		})();		
 	}
 
+    closeAccompanyingProduct() {
+        this.setState(state => {
+			state.accompanyingProduct.is = false;
+			return state;
+        });
+    }
+
 	render() {
 		const cart = this.state.cart;
 		const cartAction = cart.local.action;
@@ -170,16 +188,17 @@ class App extends CartServiceMixin(React.Component) {
 					<Header categories={this.props.categories} companyInfo={this.props.companyInfo} cart={cart} manufacturers={this.props.manufacturers} collections={this.props.collections} onCartProductQuantityChanged={this.onCartProductQuantityChanged} removeCartProduct={this.removeCartProduct} updateCartProductsIfExpired={this.updateCartProductsIfExpired} toggleCartHandler={this.toggleCartHandler}/>
 					<Switch>
 						<Route path="/categories" render={() => <CategoriesPage categories={this.props.categories}/>}/>
-						<Route exact path="/products" render={() => <ProductsPage categories={this.props.categories} addCartProduct={this.addCartProduct} manufacturers={this.props.manufacturers} collections={this.props.collections}/>}/>
-						<Route path="/products/:id" render={() => <ProductDetailPage categories={this.props.categories} addCartProduct={this.addCartProduct}/>}/>
+						<Route exact path="/products" render={() => <ProductsPage categories={this.props.categories} addCartProduct={this.addCartProduct} manufacturers={this.props.manufacturers} collections={this.props.collections} closePopup={this.closeAccompanyingProduct}/>}/>
+						<Route path="/products/:id" render={() => <ProductDetailPage categories={this.props.categories} addCartProduct={this.addCartProduct} cart={cart} onCartProductQuantityChanged={this.onCartProductQuantityChanged} addCartProduct={this.addCartProduct} openCartHandler={this.openCartHandler}/>}/>
 						<Route path="/delivery" render={() => <DeliveryPage/>}/>
-						<Route path="/contacts" render={() => <ContactsPage/>}/>
+						<Route path="/contacts" render={() => <ContactsPage data={this.props.companyInfo}/>}/>
 						<Route exact path="/" render={() => <MainPage categories={this.props.categories}/>}/>
 						<Route path="/order" render={() => <OrderPage cart={cart} removeCartProduct={this.removeCartProduct} onCartProductQuantityChanged={this.onCartProductQuantityChanged} manufacturers={this.props.manufacturers} collections={this.props.collections} cartInitialized={this.cartInitialized}/>}/>
 						<PageNotFound/>
 					</Switch>
 					<Footer companyInfo={this.props.companyInfo}/>
 					{cartAction && <CartActionInfoPlaque action={cartAction} openCartHandler={this.openCartHandler} clearCartActionInfo={this.clearCartActionInfo}></CartActionInfoPlaque>}
+					{this.state.accompanyingProduct.is && <AccompanyingProducts products={this.state.accompanyingProduct.productIds} cart={this.state.cart} categories={this.props.categories} manufacturers={this.props.manufacturers} collections={this.props.collections} colors={this.props.colors} onCartProductQuantityChanged={this.onCartProductQuantityChanged} addCartProduct={this.addCartProduct} openCartHandler={this.openCartHandler} closePopup={this.closeAccompanyingProduct}/>}
 			    </div>
 			</div>
 		);

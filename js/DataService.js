@@ -92,6 +92,13 @@ const DataService = {
         });            
     },
 
+    // Delivery
+    getDeliveryInfo(callback) {
+        fetch(`${CONFIG.ROOT_API_URL}/delivery/`, {headers}).then(response => response.json()).then(data => {
+            callback(data);
+        });                    
+    },
+
     // Post a new order
     postOrder(callback, body) {
         let status;

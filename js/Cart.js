@@ -1,14 +1,9 @@
 import React from "react";
 import {Link} from "react-router-dom";
 import Utils from "./Utils";
+import CONSTANTS from "./constants";
 
 export default class Cart extends React.Component {
-    constructor(props) {
-        super(props);
-
-        this.roubleIcon = String.fromCharCode(8381);
-    }
-
     render() {
         const products = this.props.data.storage.products;
         const cartLocal = this.props.data.local;
@@ -51,8 +46,8 @@ export default class Cart extends React.Component {
                                                 }} value={quantity} className="form-control form-quantity" />
                                             </div>
                                             <div className="price">
-                                                <span className="final">{this.roubleIcon}&nbsp;{totalPrice.price_with_discount}</span>
-                                                {totalPrice.price_with_discount !== totalPrice.price && <span className="discount">{this.roubleIcon}&nbsp;{totalPrice.price}</span>}
+                                                <span className="final">{CONSTANTS.ROUBLE_ICON}&nbsp;{totalPrice.price_with_discount}</span>
+                                                {totalPrice.price_with_discount !== totalPrice.price && <span className="discount">{CONSTANTS.ROUBLE_ICON}&nbsp;{totalPrice.price}</span>}
                                             </div>
                                         </div>
                                         <span className="icon icon-cross icon-delete" onClick={() => {
@@ -72,7 +67,7 @@ export default class Cart extends React.Component {
                                             <strong>Скидка {cartLocal.discountPercent}%</strong>
                                         </div>
                                         <div>
-                                            <span>{`${this.roubleIcon} ${cartLocal.discountValue}`}</span>
+                                            <span>{`${CONSTANTS.ROUBLE_ICON} ${cartLocal.discountValue}`}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -87,7 +82,7 @@ export default class Cart extends React.Component {
                                     <strong>К оплате</strong>
                                 </div>
                                 <div>
-                                    <div className="h4 title">{`${this.roubleIcon} ${cartLocal.totalSumDiscount}`}</div>
+                                    <div className="h4 title">{`${CONSTANTS.ROUBLE_ICON} ${cartLocal.totalSumDiscount}`}</div>
                                 </div>
                             </div>
                         </div>

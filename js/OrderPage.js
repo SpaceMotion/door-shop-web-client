@@ -3,6 +3,7 @@ import {Link} from "react-router-dom";
 import ReloadPageMixin from "./ReloadPageMixin";
 import Utils from "./Utils";
 import DataService from './DataService';
+import CONSTANTS from "./constants";
 
 export default class OrderPage extends ReloadPageMixin(React.Component) {
     constructor(props) {
@@ -28,7 +29,6 @@ export default class OrderPage extends ReloadPageMixin(React.Component) {
             },
             requestProcessing: false
         };
-        this.roubleIcon = String.fromCharCode(8381);
         window.addEventListener('click', this.closeInfoPopup);
     }
     
@@ -188,8 +188,8 @@ export default class OrderPage extends ReloadPageMixin(React.Component) {
                                                     }} className="form-control form-quantity" />
                                                 </div>
                                                 <div className="price">
-                                                    <span className="final h3">{`${this.roubleIcon} ${totalPrice.price_with_discount}`}</span>
-                                                    {totalPrice.price_with_discount !== totalPrice.price && <span className="discount">{`${this.roubleIcon} ${totalPrice.price}`}</span>}
+                                                    <span className="final h3">{`${CONSTANTS.ROUBLE_ICON} ${totalPrice.price_with_discount}`}</span>
+                                                    {totalPrice.price_with_discount !== totalPrice.price && <span className="discount">{`${CONSTANTS.ROUBLE_ICON} ${totalPrice.price}`}</span>}
                                                 </div>
                                                 <span className="icon icon-cross icon-delete" onClick={() => {
                                                     this.props.removeCartProduct(productId);
@@ -206,7 +206,7 @@ export default class OrderPage extends ReloadPageMixin(React.Component) {
                                                 <strong>Скидка {cartLocal.discountPercent}%</strong>
                                             </div>
                                             <div>
-                                                <span>{`${this.roubleIcon} ${cartLocal.discountValue}`}</span>
+                                                <span>{`${CONSTANTS.ROUBLE_ICON} ${cartLocal.discountValue}`}</span>
                                             </div>
                                         </div>                
                                     </div>
@@ -218,7 +218,7 @@ export default class OrderPage extends ReloadPageMixin(React.Component) {
                                             <strong>К оплате</strong>
                                         </div>
                                         <div>
-                                            <div className="h2 title checkout__total-price">{`${this.roubleIcon} ${cartLocal.totalSumDiscount}`}</div>
+                                            <div className="h2 title checkout__total-price">{`${CONSTANTS.ROUBLE_ICON} ${cartLocal.totalSumDiscount}`}</div>
                                         </div>
                                     </div>
                                 </div>

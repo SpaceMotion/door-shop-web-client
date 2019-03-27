@@ -191,7 +191,7 @@ class App extends CartServiceMixin(React.Component) {
 						<Route exact path="/products" render={() => <ProductsPage categories={this.props.categories} addCartProduct={this.addCartProduct} manufacturers={this.props.manufacturers} collections={this.props.collections} closePopup={this.closeAccompanyingProduct}/>}/>
 						<Route path="/products/:id" render={() => <ProductDetailPage categories={this.props.categories} addCartProduct={this.addCartProduct} cart={cart} onCartProductQuantityChanged={this.onCartProductQuantityChanged} addCartProduct={this.addCartProduct} openCartHandler={this.openCartHandler}/>}/>
 						<Route path="/delivery" render={() => <DeliveryPage/>}/>
-						<Route path="/contacts" render={() => <ContactsPage/>}/>
+						<Route path="/contacts" render={() => <ContactsPage data={this.props.companyInfo}/>}/>
 						<Route exact path="/" render={() => <MainPage categories={this.props.categories}/>}/>
 						<Route path="/order" render={() => <OrderPage cart={cart} removeCartProduct={this.removeCartProduct} onCartProductQuantityChanged={this.onCartProductQuantityChanged} manufacturers={this.props.manufacturers} collections={this.props.collections} cartInitialized={this.cartInitialized}/>}/>
 						<PageNotFound/>

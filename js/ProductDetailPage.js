@@ -181,9 +181,9 @@ export default withRouter(class ProductDetailPage extends ReloadPageMixin(React.
                                                             }} onClick={() => {
                                                                 if (isImage) {
                                                                     $(".product-detail .owl-product-gallery").data('owlCarousel').goTo(position);
-                                                                }                                                            
+                                                                }
                                                             }}/>;
-                                                        })}                                                    
+                                                        })}
                                                     </div>
                                                 </div>
                                             )}

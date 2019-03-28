@@ -6,7 +6,8 @@ export default class AccompanyingProduct extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            products: new Map()
+            products: new Map(),
+            productsWithQuantity: []
         };
         this.onQuantityChanged = this.onQuantityChanged.bind(this);
         this.applyAccompanyingProduct = this.applyAccompanyingProduct.bind(this);

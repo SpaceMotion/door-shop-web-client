@@ -12,10 +12,7 @@ export default class ProductsSearch extends React.Component {
         this.onSearchProductsLoad = this.onSearchProductsLoad.bind(this);
         this.isNonEmptyInputValue = this.isNonEmptyInputValue.bind(this);
         this.onInputValueStateUpdated = this.onInputValueStateUpdated.bind(this);
-        this.timer = new Timer({
-            duration: CONSTANTS.DELAY_QUERY_PRODUCTS_SEARCH,
-            endCallback: this.makeSearchRequest
-        });
+        this.timer = new Timer(CONSTANTS.DELAY_QUERY_PRODUCTS_SEARCH, this.makeSearchRequest);
         this.state = {
             products: [],
             searchText: ''
@@ -50,10 +47,10 @@ export default class ProductsSearch extends React.Component {
         if (this.abortController) {
             this.abortController.abort();
         }
+        this.timer.stop();
         if (this.isNonEmptyInputValue()) {
             this.timer.start();
         } else {
-            this.timer.stop();
             this.setState({
                 products: []
             });

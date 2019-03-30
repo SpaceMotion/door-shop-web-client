@@ -1,13 +1,12 @@
 export default class Timer {
-    constructor(props) {
+    constructor(duration, endCallback) {
         this.start = this.start.bind(this);
         this.stop = this.stop.bind(this);
-        this.duration = props.duration;
-        this.endCallback = props.endCallback;
+        this.duration = duration;
+        this.endCallback = endCallback;
     }
 
     start() {
-        this.stop();
         this.timer = setTimeout(this.endCallback, this.duration);
     }
 

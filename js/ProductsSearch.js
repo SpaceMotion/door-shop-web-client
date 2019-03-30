@@ -2,50 +2,62 @@ import React from "react";
 import CONSTANTS from "./constants";
 import DataService from "./DataService";
 import {Link} from "react-router-dom";
+import Timer from "./Timer";
 
 export default class ProductsSearch extends React.Component {
     constructor(props) {
         super(props);
         this.onInputValueChanged = this.onInputValueChanged.bind(this);
-        this.setUpTimer = this.setUpTimer.bind(this);
-        this.lastRequestId = 0;
+        this.makeSearchRequest = this.makeSearchRequest.bind(this);
+        this.onSearchProductsLoad = this.onSearchProductsLoad.bind(this);
+        this.isNonEmptyInputValue = this.isNonEmptyInputValue.bind(this);
+        this.onInputValueStateUpdated = this.onInputValueStateUpdated.bind(this);
+        this.timer = new Timer({
+            duration: CONSTANTS.DELAY_QUERY_PRODUCTS_SEARCH,
+            endCallback: this.makeSearchRequest
+        });
         this.state = {
             products: [],
             searchText: ''
         };
     }
+    
+    isNonEmptyInputValue() {
+        return this.state.searchText.trim().length > 0;
+    }
+
+    onSearchProductsLoad(data) {
+        this.setState({
+            products: data.results
+        });
+    }
+
+    makeSearchRequest() {
+        this.abortController = new AbortController();
+        DataService.getSearchProducts(this.onSearchProductsLoad, {
+            search: this.state.searchText,
+            signal: this.abortController.signal
+        });                        
+    }
 
     onInputValueChanged(event) {
-        const value = event.target.value;
         this.setState({
-            searchText: value
-        });
-        if (value.trim().length) {
-            this.setUpTimer();                
+            searchText: event.target.value
+        }, this.onInputValueStateUpdated);
+    }
+
+    onInputValueStateUpdated() {
+        if (this.abortController) {
+            this.abortController.abort();
+        }
+        if (this.isNonEmptyInputValue()) {
+            this.timer.start();
         } else {
-            window.clearTimeout(this.timer);
+            this.timer.stop();
             this.setState({
                 products: []
             });
         }
-    }
-
-    setUpTimer() {
-        const searchText = this.state.searchText.trim();
-        this.lastRequestId++;
-        const requestId = this.lastRequestId;
-        window.clearTimeout(this.timer);
-        this.timer = setTimeout(() => {
-            DataService.getSearchProducts(data => {
-                if (this.lastRequestId === requestId) {
-                    this.setState({
-                        products: data.results
-                    });
-                }
-            }, {
-                search: searchText
-            });                    
-        }, CONSTANTS.DELAY_QUERY_PRODUCTS_SEARCH);    
     }
 
     render() {

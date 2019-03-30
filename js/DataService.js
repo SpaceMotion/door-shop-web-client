@@ -103,9 +103,12 @@ const DataService = {
     getSearchProducts(callback, {...options}) {
         const searchText = options.search;
         
-        fetch(`${CONFIG.ROOT_API_URL}/products/?search=${searchText}`, {headers}).then(response => response.json()).then(data => {
+        fetch(`${CONFIG.ROOT_API_URL}/products/?search=${searchText}`, {
+            headers,
+            signal: options.signal
+        }).then(response => response.json()).then(data => {
             callback(data);
-        });            
+        }, () => {});
     },
 
     // Post a new order

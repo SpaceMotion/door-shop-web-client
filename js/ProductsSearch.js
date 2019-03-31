@@ -31,10 +31,11 @@ export default class ProductsSearch extends React.Component {
 
     makeSearchRequest() {
         this.abortController = new AbortController();
-        DataService.getSearchProducts(this.onSearchProductsLoad, {
-            search: this.state.searchText,
-            signal: this.abortController.signal
-        });                        
+        DataService.getSearchProducts(
+            this.onSearchProductsLoad,
+            this.state.searchText,
+            this.abortController.signal
+        );
     }
 
     onInputValueChanged(event) {

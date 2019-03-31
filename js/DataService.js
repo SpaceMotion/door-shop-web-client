@@ -100,12 +100,10 @@ const DataService = {
     },
 
     // Products search
-    getSearchProducts(callback, {...options}) {
-        const searchText = options.search;
-        
+    getSearchProducts(callback, searchText, signal) {
         fetch(`${CONFIG.ROOT_API_URL}/products/?search=${searchText}`, {
             headers,
-            signal: options.signal
+            signal: signal
         }).then(response => response.json()).then(data => {
             callback(data);
         }, () => {});

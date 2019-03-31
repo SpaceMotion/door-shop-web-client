@@ -20,7 +20,7 @@ export default class ProductsSearch extends React.Component {
     }
     
     hasTextToSearch() {
-        return this.state.searchText.trim().length > 0;
+        return this.state.searchText.trim().length > CONSTANTS.MIN_LETTERS_TO_SEARCH;
     }
 
     onSearchProductsLoad(data) {

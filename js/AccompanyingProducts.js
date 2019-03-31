@@ -26,9 +26,13 @@ export default class AccompanyingProduct extends React.Component {
         const productId = +event.target.dataset.productId;
         this.setState(state => {
             state.products.get(productId).quantity = value;
-            state.productsWithQuantity = [...state.products.values()].filter(product => product.quantity > 0);
+            state.productsWithQuantity = this.getProductsWithQuantity(state.products);
             return state;
         });    
+    }
+
+    getProductsWithQuantity(products) {
+        return [...products.values()].filter(product => product.quantity > 0);
     }
 
     applyAccompanyingProduct(event) {
@@ -75,8 +79,8 @@ export default class AccompanyingProduct extends React.Component {
         const categories = this.props.categories;
         const collections = this.props.collections;
         const manufacturers = this.props.manufacturers;
-        this.setState({
-            products: new Map(products.map(product => ([
+        this.setState(state => {
+            state.products = new Map(products.map(product => ([
                 product.id, {
                 ...product,
                 originalData: {
@@ -89,8 +93,10 @@ export default class AccompanyingProduct extends React.Component {
                     type: product.images.length || product.categories[0].icon ? 'img' : 'char',
                     value: product.images[0] && (product.images[0].preview || product.images[0].full) || categories.get(product.categories[0]).icon || categories.get(product.categories[0]).icon_code
                 },
-                quantity: 0
-            }])))
+                quantity: 1
+            }])));
+            state.productsWithQuantity = this.getProductsWithQuantity(state.products);
+            return state;
         });
     }
 

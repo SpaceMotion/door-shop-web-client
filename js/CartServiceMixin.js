@@ -67,7 +67,7 @@ export default superclass => class extends superclass {
                 type: 'add'
             };    
         }
-        if (data.accompanying_products.length) {
+        if (data.accompanying_products.length && !exists) {
             this.setState({
                 accompanyingProduct: {
                     is: true,

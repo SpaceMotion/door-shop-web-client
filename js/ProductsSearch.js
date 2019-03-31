@@ -10,7 +10,7 @@ export default class ProductsSearch extends React.Component {
         this.onInputValueChanged = this.onInputValueChanged.bind(this);
         this.makeSearchRequest = this.makeSearchRequest.bind(this);
         this.onSearchProductsLoad = this.onSearchProductsLoad.bind(this);
-        this.isNonEmptyInputValue = this.isNonEmptyInputValue.bind(this);
+        this.hasTextToSearch = this.hasTextToSearch.bind(this);
         this.onInputValueStateUpdated = this.onInputValueStateUpdated.bind(this);
         this.timer = new Timer(CONSTANTS.DELAY_QUERY_PRODUCTS_SEARCH, this.makeSearchRequest);
         this.state = {
@@ -19,7 +19,7 @@ export default class ProductsSearch extends React.Component {
         };
     }
     
-    isNonEmptyInputValue() {
+    hasTextToSearch() {
         return this.state.searchText.trim().length > 0;
     }
 
@@ -48,7 +48,7 @@ export default class ProductsSearch extends React.Component {
             this.abortController.abort();
         }
         this.timer.stop();
-        if (this.isNonEmptyInputValue()) {
+        if (this.hasTextToSearch()) {
             this.timer.start();
         } else {
             this.setState({

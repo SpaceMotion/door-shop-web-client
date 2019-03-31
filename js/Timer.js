@@ -7,10 +7,19 @@ export default class Timer {
     }
 
     start() {
-        this.timer = setTimeout(this.endCallback, this.duration);
+        if (!this.isRunning()) {
+            this.timer = setTimeout(this.endCallback, this.duration);
+        }
     }
 
     stop() {
-        window.clearTimeout(this.timer);
+        if (this.isRunning()) {
+            window.clearTimeout(this.timer);
+            this.timer = undefined;
+        }
+    }
+
+    isRunning() {
+        return this.timer !== undefined;
     }
 }

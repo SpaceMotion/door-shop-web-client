@@ -99,6 +99,16 @@ const DataService = {
         });                    
     },
 
+    // Products search
+    getSearchProducts(callback, searchText, signal) {
+        fetch(`${CONFIG.ROOT_API_URL}/products/?search=${searchText}`, {
+            headers,
+            signal: signal
+        }).then(response => response.json()).then(data => {
+            callback(data);
+        }, () => {});
+    },
+
     // Post a new order
     postOrder(callback, body) {
         let status;

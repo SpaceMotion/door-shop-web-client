@@ -1556,6 +1556,8 @@ nav .search-wrapper .btn-search {
 nav .search-wrapper .search-results {
     padding: 15px;
     border: 1px solid #dddddd;
+    max-height: 300px;
+    overflow: auto;
 }
 
 nav .search-wrapper .search-results .search-result-items {

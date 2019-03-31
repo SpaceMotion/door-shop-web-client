@@ -64,7 +64,7 @@ export default class ProductsSearch extends React.Component {
 
         return (
             <div className="search-wrapper">
-                <input className="form-control" placeholder="Что Вы ищете?" onChange={this.onInputValueChanged} value={this.state.searchText} />
+                <input className="form-control" placeholder="Введите текст для поиска" onChange={this.onInputValueChanged} value={this.state.searchText} />
 
                 <div className="search-results">
                     <div className="search-result-items">

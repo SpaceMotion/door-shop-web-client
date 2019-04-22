@@ -1,38 +1,36 @@
 import React from 'react';
 import DataService from "./DataService";
-import CONSTANTS from "./constants";
+import AccompanyingProduct from "./AccompanyingProduct";
 
-export default class AccompanyingProduct extends React.Component {
+export default class AccompanyingProducts extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             products: new Map(),
             productsWithQuantity: []
         };
-        this.onQuantityChanged = this.onQuantityChanged.bind(this);
+        this.onQuantityChange = this.onQuantityChange.bind(this);
         this.applyAccompanyingProduct = this.applyAccompanyingProduct.bind(this);
         this.jumpToCart = this.jumpToCart.bind(this);
         this.continueShopping = this.continueShopping.bind(this);
+        this.getProductsWithQuantity = this.getProductsWithQuantity.bind(this);
     }
 
     componentDidMount() {
-        const products = this.props.products;
         this.openPopup();
-        this.getProductsData(products);
+        this.getProductsData(this.props.products);
     }
 
-    onQuantityChanged(event) {
-        const value = +event.target.value;
-        const productId = +event.target.dataset.productId;
+    onQuantityChange(id, value) {
         this.setState(state => {
-            state.products.get(productId).quantity = value;
-            state.productsWithQuantity = this.getProductsWithQuantity(state.products);
+            state.products.get(id).quantity = +value;
+            state.productsWithQuantity = this.getProductsWithQuantity();
             return state;
         });    
     }
 
-    getProductsWithQuantity(products) {
-        return [...products.values()].filter(product => product.quantity > 0);
+    getProductsWithQuantity() {
+        return [...this.state.products.values()].filter(product => product.quantity > 0);
     }
 
     applyAccompanyingProduct(event) {
@@ -90,18 +88,18 @@ export default class AccompanyingProduct extends React.Component {
                 collection: product.collection && collections.get(product.collection),
                 manufacturer: product.manufacturer && manufacturers.get(product.manufacturer),
                 preview: {
-                    type: product.images.length || product.categories[0].icon ? 'img' : 'char',
+                    type: product.images.length || categories.get(product.categories[0]).icon ? 'img' : 'char',
                     value: product.images[0] && (product.images[0].preview || product.images[0].full) || categories.get(product.categories[0]).icon || categories.get(product.categories[0]).icon_code
                 },
                 quantity: 1
             }])));
-            state.productsWithQuantity = this.getProductsWithQuantity(state.products);
+            state.productsWithQuantity = this.getProductsWithQuantity();
             return state;
         });
     }
 
     openPopup() {
-        const accompanyingProduct = this;
+        const accompanyingProducts = this;
         $.magnificPopup.open({
             items: {
                 src: '.accompanying-products'
@@ -117,7 +115,7 @@ export default class AccompanyingProduct extends React.Component {
             mainClass: 'my-mfp-zoom-in',
             callbacks: {
                 afterClose: () => {
-                    accompanyingProduct.props.closePopup();
+                    accompanyingProducts.props.closePopup();
                 }
             }
         });
@@ -137,29 +135,7 @@ export default class AccompanyingProduct extends React.Component {
                 <div className="accompanying-products mfp-hide">
                     <div className='accompanying-products__header h1'>Сопутствующие товары</div>
                     <div className='accompanying-products__items'>
-                        {products.map(product => {
-                            const totalPrice = {
-                                price: (parseFloat(product.price) * product.quantity).toFixed(2),
-                                price_with_discount: (parseFloat(product.price_with_discount) * product.quantity).toFixed(2)
-                            };
-
-                            return (
-                                <div key={product.id} className="accompanying-products__item">
-                                    <div className="accompanying-products__item-image f-icon" style={{backgroundImage: product.preview.type === 'img' ? `url(${product.preview.value})` : 'none'}}>
-                                        {product.preview.type === 'char' ? String.fromCharCode(product.preview.value) : ''}
-                                    </div>                                                    
-                                    <div className="accompanying-products__item-title">{product.name}</div>
-                                    <div className="accompanying-products__item-manufacturer">{product.collection && product.collection.name || product.manufacturer && product.manufacturer.name}&nbsp;</div>
-                                    <div className="accompanying-products__item-quantity-price-wrapper">
-                                        <input className="accompanying-products__item-quantity form-control" type="number" min="0" onChange={this.onQuantityChanged} data-product-id={product.id} value={product.quantity} />
-                                        <div className="accompanying-products__item-price-wrapper">
-                                            <span className="accompanying-products__item-price accompanying-products__item-price_type_with-discount">{CONSTANTS.ROUBLE_ICON}&nbsp;{totalPrice.price_with_discount}</span>
-                                            {totalPrice.price_with_discount !== totalPrice.price && <span className="accompanying-products__item-price accompanying-products__item-price_type_without-discount">{CONSTANTS.ROUBLE_ICON}&nbsp;{totalPrice.price}</span>}
-                                        </div>
-                                    </div>
-                                </div>    
-                            );
-                        })}
+                        {products.map(product => <AccompanyingProduct key={product.id} {...product} onQuantityChange={this.onQuantityChange}/>)}
                     </div>
                     <div className='accompanying-products__actions'>
                         <a href='#' className={`accompanying-products__action accompanying-products__action_type_apply ${this.state.productsWithQuantity.length ? '' : 'accompanying-products__action_state_disabled'}`} onClick={this.applyAccompanyingProduct}>Купить</a>

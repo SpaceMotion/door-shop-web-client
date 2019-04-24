@@ -141,78 +141,80 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
     }    
 
 	onURLChanged(location) {
-        const searchParamsToSubmit = new URLSearchParams();
+        if (this.history.location.pathname.match(/^\/products/)) {
+            const searchParamsToSubmit = new URLSearchParams();
 
-        // Обработка параметров запроса
-        const searchParams = new URLSearchParams(location.search);
-        const category = parseInt(searchParams.get('category'));
-        const minPrice = Utils.parseValueToInt(searchParams.get('min_price'), this.minPrice);
-        const maxPrice = Utils.parseValueToInt(searchParams.get('max_price'), this.maxPrice);
-        const page = Utils.parseValueToInt(searchParams.get('page'), 1);
-        const pageSize = Utils.parseValueToInt(searchParams.get('page_size'), this.itemsPerPageOptions[0]);
-        const sortById = searchParams.get('sort_by');
-        const sortBy = this.sortByOptions.has(sortById) ? sortById : this.sortByOptions.defaultId;
-        const productId = Utils.parseValueToInt(searchParams.get('product'), null);
-        const manufacturers = this.props.manufacturers;
-        const manufacturersIds = ([...(new Set(searchParams.getAll('manufacturer')
-        .map(manufacturer => Utils.parseValueToInt(manufacturer, 0))))]
-        .filter(manufacturer => manufacturers.has(manufacturer)));
-        const collections = this.props.collections;
-        const collectionsIds = ([...(new Set(searchParams.getAll('collection')
-        .map(collection => Utils.parseValueToInt(collection, 0))))]
-        .filter(collection => collections.has(collection)));
-
-        // Сбор параметров для отправки запроса /products
-        for (let i = 0, len = manufacturersIds.length; i < len; i++) {
-            searchParamsToSubmit.append('manufacturer', manufacturersIds[i]);
-        }
-        for (let i = 0, len = collectionsIds.length; i < len; i++) {
-            searchParamsToSubmit.append('collection', collectionsIds[i]);
-        }
-        searchParamsToSubmit.set('ordering', sortBy);
-        if (category) {
-            searchParamsToSubmit.set('categories', category);
-        }
-        searchParamsToSubmit.set('price_with_discount_min', minPrice);
-        searchParamsToSubmit.set('price_with_discount_max', maxPrice);
-        searchParamsToSubmit.set('page', page);
-        searchParamsToSubmit.set('page_size', pageSize);
-
-        // Отправка запроса /products
-        if (searchParamsToSubmit.toString() !== this.lastSearchParams.string) {
-            this.disableControls(true);
-            $('.products-loader').removeClass('loaded');
-            const offsetFromTop = $('.products').offset().top - (window.innerWidth < constants.DESKTOP_MORE_THAN ? 0 : $('.header-nav').height());
-            const documentScrollTop = $(document).scrollTop();
-            Utils.scrollTo(documentScrollTop - offsetFromTop > 0 ? offsetFromTop : documentScrollTop, 0);
-            this.lastSearchParams.parsed = searchParamsToSubmit;
-            this.lastSearchParams.string = this.lastSearchParams.parsed.toString();
-            clearInterval(this.timer);
-            this.sendRequestForProducts(this.lastSearchParams);
-            this.timer = setInterval(() => {
-                this.disableControls(false);
+            // Обработка параметров запроса
+            const searchParams = new URLSearchParams(location.search);
+            const category = parseInt(searchParams.get('category'));
+            const minPrice = Utils.parseValueToInt(searchParams.get('min_price'), this.minPrice);
+            const maxPrice = Utils.parseValueToInt(searchParams.get('max_price'), this.maxPrice);
+            const page = Utils.parseValueToInt(searchParams.get('page'), 1);
+            const pageSize = Utils.parseValueToInt(searchParams.get('page_size'), this.itemsPerPageOptions[0]);
+            const sortById = searchParams.get('sort_by');
+            const sortBy = this.sortByOptions.has(sortById) ? sortById : this.sortByOptions.defaultId;
+            const productId = Utils.parseValueToInt(searchParams.get('product'), null);
+            const manufacturers = this.props.manufacturers;
+            const manufacturersIds = ([...(new Set(searchParams.getAll('manufacturer')
+            .map(manufacturer => Utils.parseValueToInt(manufacturer, 0))))]
+            .filter(manufacturer => manufacturers.has(manufacturer)));
+            const collections = this.props.collections;
+            const collectionsIds = ([...(new Set(searchParams.getAll('collection')
+            .map(collection => Utils.parseValueToInt(collection, 0))))]
+            .filter(collection => collections.has(collection)));
+    
+            // Сбор параметров для отправки запроса /products
+            for (let i = 0, len = manufacturersIds.length; i < len; i++) {
+                searchParamsToSubmit.append('manufacturer', manufacturersIds[i]);
+            }
+            for (let i = 0, len = collectionsIds.length; i < len; i++) {
+                searchParamsToSubmit.append('collection', collectionsIds[i]);
+            }
+            searchParamsToSubmit.set('ordering', sortBy);
+            if (category) {
+                searchParamsToSubmit.set('categories', category);
+            }
+            searchParamsToSubmit.set('price_with_discount_min', minPrice);
+            searchParamsToSubmit.set('price_with_discount_max', maxPrice);
+            searchParamsToSubmit.set('page', page);
+            searchParamsToSubmit.set('page_size', pageSize);
+    
+            // Отправка запроса /products
+            if (searchParamsToSubmit.toString() !== this.lastSearchParams.string) {
+                this.disableControls(true);
+                $('.products-loader').removeClass('loaded');
+                const offsetFromTop = $('.products').offset().top - (window.innerWidth < constants.DESKTOP_MORE_THAN ? 0 : $('.header-nav').height());
+                const documentScrollTop = $(document).scrollTop();
+                Utils.scrollTo(documentScrollTop - offsetFromTop > 0 ? offsetFromTop : documentScrollTop, 0);
+                this.lastSearchParams.parsed = searchParamsToSubmit;
+                this.lastSearchParams.string = this.lastSearchParams.parsed.toString();
+                clearInterval(this.timer);
                 this.sendRequestForProducts(this.lastSearchParams);
-            }, 10000);    
+                this.timer = setInterval(() => {
+                    this.disableControls(false);
+                    this.sendRequestForProducts(this.lastSearchParams);
+                }, 10000);    
+            }
+    
+            // Вызов модального окна "Быстрый просмотр" при необходимости
+            this.setQuickViewData(productId);
+    
+            // Установка состояния
+            this.setState(state => {
+                const filters = state.filters;
+                const priceFilter = filters.price;
+    
+                priceFilter.from = minPrice;
+                priceFilter.to = maxPrice;
+                state.sorting.itemsPerPage = pageSize;
+                state.sorting.value = sortBy;
+                state.pagination.activePage = page;
+                filters.manufacturers = manufacturersIds;
+                filters.collections = collectionsIds;
+    
+                return state;
+            });    
         }
-
-        // Вызов модального окна "Быстрый просмотр" при необходимости
-        this.setQuickViewData(productId);
-
-        // Установка состояния
-        this.setState(state => {
-            const filters = state.filters;
-            const priceFilter = filters.price;
-
-            priceFilter.from = minPrice;
-            priceFilter.to = maxPrice;
-            state.sorting.itemsPerPage = pageSize;
-            state.sorting.value = sortBy;
-            state.pagination.activePage = page;
-            filters.manufacturers = manufacturersIds;
-            filters.collections = collectionsIds;
-
-            return state;
-        });
 	}
 
     disableControls(disable) {
@@ -245,7 +247,8 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
                     });                    
                 }    
             } else {
-                const tempSearchParams = {
+                this.history.push('/');
+                /*const tempSearchParams = {
                     string: searchParams.string,
                     parsed: new URLSearchParams(searchParams.string)
                 };
@@ -255,7 +258,7 @@ export default class ProductsPage extends ReloadPageMixin(React.Component) {
                     state.pagination.activePage = 1;
                     return state;
                 });
-                this.sendRequestForProducts(tempSearchParams);
+                this.sendRequestForProducts(tempSearchParams);*/
             }
         }, {
             search: searchParams.string

@@ -81,7 +81,7 @@ const DataService = {
         const searchParams = options.search ? `?${options.search}` : ""; 
         
         fetch(`${CONFIG.ROOT_API_URL}/products/${productId}${searchParams}`, {headers}).then(response => {
-            return response.status === 404 ? null : response.json();
+            return response.status >= 400 && response.status <= 499 ? null : response.json();
         }).then(data => {
             if (!data || !Array.isArray(data.results)) {
                 callback(data);
